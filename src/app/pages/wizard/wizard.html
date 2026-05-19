@@ -1,0 +1,76 @@
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="/enstmo.jfif" alt="ENSTMO" class="logo-img"/>
+      <span class="logo-text">ENSTMO</span>
+    </div>
+    <button class="header-menu" aria-label="Menu">&#9776;</button>
+  </div>
+</header>
+
+<!-- ═══ PAGE TITLE ═══ -->
+<div class="page-title-bar">
+  <h1 class="page-title">Consulter la liste Provisoire</h1>
+  <nav class="breadcrumb" aria-label="Fil d'Ariane">
+    <a class="breadcrumb-link" routerLink="/">Home</a>
+    <span class="breadcrumb-sep">&rsaquo;</span>
+    <span class="breadcrumb-current">Inscription</span>
+  </nav>
+</div>
+
+<!-- ═══ WIZARD CARD ═══ -->
+<main class="wizard-container">
+  <div class="wizard-card">
+
+    <!-- Barre de navigation des étapes -->
+    <nav class="wizard-nav" role="tablist" aria-label="Étapes d'inscription">
+      <button
+        *ngFor="let step of steps; let i = index"
+        class="wizard-tab"
+        [class.active]="currentStep === i"
+        [class.completed]="currentStep > i"
+        [attr.aria-selected]="currentStep === i"
+        role="tab"
+        (click)="goToStep(i)"
+      >
+        {{ step.label }}
+      </button>
+    </nav>
+
+    <!-- Séparateur -->
+    <div class="wizard-divider"></div>
+
+    <!-- Contenu de l'étape active -->
+    <div class="wizard-body">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Navigation BACK / NEXT -->
+    <div class="wizard-footer">
+      <button
+        class="back"
+        *ngIf="currentStep > 0"
+        (click)="prevStep()"
+      >
+        &lsaquo; BACK
+      </button>
+      <button
+        class="next"
+        *ngIf="currentStep < steps.length - 1"
+        (click)="nextStep()"
+      >
+        NEXT &rsaquo;
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<!---FOOTERR -->
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>Copyright &copy; 2023-2024 <span>ENSTMO/NHPSD Ueb.</span> all rights reserved.</p>
+  </div>
+</footer>
