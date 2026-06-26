@@ -48,7 +48,11 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
+          script: |
+            if [ -f /home/springapp/web/index.csr.html ] && [ ! -f /home/springapp/web/index.html ]; then
+              cp /home/springapp/web/index.csr.html /home/springapp/web/index.html
+            fi
           source: "dist/concours/browser/*"
           target: "/home/springapp/web"
           # strip_components: 3 retire "dist/", "concours/" et "browser/" pour ne coller QUE le contenu
-          strip_components: 3
+          strip_components: 3 # Retire dist (1), concours (2), browser (3)
