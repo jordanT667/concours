@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "estm-ube": {
+    "concours": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -72,10 +72,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "estm-ube:build:production"
+              "buildTarget": "concours:build:production"
             },
             "development": {
-              "buildTarget": "estm-ube:build:development"
+              "buildTarget": "concours:build:development"
             }
           },
           "defaultConfiguration": "development"
