@@ -49,9 +49,19 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            if [ -f /home/springapp/web/index.csr.html ] && [ ! -f /home/springapp/web/index.html ]; then
-              cp /home/springapp/web/index.csr.html /home/springapp/web/index.html
+            cd /home/springapp/web
+            # Si index.html n'existe pas, on cherche n'importe quel fichier HTML restant pour faire une copie
+            if [ ! -f index.html ]; then
+              AVAILABLE_HTML=$(ls *.html 2>/dev/null | head -n 1)
+              if [ ! -z "$AVAILABLE_HTML" ]; then
+                cp "$AVAILABLE_HTML" index.html
+                echo "index.html créé à partir de $AVAILABLE_HTML"
+              else
+                echo "Aucun fichier HTML trouvé dans /home/springapp/web !"
+              fi
             fi
+            # On s'assure qu'Apache a bien le droit de lire le fichier créé
+            chmod 644 index.html 2>/dev/null || true
           source: "dist/concours/browser/*"
           target: "/home/springapp/web"
           # strip_components: 3 retire "dist/", "concours/" et "browser/" pour ne coller QUE le contenu
