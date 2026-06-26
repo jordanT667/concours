@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   templateUrl: './step-recommandation.html',
   styleUrl: './step-recommandation.css'
 })
-export class StepRecommandationComponent {
+export class StepRecommandation {
 
   constructor(private router: Router) { }
 

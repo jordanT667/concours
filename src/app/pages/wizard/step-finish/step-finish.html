@@ -1,1 +1,227 @@
-<p>step-finish works!</p>
+<div class="finish-wrap">
+
+  <!-- Alerte d'avertissement -->
+  <div class="alerte">
+    <div class="ico-alerte">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <div class="txt-alerte">
+      <strong>ATTENTION !!!</strong>
+      <p>Vérifier vos informations avant d'enregistrer SVP !!!</p>
+    </div>
+  </div>
+
+  <div class="finish-grid">
+
+    <!-- ── Colonne gauche : récapitulatif ───────────────────────────── -->
+    <div class="recap-card">
+      <h3 class="recap-title">Récapitulatif de votre préinscription</h3>
+
+      <div class="recap-scroll">
+
+        <!-- Identification -->
+        <section class="recap-section">
+          <h4 class="recap-section-title">Identification</h4>
+          <div class="recap-row">
+            <span class="recap-label">Nom &amp; Prénoms</span>
+            <span class="recap-value">{{ nomComplet || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Sexe</span>
+            <span class="recap-value">{{ identification?.sexe || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Né(e) le</span>
+            <span class="recap-value">
+              {{ identification?.dateNaissance || '—' }}
+              <ng-container *ngIf="identification?.lieuNaissance"> à {{ identification?.lieuNaissance }}</ng-container>
+            </span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Situation matrimoniale</span>
+            <span class="recap-value">{{ identification?.situationMatrimoniale || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Nationalité</span>
+            <span class="recap-value">
+              {{ identification?.paysNationalite || '—' }}
+              <ng-container *ngIf="identification?.regionOrigine"> — région {{ identification?.regionOrigine }}</ng-container>
+              <ng-container *ngIf="identification?.departementOrigine"> ({{ identification?.departementOrigine }})</ng-container>
+            </span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Adresse</span>
+            <span class="recap-value">{{ identification?.adresse || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Téléphone</span>
+            <span class="recap-value">{{ identification?.telephone || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">E-mail</span>
+            <span class="recap-value">{{ identification?.email || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">N° CNI</span>
+            <span class="recap-value">{{ identification?.numeroCNI || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Langues parlées</span>
+            <span class="recap-value">{{ langues || '—' }}</span>
+          </div>
+        </section>
+
+        <!-- Formation -->
+        <section class="recap-section">
+          <h4 class="recap-section-title">Formation</h4>
+          <div class="recap-row">
+            <span class="recap-label">Cursus</span>
+            <span class="recap-value">{{ specialisation?.cursus || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Niveau</span>
+            <span class="recap-value">{{ specialisation?.niveau || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Domaine de formation</span>
+            <span class="recap-value">{{ specialisation?.domaineFormation || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Diplôme d'admission</span>
+            <span class="recap-value">
+              {{ specialisation?.diplomeAdmission || '—' }}
+              <ng-container *ngIf="specialisation?.serieDiplome"> série {{ specialisation?.serieDiplome }}</ng-container>
+              <ng-container *ngIf="specialisation?.mentionDiplome"> — mention {{ specialisation?.mentionDiplome }}</ng-container>
+            </span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Obtenu en</span>
+            <span class="recap-value">
+              {{ specialisation?.anneeObtentionDip || '—' }}
+              <ng-container *ngIf="specialisation?.etablissementObtention"> à {{ specialisation?.etablissementObtention }}</ng-container>
+              <ng-container *ngIf="specialisation?.paysObtention"> ({{ specialisation?.paysObtention }})</ng-container>
+            </span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Centre de concours</span>
+            <span class="recap-value">{{ specialisation?.centreConcours || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Centre de dépôt</span>
+            <span class="recap-value">{{ specialisation?.centreDepotDossier || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">N° reçu CCA / Banque</span>
+            <span class="recap-value">{{ specialisation?.numeroRecuCCA || '—' }} — {{ specialisation?.banque || '—' }}</span>
+          </div>
+        </section>
+
+        <!-- Parcours scolaire -->
+        <section class="recap-section" *ngIf="cursus && cursus.length > 0">
+          <h4 class="recap-section-title">Parcours scolaire</h4>
+          <table class="recap-table">
+            <thead>
+              <tr>
+                <th>Année</th>
+                <th>Établissement</th>
+                <th>Diplôme</th>
+                <th>Mention</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of cursus">
+                <td>{{ d.annee }}</td>
+                <td>{{ d.etablissement }}</td>
+                <td>{{ d.diplome }}</td>
+                <td>{{ d.mention }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Informations complémentaires -->
+        <section class="recap-section">
+          <h4 class="recap-section-title">Informations complémentaires</h4>
+          <div class="recap-row">
+            <span class="recap-label">Handicap signalé</span>
+            <span class="recap-value">{{ contacts?.handicap || 'NON' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Profession</span>
+            <span class="recap-value">{{ contacts?.profession || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Sports pratiqués</span>
+            <span class="recap-value">{{ sportsPratiques || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Loisirs</span>
+            <span class="recap-value">{{ loisirs || '—' }}</span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Nom du père</span>
+            <span class="recap-value">{{ contacts?.nomPere || '—' }} <ng-container *ngIf="contacts?.telPere">— {{ contacts?.telPere }}</ng-container></span>
+          </div>
+          <div class="recap-row">
+            <span class="recap-label">Nom de la mère</span>
+            <span class="recap-value">{{ contacts?.nomMere || '—' }} <ng-container *ngIf="contacts?.telMere">— {{ contacts?.telMere }}</ng-container></span>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ── Colonne droite : action ──────────────────────────────────── -->
+    <div class="action-card">
+
+      <ng-container *ngIf="!enregistrementReussi">
+        <button
+          class="btn-enregistrer"
+          [disabled]="enCours"
+          (click)="onEnregistrer()"
+        >
+          <i class="fa-solid fa-spinner fa-spin" *ngIf="enCours"></i>
+          <i class="fa-solid fa-download" *ngIf="!enCours"></i>
+          {{ enCours ? 'Enregistrement...' : 'Enregistrer ma préinscription' }}
+        </button>
+
+        <p class="action-hint">
+          SVP relisez attentivement vos informations<br>avant de les enregistrer
+        </p>
+
+        <p class="action-erreur" *ngIf="erreur">
+          <i class="fa-solid fa-circle-exclamation"></i> {{ erreur }}
+        </p>
+      </ng-container>
+
+    
+
+      <ng-container *ngIf="enregistrementReussi">
+        <div class="succes-box">
+          <i class="fa-solid fa-circle-check"></i>
+          <p>Préinscription enregistrée avec succès !</p>
+          <p class="succes-numero">N° de dossier : <strong>{{ numeroDossier }}</strong></p>
+        </div>
+
+        <button class="btn-retelecharger" (click)="onRetelecharger()">
+          <i class="fa-solid fa-file-arrow-down"></i> Retélécharger la fiche PDF
+        </button>
+
+        <p class="action-hint">
+          Le rendez-vous sur vos quitus ou fiche<br>doit être strictement respecté
+        </p>
+      </ng-container>
+
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="finish-nav">
+    <button class="back" (click)="onBack()">&lsaquo; BACK</button>
+
+   
+  </div>
+  
+
+</div>

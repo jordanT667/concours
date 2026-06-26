@@ -30,17 +30,16 @@ export class WizardComponent implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    // Restaurer l'étape depuis localStorage si disponible
-    const saved = localStorage.getItem('enstmo_current_step');
-    if (saved !== null) {
-      this.currentStep = parseInt(saved, 10);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem('enstmo_current_step');
+      if (saved !== null) {
+        this.currentStep = parseInt(saved, 10);
+      }
     }
-    // Naviguer vers la bonne route enfant
     this.navigateToStep(this.currentStep);
   }
 
   goToStep(index: number): void {
-    // On ne peut aller qu'aux étapes déjà atteintes ou l'étape courante
     if (index <= this.currentStep) {
       this.currentStep = index;
       this.navigateToStep(index);
@@ -50,7 +49,9 @@ export class WizardComponent implements OnInit {
   nextStep(): void {
     if (this.currentStep < this.steps.length - 1) {
       this.currentStep++;
-      localStorage.setItem('enstmo_current_step', String(this.currentStep));
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('enstmo_current_step', String(this.currentStep));
+      }
       this.navigateToStep(this.currentStep);
     }
   }
@@ -58,10 +59,16 @@ export class WizardComponent implements OnInit {
   prevStep(): void {
     if (this.currentStep > 0) {
       this.currentStep--;
-      localStorage.setItem('enstmo_current_step', String(this.currentStep));
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('enstmo_current_step', String(this.currentStep));
+      }
       this.navigateToStep(this.currentStep);
     }
   }
+
+  // NOTE : la méthode finish() a été retirée. L'enregistrement final,
+  // la validation et la génération du PDF sont désormais entièrement
+  // gérés par le composant StepFinish (bouton "Enregistrer ma préinscription").
 
   private navigateToStep(index: number): void {
     const route = this.steps[index].route;

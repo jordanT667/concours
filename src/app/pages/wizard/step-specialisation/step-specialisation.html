@@ -1,1 +1,212 @@
-<p>step-specialisation works!</p>
+<form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+  <div class="grille">
+
+    <!-- ═══ LIGNE 1 : Cursus / Niveau / Domaine / Diplôme ═══ -->
+    <div class="champ col3">
+      <label class="titre">Cursus <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('cursus')">
+        <i class="fa-solid fa-circle-check ico"></i>
+        <select formControlName="cursus" class="entr" (change)="onCursusChange($event)">
+          <option value=""> --- Choisir un seul --</option>
+          <option *ngFor="let c of cursusOptions" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('cursus')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Niveau <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('niveau')">
+        <i class="fa-solid fa-briefcase ico"></i>
+        <select formControlName="niveau" class="entr">
+          <option value="">Faites le Choix</option>
+          <option *ngFor="let n of niveauxFiltres" [value]="n">{{ n }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('niveau')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Domaine de formation <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('domaineFormation')">
+        <i class="fa-solid fa-briefcase ico"></i>
+        <select formControlName="domaineFormation" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let d of domainesFiltres" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('domaineFormation')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Diplôme d'admission <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('diplomeAdmission')">
+        <i class="fa-solid fa-book-open ico"></i>
+        <select formControlName="diplomeAdmission" class="entr" (change)="onDiplomeChange($event)">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let d of diplomesAdmission" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('diplomeAdmission')">Champ obligatoire.</span>
+    </div>
+
+    <!-- ═══ LIGNE 2 : Série / Mention / Année dip / Établissement ═══ -->
+    <div class="champ col3">
+      <label class="titre">Série diplôme d'admission <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('serieDiplome')">
+        <i class="fa-solid fa-book-open ico"></i>
+        <select formControlName="serieDiplome" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let s of seriesFiltrees" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('serieDiplome')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Mention diplôme d'admission <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('mentionDiplome')">
+        <i class="fa-solid fa-book-open ico"></i>
+        <select formControlName="mentionDiplome" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let m of mentionsOptions" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('mentionDiplome')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Année d'obtention Dip admission <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('anneeObtentionDip')">
+        <i class="fa-solid fa-calendar-days ico"></i>
+        <select formControlName="anneeObtentionDip" class="entr">
+          <option *ngFor="let a of anneesCourantes" [value]="a">{{ a }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Établissement d'obtention <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('etablissementObtention')">
+        <i class="fa-solid fa-building-columns ico"></i>
+        <input type="text" formControlName="etablissementObtention"
+               placeholder="saisir établissement du diplôme" class="entr"/>
+      </div>
+      <span class="err" *ngIf="isInvalid('etablissementObtention')">Champ obligatoire.</span>
+    </div>
+
+    <!-- ═══ LIGNE 3 : Pays / Année BEPC / Épreuve ═══ -->
+    <div class="champ col4">
+      <label class="titre">Pays d'obtention <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('paysObtention')">
+        <i class="fa-solid fa-flag ico"></i>
+        <select formControlName="paysObtention" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let p of paysOptions" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('paysObtention')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">Année obtention BEPC/GCEOL/CAP/equiv <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('anneeBEPC')">
+        <i class="fa-solid fa-pencil ico"></i>
+        <select formControlName="anneeBEPC" class="entr">
+          <option *ngFor="let a of anneesBEPC" [value]="a">{{ a }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">Choix épreuve écrite</label>
+      <div class="saisie">
+        <i class="fa-solid fa-briefcase ico"></i>
+        <select formControlName="choixEpreuve" class="entr">
+          <option *ngFor="let e of epreuvesOptions" [value]="e">{{ e }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ═══ LIGNE 4 : Centre concours / Centre dépôt / N° Reçu ═══ -->
+    <div class="champ col4">
+      <label class="titre">Choix Centre d'examen concours <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('centreConcours')">
+        <i class="fa-solid fa-pencil ico"></i>
+        <select formControlName="centreConcours" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let c of centresConcours" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('centreConcours')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">Centre dépôt dossier <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('centreDepotDossier')">
+        <i class="fa-solid fa-pencil ico"></i>
+        <select formControlName="centreDepotDossier" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let c of centresDepot" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('centreDepotDossier')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">N° Reçu CCA BANK <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('numeroRecuCCA')">
+        <i class="fa-solid fa-credit-card ico"></i>
+        <input type="text" formControlName="numeroRecuCCA"
+               placeholder="saisir n° reçu bancaire" class="entr"/>
+      </div>
+      <span class="err" *ngIf="isInvalid('numeroRecuCCA')">Champ obligatoire.</span>
+    </div>
+
+    <!-- ═══ LIGNE 5 : Banque / Image reçu ═══ -->
+    <div class="champ col6">
+      <label class="titre">Banque <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('banque')">
+        <i class="fa-solid fa-landmark ico"></i>
+        <select formControlName="banque" class="entr">
+          <option value="">Votre choix</option>
+          <option *ngFor="let b of banquesOptions" [value]="b">{{ b }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('banque')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col6">
+      <label class="titre">Image reçu bancaire <span class="req">*</span></label>
+
+      <!-- Zone upload -->
+      <div class="zone-charg" [class.upload-erreur]="isInvalid('imageRecu')" *ngIf="!imagePreview">
+        <i class="fa-solid fa-image ico-charg"></i>
+        <span class="txt-charg">PNG ou JPG · Max 2 Mo · Sans accents dans le nom</span>
+        <label class="btn-charg">
+          <i class="fa-solid fa-folder-open"></i> Choisir un fichier
+          <input type="file" accept=".png,.jpg,.jpeg" (change)="onImageChange($event)" hidden/>
+        </label>
+      </div>
+
+      <!-- Aperçu image -->
+      <div class="wrap-img" *ngIf="imagePreview">
+        <img [src]="imagePreview" alt="Aperçu reçu" class="img-prev"/>
+        <div class="info-img">
+          <i class="fa-solid fa-file-image"></i>
+          <span>{{ imageNom }}</span>
+          <button type="button" class="btn-sup" (click)="supprimerImage()">
+            <i class="fa-solid fa-xmark"></i> Supprimer
+          </button>
+        </div>
+      </div>
+
+      <!-- Erreurs -->
+      <span class="err" *ngIf="imageErreur">{{ imageErreur }}</span>
+      <span class="err" *ngIf="isInvalid('imageRecu') && !imageErreur">
+        Le reçu bancaire est obligatoire.
+      </span>
+    </div>
+
+  </div><!-- /grille -->
+</form>

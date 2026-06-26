@@ -1,85 +1,111 @@
-.Recommandation {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 24px 0 8px;
+.recom {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 24px 0 8px;
 }
 
-/* ── Base pour tous les blocs informatifs (équivalent à .info-block) ── */
-.info-bank,
-.info-scan,
-.champ-obligatoire,
-.nouveau,
-.telechargement-1,
-.inscription-1,
-.contact-1 {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #fff;
-  font-weight: 500;
+.inf-banq,
+.inf-scan,
+.ch-obli,
+.nouv,
+.telec-inf,
+.inscr-inf,
+.cont-inf {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #fff;
+    font-weight: 500;
 }
 
-/* ── Couleurs thématiques pour chaque bloc ── */
-.info-bank { background-color: #4a4a4a; }        /* Thème sombre */
-.info-scan { background-color: #c0392b; }        /* Thème rouge */
-.champ-obligatoire { background-color: #e67e22; } /* Thème orange */
-.nouveau { background-color: #f39c12; }          /* Thème jaune/orange */
-.telechargement-1 { background-color: #27ae60; } /* Thème vert */
-.inscription-1 { background-color: #2980b9; }    /* Thème bleu */
-.contact-1 { background-color: #8e44ad; }        /* Thème violet */
-
-/* ── Ligne avec bouton (équivalent à .info-action-row) ── */
-.telechargement,
-.inscription,
-.contact {
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
+.inf-banq {
+    background-color: #4a4a4a;
+    width: 40%;
 }
 
-/* Les blocs texte à l'intérieur s'étirent pour remplir l'espace restant */
-.telechargement .telechargement-1,
-.inscription .inscription-1,
-.contact .contact-1 {
-  flex: 1;
+.inf-scan {
+    background-color: #c0392b;
+    width: 95%;
 }
 
-/* ── Boutons d'action ── */
-.btn-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.2s, transform 0.1s;
-  flex-shrink: 0;
+.ch-obli {
+    background-color: #e67e22;
+    width: 35%;
 }
 
-.btn-action:hover  { opacity: 0.88; }
-.btn-action:active { transform: scale(0.97); }
+.nouv {
+    background-color: #f39c12;
+    width: 65%;
+}
 
-.btn-green { background-color: #1e8449; }
+.telec-inf {
+    background-color: #27ae60;
+}
+
+.inscr-inf {
+    background-color: #2980b9;
+}
+
+.cont-inf {
+    background-color: #8e44ad;
+}
+
+.telec,
+.inscr,
+.cont {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.inscr .inscr-inf,
+.cont .cont-inf {
+    flex: 1;
+}
+
+.btn-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+}
+
+.btn-act:hover {
+    opacity: 0.78;
+}
+
+.btn-act:active {
+    transform: scale(0.97);
+}
+
+.btn-vert {
+    background-color: #1e8449;
+}
 
 /* ── Responsive ── */
 @media (max-width: 680px) {
-  .telechargement,
-  .inscription,
-  .contact {
-    flex-direction: column;
-  }
-  .btn-action {
-    width: 100%;
-  }
+    .telec,
+    .inscr,
+    .cont {
+        flex-direction: column;
+    }
+
+    .btn-act {
+        width: 100%;
+    }
 }
