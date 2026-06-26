@@ -1,0 +1,53 @@
+name: Deploy Angular App to Apache VPS
+
+on:
+  push:
+    branches:
+      - main # Ajustez si votre branche principale s'appelle 'master'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupérer le code du dépôt
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurer Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ajustez selon la version requise par votre projet
+          cache: 'npm'
+
+      # 3. Installer les dépendances et Build le projet
+      - name: Install dependencies and build
+        run: |
+          npm ci
+          npm run build -- --configuration=production
+
+      # 4. Nettoyer le dossier de destination sur le VPS pour éviter les conflits de cache
+      - name: Clean remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            rm -rf /home/springapp/web/*
+
+      # 5. Déployer les nouveaux fichiers sur le VPS
+      - name: Deploy to VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          # ATTENTION : Vérifiez si le build génère dans 'dist/concours/*' ou directement dans 'dist/*'
+          source: "dist/concours/*"
+          target: "/home/springapp/web"
+          # strip_components: 2 permet de retirer "dist/enstmo/" pour ne coller que le contenu du build
+          strip_components: 2
