@@ -1,1 +1,156 @@
-<p>step-contacts works!</p>
+<form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+  <div class="grille">
+
+    <!-- LIGNE 1 -->
+    <div class="champ col3">
+      <label class="titre">1er loisir</label>
+      <div class="saisie" [class.erreur]="isInvalid('loisir1')">
+        <i class="fa-solid fa-masks-theater ico"></i>
+        <select formControlName="loisir1" class="entr" (change)="onLoisirChange($event)">
+          <option *ngFor="let opt of loisirOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('loisir1')">Obligatoire</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">1ère activité sportive</label>
+      <div class="saisie" [class.erreur]="isInvalid('activite1')">
+        <i class="fa-solid fa-futbol ico"></i>
+        <select formControlName="activite1" class="entr">
+          <option *ngFor="let opt of sportOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('activite1')">Obligatoire</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Handicap</label>
+      <div class="saisie" [class.erreur]="isInvalid('handicap')">
+        <i class="fa-solid fa-wheelchair ico"></i>
+        <select formControlName="handicap" class="entr">
+          <option *ngFor="let opt of handicapOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('handicap')">Obligatoire</span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">Profession?</label>
+      <div class="saisie" [class.erreur]="isInvalid('profession')">
+        <i class="fa-solid fa-user-tie ico"></i>
+        <select formControlName="profession" class="entr">
+          <option *ngFor="let opt of professionOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('profession')">Obligatoire</span>
+    </div>
+
+    <!-- LIGNE 2 -->
+    <div class="champ col3">
+      <label class="titre">2ième loisir</label>
+      <div class="saisie">
+        <i class="fa-solid fa-masks-theater ico"></i>
+        <select formControlName="loisir2" class="entr">
+          <option *ngFor="let opt of loisirOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">2ième activité sportive</label>
+      <div class="saisie">
+        <i class="fa-solid fa-futbol ico"></i>
+        <select formControlName="activite2" class="entr">
+          <option *ngFor="let opt of sportOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="col6"></div>
+
+    <!-- LIGNE 3 -->
+    <div class="champ col6">
+      <label class="titre">Nom du père ou du tuteur <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('nomPere')">
+        <i class="fa-solid fa-user ico"></i>
+        <input
+          type="text"
+          formControlName="nomPere"
+          placeholder="Nom du papa ou du tuteur à contacter en cas de problème"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('nomPere')">
+        Le nom du père ou tuteur est obligatoire.
+      </span>
+    </div>
+
+    <div class="champ col6">
+      <label class="titre">Nom de la mère ou de la tutrice <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('nomMere')">
+        <i class="fa-solid fa-user-dress ico"></i>
+        <input
+          type="text"
+          formControlName="nomMere"
+          placeholder="Nom de la maman ou de la tutrice à contacter en cas de problème"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('nomMere')">
+        Le nom de la mère ou tutrice est obligatoire.
+      </span>
+    </div>
+
+    <!-- LIGNE 4 -->
+    <div class="champ col4">
+      <label class="titre">N° téléphone du père ou tuteur <span class="req">*</span></label>
+      <div class="saisie" [class.erreur]="isInvalid('telPere')">
+        <i class="fa-solid fa-phone ico"></i>
+        <input
+          type="tel"
+          formControlName="telPere"
+          placeholder="N° tel père ou tuteur"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('telPere')">
+        <span *ngIf="f['telPere'].errors?.['required']">Téléphone obligatoire.</span>
+        <span *ngIf="f['telPere'].errors?.['pattern']">Numéro invalide (9 chiffres).</span>
+      </span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">Email du père ou tuteur</label>
+      <div class="saisie" [class.erreur]="isInvalid('emailPere')">
+        <i class="fa-solid fa-paper-plane ico"></i>
+        <input
+          type="email"
+          formControlName="emailPere"
+          placeholder="email père / tuteur"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('emailPere')">
+        Format d'adresse email invalide.
+      </span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">N° téléphone de la mère ou tutrice</label>
+      <div class="saisie" [class.erreur]="isInvalid('telMere')">
+        <i class="fa-solid fa-phone ico"></i>
+        <input
+          type="tel"
+          formControlName="telMere"
+          placeholder="N° tel mère / tutrice"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('telMere')">
+        Numéro de téléphone invalide (9 chiffres).
+      </span>
+    </div>
+
+  </div>
+</form>

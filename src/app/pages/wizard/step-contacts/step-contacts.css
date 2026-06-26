@@ -1,0 +1,153 @@
+/* 
+   GRILLE DU FORMULAIRE
+ */
+.grille {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px 20px;
+    padding: 8px 0 24px;
+}
+
+/* Colonnes */
+.col3 {
+    grid-column: span 3;
+}
+
+.col4 {
+    grid-column: span 4;
+}
+
+.col6 {
+    grid-column: span 6;
+}
+
+.col12 {
+    grid-column: span 12;
+}
+
+/* Responsive tablette */
+@media (max-width: 900px) {
+    .col3,
+    .col4 {
+        grid-column: span 6;
+    }
+
+    .col6 {
+        grid-column: span 12;
+    }
+}
+
+/* Responsive mobile */
+@media (max-width: 600px) {
+    .col3,
+    .col4,
+    .col6 {
+        grid-column: span 12;
+    }
+}
+
+/* 
+   GROUPE DE CHAMP
+ */
+.champ {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* 
+   LABEL / TITRE
+*/
+.titre {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.req {
+    color: #c0392b;
+    font-weight: 700;
+}
+
+/* 
+   WRAPPER ICÔNE + INPUT/SELECT
+*/
+.saisie {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.saisie:focus-within {
+    border-color: #2980b9;
+    box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.12);
+}
+
+.saisie.erreur {
+    border-color: #c0392b;
+    background: #fff8f8;
+}
+
+.saisie.erreur:focus-within {
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+}
+
+/* ICÔNES DANS LES CHAMPS */
+.ico {
+    color: #8B5E3C;
+    font-size: 14px;
+    padding: 0 10px;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+}
+
+/* INPUTS & SELECTS */
+.entr {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: #2c3e50;
+    padding: 9px 10px 9px 4px;
+    min-width: 0;
+}
+
+.entr::placeholder {
+    color: #aab0b8;
+    font-size: 12px;
+}
+
+select.entr {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236c757d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+select.entr option {
+    color: #2c3e50;
+}
+
+/* MESSAGES D'ERREUR */
+.err {
+    font-size: 11px;
+    color: #c0392b;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.err::before {
+    content: '⚠';
+    font-size: 11px;
+}

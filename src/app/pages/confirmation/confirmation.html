@@ -1,0 +1,55 @@
+<div class="confirm-page">
+
+  <!-- En-tête -->
+  <header class="confirm-header">
+    <img src="/enstmo.jfif" alt="ENSTMO" class="confirm-logo" />
+    <span class="confirm-school">ENSTMO</span>
+  </header>
+
+  <!-- Carte de confirmation -->
+  <div class="confirm-card">
+
+    <!-- Icône succès animée -->
+    <div class="confirm-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+
+    <h1 class="confirm-title">Préinscription enregistrée !</h1>
+    <p class="confirm-subtitle">
+      Votre dossier de préinscription a été enregistré avec succès.<br>
+      Conservez précieusement votre numéro de dossier.
+    </p>
+
+    <!-- Numéro de dossier -->
+    <div class="confirm-dossier">
+      <span class="confirm-dossier-label">N° de dossier</span>
+      <strong class="confirm-dossier-num">{{ numeroDossier }}</strong>
+    </div>
+
+    <!-- Avertissement -->
+    <div class="confirm-alerte">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <p>
+        Le respect du rendez-vous de dépôt de dossier est <strong>obligatoire</strong>.<br>
+        Présentez cette fiche lors de votre passage au service d'inscription.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="confirm-actions">
+      <button class="btn-pdf" (click)="onRetelecharger()">
+        <i class="fa-solid fa-file-arrow-down"></i> Retélécharger la fiche PDF
+      </button>
+      <button class="btn-nouvelle" (click)="onNouvelleInscription()">
+        <i class="fa-solid fa-rotate-left"></i> Nouvelle inscription
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Pied de page -->
+  <footer class="confirm-footer">
+    <p>Copyright &copy; {{ annee }}-{{ annee + 1 }} <span>ENSTMO/NHPSD Ueb.</span> — Tous droits réservés.</p>
+  </footer>
+
+</div>

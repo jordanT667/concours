@@ -1,1 +1,235 @@
-<p>step-identification works!</p>
+<form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+  <div class="grille">
+
+    <!--LIGNE 1 : Nom / Prénom-->
+    <div class="champ col6">
+      <label class="titre">
+        Nom <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('nom')">
+        <i class="fa-solid fa-user ico"></i>
+        <input
+          type="text"
+          formControlName="nom"
+          placeholder="saisir votre nom"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('nom')">
+        <span *ngIf="f['nom'].errors?.['required']">Le nom est obligatoire.</span>
+        <span *ngIf="f['nom'].errors?.['minlength']">Minimum 2 caractères.</span>
+      </span>
+    </div>
+
+    <div class="champ col6">
+      <label class="titre">Prénom(s)</label>
+      <div class="saisie">
+        <i class="fa-solid fa-user-pen ico"></i>
+        <input
+          type="text"
+          formControlName="prenom"
+          placeholder="saisir votre prénom"
+          class="entr"
+        />
+      </div>
+    </div>
+
+    <!--LIGNE 2 : Sexe / Date / Lieu / Situation -->
+    <div class="champ col3">
+      <label class="titre">
+        Sexe <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('sexe')">
+        <i class="fa-solid fa-venus-mars ico"></i>
+        <select formControlName="sexe" class="entr">
+          <option value="Masculin">Masculin</option>
+          <option value="Féminin">Féminin</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">
+        Date naissance <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('dateNaissance')">
+        <i class="fa-solid fa-calendar-days ico"></i>
+        <input
+          type="date"
+          formControlName="dateNaissance"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('dateNaissance')">
+        La date est obligatoire.
+      </span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">
+        Lieu Naissance <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('lieuNaissance')">
+        <i class="fa-solid fa-location-dot ico"></i>
+        <input
+          type="text"
+          formControlName="lieuNaissance"
+          placeholder="saisir votre lieu de naissance"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('lieuNaissance')">
+        Champ obligatoire.
+      </span>
+    </div>
+
+    <div class="champ col3">
+      <label class="titre">
+        Situation matrimoniale <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('situationMatrimoniale')">
+        <i class="fa-solid fa-rings-wedding ico"></i>
+        <select formControlName="situationMatrimoniale" class="entr">
+          <option *ngFor="let s of situationsMatrimoniales" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!--LIGNE 3 : Adresse / Téléphone / CNI + Email-->
+    <div class="champ col4">
+      <label class="titre">
+        Adresse <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('adresse')">
+        <i class="fa-solid fa-map-marker-alt ico"></i>
+        <input
+          type="text"
+          formControlName="adresse"
+          placeholder="saisir Ville / Quartier / BP"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('adresse')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre titre-rouge">
+        N° téléphone du Candidat (Orange de Préférence) <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('telephone')">
+        <i class="fa-solid fa-phone ico"></i>
+        <input
+          type="tel"
+          formControlName="telephone"
+          placeholder="saisir votre numéro de téléphone"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('telephone')">
+        <span *ngIf="f['telephone'].errors?.['required']">Champ obligatoire.</span>
+        <span *ngIf="f['telephone'].errors?.['pattern']">Numéro invalide (9 chiffres).</span>
+      </span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">
+        N° CNI <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('numeroCNI')">
+        <i class="fa-solid fa-id-card ico"></i>
+        <input
+          type="text"
+          formControlName="numeroCNI"
+          placeholder="saisir votre numéro de CNI"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('numeroCNI')">Champ obligatoire.</span>
+
+      <label class="titre" style="margin-top: 14px;">Email</label>
+      <div class="saisie" [class.erreur]="isInvalid('email')">
+        <i class="fa-solid fa-at ico"></i>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="saisir votre adresse email"
+          class="entr"
+        />
+      </div>
+      <span class="err" *ngIf="isInvalid('email')">
+        Adresse email invalide.
+      </span>
+    </div>
+
+    <!--LIGNE 4 : Langues / Pays-->
+    <div class="champ col4">
+      <label class="titre">
+        1ère langue <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('premiereLangue')">
+        <i class="fa-solid fa-language ico"></i>
+        <select formControlName="premiereLangue" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let l of langues" [value]="l">{{ l }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('premiereLangue')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">
+        2ième langue <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('deuxiemeLangue')">
+        <i class="fa-solid fa-language ico"></i>
+        <select formControlName="deuxiemeLangue" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let l of langues" [value]="l">{{ l }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('deuxiemeLangue')">Champ obligatoire.</span>
+    </div>
+
+    <div class="champ col4">
+      <label class="titre">
+        Pays de nationalité <span class="req">*</span>
+      </label>
+      <div class="saisie" [class.erreur]="isInvalid('paysNationalite')">
+        <i class="fa-solid fa-globe ico"></i>
+        <select formControlName="paysNationalite" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let p of pays" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+      <span class="err" *ngIf="isInvalid('paysNationalite')">Champ obligatoire.</span>
+    </div>
+
+    <!--LIGNE 5 : Région / Département -->
+    <div class="champ col6">
+      <label class="titre">Région d'origine</label>
+      <div class="saisie">
+        <i class="fa-solid fa-map-pin ico"></i>
+        <select
+          formControlName="regionOrigine"
+          class="entr"
+          (change)="onRegionChange($event)"
+        >
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="champ col6">
+      <label class="titre">Département d'origine</label>
+      <div class="saisie">
+        <i class="fa-solid fa-location-crosshairs ico"></i>
+        <select formControlName="departementOrigine" class="entr">
+          <option value="">-- Choisir --</option>
+          <option *ngFor="let d of departementsFiltres" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+</form>

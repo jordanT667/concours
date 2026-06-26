@@ -1,1 +1,134 @@
-<p>step-cursus works!</p>
+<div class="cursus">
+  <!-- Alerte d'information -->
+  <div class="alerte">
+    <div class="ico-alerte">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <div class="txt-alerte">
+      <strong>Parcours Scolaire / Académique</strong>
+      <p>Veuillez renseigner au moins 3 diplômes obtenus durant votre cursus .</p>
+    </div>
+  </div>
+
+  <!-- Tableau des diplômes ajoutés -->
+  <div class="cadre-tab">
+    <table class="tab">
+      <thead>
+        <tr>
+          <th class="td-n">#</th>
+          <th>Année</th>
+          <th>Établissement d'obtention</th>
+          <th>Diplôme</th>
+          <th>Mention</th>
+          <th style="width: 60px; text-align: center;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of diplomes; let i = index" class="ligne">
+          <td class="td-n">{{ i + 1 }}</td>
+          <td class="td-a">{{ d.annee }}</td>
+          <td class="td-e">{{ d.etablissement }}</td>
+          <td class="td-d">{{ d.diplome }}</td>
+          <td>
+            <span class="badge">{{ d.mention }}</span>
+          </td>
+          <td style="text-align: center;">
+            <button type="button" class="btn-sup" (click)="supprimerDiplome(i)" title="Supprimer ce diplôme" style="width: 28px; height: 28px; border-radius: 50%;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="diplomes.length === 0" class="ligne-vide">
+          <td colspan="6" style="text-align: center; padding: 32px 14px; color: #aaa; font-size: 13px;">
+            <i class="fa-solid fa-folder-open" style="font-size: 20px; margin-right: 8px; color: #ccc;"></i>
+            Aucun diplôme ajouté pour le moment.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Erreur globale si moins de 3 diplômes -->
+  <div class="err-glob" *ngIf="erreurGlobale">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ erreurGlobale }}</span>
+  </div>
+
+  <!-- Boutons d'action pour ajouter/supprimer -->
+  <div class="action-btn-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn-aj" (click)="ouvrirModal()">
+      <i class="fa-solid fa-plus"></i> Ajouter un diplôme
+    </button>
+    
+  </div>
+
+  <!-- Modale d'ajout de diplôme -->
+  <div class="fond-mod" *ngIf="showModal" (click)="onOverlayClick($event)">
+    <div class="boite-mod">
+      <div class="tete-mod">
+        <div>
+          <h3 class="titre-mod">Ajouter un Diplôme</h3>
+          <span class="sous-mod">Remplissez les détails du diplôme obtenu</span>
+        </div>
+        <button type="button" class="ferm-mod" (click)="fermerModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="modalForm" (ngSubmit)="sauvegarderDiplome()" novalidate>
+        <div class="corps-mod">
+          <!-- Année -->
+          <div class="champ">
+            <label class="titre">Année d'obtention <span class="req">*</span></label>
+            <div class="saisie" [class.erreur]="isInvalid('annee')">
+              <i class="fa-solid fa-calendar-days ico"></i>
+              <select formControlName="annee" class="entr">
+                <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+              </select>
+            </div>
+            <span class="err" *ngIf="isInvalid('annee')">Année obligatoire.</span>
+          </div>
+
+          <!-- Établissement -->
+          <div class="champ">
+            <label class="titre">Établissement d'obtention <span class="req">*</span></label>
+            <div class="saisie" [class.erreur]="isInvalid('etablissement')">
+              <i class="fa-solid fa-building-columns ico"></i>
+              <input type="text" formControlName="etablissement" placeholder="Saisir l'établissement" class="entr" />
+            </div>
+            <span class="err" *ngIf="isInvalid('etablissement')">Établissement obligatoire.</span>
+          </div>
+
+          <!-- Diplôme -->
+          <div class="champ">
+            <label class="titre">Diplôme <span class="req">*</span></label>
+            <div class="saisie" [class.erreur]="isInvalid('diplome')">
+              <i class="fa-solid fa-graduation-cap ico"></i>
+              <select formControlName="diplome" class="entr">
+                <option *ngFor="let opt of diplomesOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <span class="err" *ngIf="isInvalid('diplome')">Diplôme obligatoire.</span>
+          </div>
+
+          <!-- Mention -->
+          <div class="champ">
+            <label class="titre">Mention <span class="req">*</span></label>
+            <div class="saisie" [class.erreur]="isInvalid('mention')">
+              <i class="fa-solid fa-award ico"></i>
+              <select formControlName="mention" class="entr">
+                <option *ngFor="let opt of mentionsOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+            <span class="err" *ngIf="isInvalid('mention')">Mention obligatoire.</span>
+          </div>
+        </div>
+
+        <div class="pied-mod">
+          <button type="button" class="btn-ferm" (click)="fermerModal()">Annuler</button>
+          <button type="submit" class="btn-enreg">
+            <i class="fa-solid fa-check"></i> Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
