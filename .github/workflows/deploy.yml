@@ -1,0 +1,52 @@
+name: Deploy Angular 21.2 App to Apache
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupération du code source
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js avec cache natif npm
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Installation propre et Build de production (Esbuild/Vite)
+      - name: Install dependencies and build
+        run: |
+          npm ci
+          npm run build -- --configuration=production
+
+      # 4. Nettoyage du répertoire web de springapp pour éviter les résidus de cache
+      - name: Clean remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            rm -rf /home/springapp/web/*
+
+      # 5. Déploiement du build moderne (dist/concours/browser/*)
+      - name: Deploy to VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "dist/concours/browser/*"
+          target: "/home/springapp/web"
+          # strip_components: 3 retire "dist/", "concours/" et "browser/" pour ne coller QUE le contenu
+          strip_components: 3
