@@ -35,6 +35,8 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
+          # options expérimentales si votre serveur rejette l'algo par défaut :
+          fingerprint: ""
           script: |
             rm -rf /home/springapp/web/*
 
