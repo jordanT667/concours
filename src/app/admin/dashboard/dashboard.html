@@ -1,0 +1,73 @@
+<div class="dashboard">
+
+  @if (isLoading) {
+    <div class="loading-global">Chargement du tableau de bord...</div>
+  } @else {
+
+    <!-- Bandeau de bienvenue -->
+    <app-welcome-banner
+      [prenom]="prenomAdmin",
+      [nom]="nomAdmin",
+      [totalInscrits]="stats.totalInscrits">
+    </app-welcome-banner>
+
+    <!-- 4 cartes statistiques -->
+    <app-stats-overview [stats]="stats"></app-stats-overview>
+
+    <!-- Ligne : inscriptions récentes + répartition centres -->
+    <div class="dashboard-grille">
+
+      <app-inscriptions-recentes
+        [inscriptions]="inscriptionsRecentes"
+        (voirTout)="allerInscriptions()">
+      </app-inscriptions-recentes>
+
+      <app-repartition-centres
+        [parCentre]="stats.parCentre">
+      </app-repartition-centres>
+
+    </div>
+
+    <!-- Raccourcis actions rapides -->
+    <div class="actions-rapides">
+      <h3 class="section-titre">Actions rapides</h3>
+      <div class="actions-grille">
+
+        <button class="action-card" (click)="allerInscriptions()">
+          
+          <span class="action-label">Voir toutes les inscriptions</span>
+          <span class="action-flèche">→</span>
+        </button>
+
+        <button class="action-card" (click)="allerCandidats()">
+          
+          <span class="action-label">Gérer les candidats</span>
+          <span class="action-flèche">→</span>
+        </button>
+
+        <button class="action-card"
+          routerLink="/admin/resultats">
+         
+          <span class="action-label">Publier les résultats</span>
+          <span class="action-flèche">→</span>
+        </button>
+
+        <button class="action-card"
+          routerLink="/admin/centres">
+
+          <span class="action-label">Gérer les centres</span>
+          <span class="action-flèche">→</span>
+        </button>
+
+        <button class="action-card"
+          routerLink="/admin/annonces">
+          <span class="action-icone">+</span>
+          <span class="action-label">Gérer les annonces</span>
+          <span class="action-flèche">→</span>
+        </button>
+
+      </div>
+    </div>
+
+  }
+</div>

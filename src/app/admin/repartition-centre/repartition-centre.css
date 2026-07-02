@@ -1,0 +1,87 @@
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    height: fit-content;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-titre {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a2332;
+    margin: 0;
+}
+
+.total-badge {
+    font-size: 12px;
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.centres-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.centre-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.centre-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.centre-nom {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.centre-chiffres {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a2332;
+}
+
+.centre-pct {
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.barre-fond {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.barre-remplie {
+    height: 100%;
+    background: linear-gradient(90deg, #1a2332, #f59e0b);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.vide {
+    text-align: center;
+    padding: 20px;
+    color: #9ca3af;
+    font-size: 14px;
+}

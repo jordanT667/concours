@@ -1,0 +1,26 @@
+<div class="recom">
+
+  @for (annonce of annonces; track annonce.id) {
+    @if (annonce.lien) {
+      <!-- Annonce avec bouton lien -->
+      <div class="ligne-avec-btn">
+        <div class="annonce-inf" [style.background-color]="couleurCss(annonce.couleur)">
+          <span>{{ annonce.contenu }}</span>
+        </div>
+        <button type="button" class="btn-act btn-vert" (click)="ouvrirLien(annonce.lien!)">
+          {{ annonce.libelleLien || annonce.lien }}
+        </button>
+      </div>
+    } @else {
+      <!-- Annonce simple -->
+      <div class="annonce-inf" [style.background-color]="couleurCss(annonce.couleur)">
+        <span>{{ annonce.contenu }}</span>
+      </div>
+    }
+  }
+
+  @if (annonces.length === 0) {
+    <div class="vide">Aucune annonce active.</div>
+  }
+
+</div>

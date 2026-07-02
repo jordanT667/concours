@@ -1,0 +1,122 @@
+<div class="page-annonces">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Annonces du wizard</h2>
+      <p class="page-sous-titre">
+        {{ totalActives }} annonce(s) active(s) visible(s)
+        par les candidats
+      </p>
+    </div>
+    <button class="btn-ajouter" (click)="ouvrirFormulaire()">
+      + Nouvelle annonce
+    </button>
+  </div>
+
+  <!-- Aperçu live -->
+  <div class="section-apercu">
+    <h3 class="section-titre">
+      Aperçu — ce que voient les candidats
+    </h3>
+    <div class="apercu-liste">
+      @for (a of annonces; track a.id) {
+        @if (a.actif) {
+          <div [class]="'apercu-ligne ' + cssAnnonce(a.couleur)">
+            <span class="apercu-texte">{{ a.contenu }}</span>
+            @if (a.lien) {
+              <a [href]="a.lien" class="apercu-btn">
+                {{ a.libelleLien }}
+              </a>
+            }
+          </div>
+        }
+      }
+      @if (totalActives === 0) {
+        <div class="apercu-vide">
+          Aucune annonce active — les candidats ne verront rien
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Liste de gestion -->
+  <div class="section-gestion">
+    <h3 class="section-titre">Gestion des annonces</h3>
+
+    <div class="annonces-liste">
+      @for (a of annonces; track a.id) {
+        <div class="annonce-item" [class.inactif]="!a.actif">
+
+          <!-- Indicateur couleur -->
+          <div [class]="'couleur-bande ' + cssAnnonce(a.couleur)">
+          </div>
+
+          <!-- Ordre -->
+          <div class="ordre-controles">
+            <button class="btn-ordre"
+              (click)="monterOrdre(a)"
+              [disabled]="a.ordre === 1"
+              title="Monter"><i class="fas fa-chevron-up"></i></button>
+            <span class="ordre-num">{{ a.ordre }}</span>
+            <button class="btn-ordre"
+              (click)="descendreOrdre(a)"
+              [disabled]="a.ordre === annonces.length"
+              title="Descendre"><i class="fas fa-chevron-down"></i></button>
+          </div>
+
+          <!-- Contenu -->
+          <div class="annonce-contenu">
+            <div class="annonce-meta">
+              <span class="annonce-type">{{ a.type }}</span>
+              <span [class]="'couleur-badge ' + cssAnnonce(a.couleur)">
+                {{ a.couleur }}
+              </span>
+            </div>
+            <p class="annonce-texte">{{ a.contenu }}</p>
+            @if (a.lien) {
+              <p class="annonce-lien">
+                {{ a.libelleLien }} — {{ a.lien }}
+              </p>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="annonce-actions">
+            <!-- Toggle actif -->
+            <label class="toggle" title="Activer/Désactiver">
+              <input type="checkbox"
+                [checked]="a.actif"
+                (change)="toggleActif(a)" />
+              <span class="toggle-slider"></span>
+            </label>
+
+            <button class="btn-modifier"
+              (click)="ouvrirFormulaire(a)"
+              title="Modifier"><i class="fas fa-pen"></i></button>
+
+            <button class="btn-supprimer"
+              (click)="supprimer(a.id)"
+              title="Supprimer"><i class="fas fa-trash"></i></button>
+          </div>
+
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Modal formulaire -->
+  @if (formulaireOuvert) {
+    <div class="modal-overlay" (click)="fermerFormulaire()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <app-annonce-form
+          [annonce]="annonceSelectionnee"
+          [ordreMax]="annonces.length"
+          (sauvegarder)="sauvegarder($event)"
+          (annuler)="fermerFormulaire()">
+        </app-annonce-form>
+      </div>
+    </div>
+  }
+
+</div>

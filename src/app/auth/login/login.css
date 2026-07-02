@@ -1,0 +1,400 @@
+/* ===================== VARIABLES ===================== */
+:host {
+    --teal: #2ec4a6;
+    --teal-dark: #25a890;
+    --teal-light: #e9f8f4;
+    --coral: #ff6f6f;
+    --text-dark: #2c3e50;
+    --text-grey: #8c97a3;
+    --input-bg: #f4f6f8;
+    display: block;
+    height: 100vh;
+}
+
+/* ===================== LAYOUT GLOBAL ===================== */
+.auth-page {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.auth-panel {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===================== PANNEAU GAUCHE ===================== */
+.left-panel {
+    background: #ffffff;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.brand {
+    position: absolute;
+    top: 24px;
+    left: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--text-dark);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+.brand-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    border: 9px solid #79d4c5;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 24px;
+}
+
+/* ----- Réseaux sociaux ----- */
+.social-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.social-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid #e2e6ea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-grey);
+    font-size: 16px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+}
+
+.divider-text {
+    font-size: 12px;
+    color: var(--text-grey);
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+}
+
+/* ----- Erreur ----- */
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fdecec;
+    color: #c0392b;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    text-align: left;
+}
+
+/* ----- Champs ----- */
+.input-group {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-grey);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px 14px 42px;
+    border: none;
+    border-radius: 6px;
+    background: var(--input-bg);
+    font-size: 13px;
+    color: var(--text-dark);
+    outline: none;
+    transition: background 0.2s ease;
+    box-sizing: border-box;
+}
+
+.input-group input::placeholder {
+    color: #aab3bc;
+}
+
+.input-group input:focus {
+    background: #ecf0f3;
+    box-shadow: 0 0 0 2px rgba(46, 196, 166, 0.25);
+}
+
+.forgot-link {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dark);
+    text-decoration: underline;
+    margin: 6px 0 22px;
+}
+
+/* ----- Bouton principal ----- */
+.btn-submit {
+    width: 60%;
+    padding: 13px 0;
+    border: none;
+    border-radius: 24px;
+    background: var(--teal);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--teal-dark);
+}
+
+.btn-submit:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ===================== PANNEAU DROIT ===================== */
+.right-panel {
+    background: linear-gradient(135deg, #38c2a8 0%, #239e87 100%);
+    color: #ffffff;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* ----- Switch Connexion / Inscription ----- */
+.switch-links {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    z-index: 5;
+}
+
+.switch-link {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 4px 6px;
+    transition: color 0.2s ease;
+}
+
+.switch-link.active {
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff;
+}
+
+.switch-link:hover {
+    color: #ffffff;
+}
+
+.switch-sep {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+}
+
+/* ----- Contenu central ----- */
+.right-content {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 0 40px;
+}
+
+.hello-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.hello-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 28px;
+}
+
+.btn-outline {
+    display: inline-block;
+    padding: 12px 36px;
+    border: 1.5px solid #ffffff;
+    border-radius: 24px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-outline:hover {
+    background: #ffffff;
+    color: var(--teal-dark);
+}
+
+/* ----- Décorations géométriques ----- */
+.shape {
+    position: absolute;
+    pointer-events: none;
+}
+
+.shape-triangle {
+    top: -40px;
+    right: -20px;
+    width: 260px;
+    height: 260px;
+    background: rgba(255, 255, 255, 0.07);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    transform: rotate(15deg);
+}
+
+.shape-triangle_2 {
+    top: 100px;
+    left: 90px;
+    width: 360px;
+    height: 160px;
+    background: rgba(255, 255, 255, 0.07);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    transform: rotate(15deg);
+}
+
+.MOT {
+    border: 9px solid #ffffff;
+    margin: 40px;
+    padding: 40px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.shape-circle {
+    bottom: 90px;
+    left: 30px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.shape-square {
+    top: 40%;
+    right: 60px;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    transform: rotate(20deg);
+}
+
+.accent-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--coral);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 900px) {
+    :host {
+        height: auto;
+    }
+
+    .auth-page {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+    }
+
+    .right-panel {
+        order: -1;
+        padding: 60px 20px 40px;
+        min-height: 240px;
+    }
+
+    .left-panel {
+        padding: 40px 24px;
+    }
+
+    .switch-links {
+        top: 16px;
+        right: 20px;
+    }
+
+    .MOT {
+        margin: 20px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-panel {
+        padding: 24px 16px;
+    }
+
+    .form-wrapper {
+        border-width: 4px;
+        padding: 16px;
+    }
+
+    .btn-submit {
+        width: 80%;
+    }
+
+    .hello-title {
+        font-size: 22px;
+    }
+}

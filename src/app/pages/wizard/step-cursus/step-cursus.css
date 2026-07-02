@@ -330,7 +330,7 @@ select.entr {
 }
 
 .err::before {
-    content: '⚠ ';
+    content: '! ';
 }
 
 /* Pied modale */

@@ -1,0 +1,47 @@
+<div class="card">
+
+  <div class="card-header">
+    <h3 class="card-titre">Inscriptions récentes</h3>
+    <button class="btn-voir-tout" (click)="voirTout.emit()">
+      Voir tout →
+    </button>
+  </div>
+
+  <div class="liste">
+    @for (ins of inscriptions; track ins.id) {
+      <div class="ins-item">
+
+        <!-- Avatar initiales -->
+        <div class="ins-avatar">
+          {{ ins.candidat.prenom[0] }}{{ ins.candidat.nom[0] }}
+        </div>
+
+        <!-- Infos -->
+        <div class="ins-infos">
+          <p class="ins-nom">
+            {{ ins.candidat.prenom }} {{ ins.candidat.nom }}
+          </p>
+          <p class="ins-detail">
+            {{ ins.filiere.nom }} · {{ ins.centreExamen.ville }}
+          </p>
+        </div>
+
+        <!-- Statut + date -->
+        <div class="ins-meta">
+          <span [class]="'badge ' + couleurStatut(ins.statut)">
+            {{ libelleStatut(ins.statut) }}
+          </span>
+          <span class="ins-date">
+            {{ ins.dateInscription | date:'dd/MM' }}
+          </span>
+        </div>
+
+      </div>
+    } @empty {
+      <div class="vide">
+        Aucune inscription récente
+      </div>
+    }
+  </div>
+
+</div>

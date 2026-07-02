@@ -1,0 +1,14 @@
+<div class="stats-grille">
+  @for (carte of cartes; track carte.label) {
+    <div [class]="'stat-card ' + carte.couleur">
+      <div class="stat-header">
+        <span class="stat-icone">{{ carte.icone }}</span>
+        <span class="stat-evolution">{{ carte.evolution }}</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-valeur">{{ carte.valeur }}</span>
+        <span class="stat-label">{{ carte.label }}</span>
+      </div>
+    </div>
+  }
+</div>

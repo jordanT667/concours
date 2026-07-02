@@ -1,0 +1,15 @@
+<div class="annonces-wrapper">
+  @for (a of annonces; track a.id) {
+    <div class="annonce-ligne"
+      [style.background]="cssAnnonce(a.couleur)">
+      <span class="annonce-texte">{{ a.contenu }}</span>
+      @if (a.lien) {
+        <a [href]="a.lien"
+          class="annonce-btn"
+          target="_blank">
+          {{ a.libelleLien }}
+        </a>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,130 @@
+<div class="form-container">
+
+  <div class="form-header">
+    <h3 class="form-titre">
+      {{ estModification ? 'Modifier l\'annonce' : 'Nouvelle annonce' }}
+    </h3>
+    <button class="btn-fermer" title="Fermer" (click)="annuler.emit()"><i class="fas fa-times"></i></button>
+  </div>
+
+  <form class="form-body" (ngSubmit)="onSubmit()">
+
+    <!-- Type -->
+    <div class="champ">
+      <label class="champ-label">Type d'annonce</label>
+      <select class="champ-input"
+        [(ngModel)]="form.type"
+        name="type">
+        @for (t of types; track t.valeur) {
+          <option [value]="t.valeur">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Couleur -->
+    <div class="champ">
+      <label class="champ-label">Couleur *</label>
+      <div class="couleurs-grille">
+        @for (c of couleurs; track c.valeur) {
+          <div
+            [class]="'couleur-option ' + c.css"
+            [class.selected]="form.couleur === c.valeur"
+            (click)="form.couleur = c.valeur"
+            [title]="c.label">
+            <span class="couleur-cercle"></span>
+            <span class="couleur-nom">{{ c.label.split(' (')[0] }}</span>
+            @if (form.couleur === c.valeur) {
+              <i class="fas fa-check couleur-check"></i>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="champ">
+      <label class="champ-label">Texte de l'annonce *</label>
+      <textarea class="champ-input"
+        [(ngModel)]="form.contenu"
+        name="contenu"
+        rows="3"
+        placeholder="Ex: Code complet CCA Banque: 10039-..."
+        required>
+      </textarea>
+    </div>
+
+    <!-- Lien (optionnel) -->
+    <div class="champ">
+      <label class="champ-label">
+        Lien (optionnel — affiche un bouton vert)
+      </label>
+      <input type="text"
+        class="champ-input"
+        [(ngModel)]="form.lien"
+        name="lien"
+        placeholder="Ex: /fiche ou tel:+237695734150" />
+    </div>
+
+    @if (form.lien) {
+      <div class="champ">
+        <label class="champ-label">Texte du bouton lien</label>
+        <input type="text"
+          class="champ-input"
+          [(ngModel)]="form.libelleLien"
+          name="libelleLien"
+          placeholder="Ex: Télécharger sa fiche d'inscription" />
+      </div>
+    }
+
+    <!-- Ordre -->
+    <div class="champ">
+      <label class="champ-label">Ordre d'affichage</label>
+      <input type="number"
+        class="champ-input"
+        [(ngModel)]="form.ordre"
+        name="ordre"
+        [min]="1" />
+    </div>
+
+    <!-- Statut -->
+    <div class="champ">
+      <label class="champ-label">Visible par les candidats</label>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox"
+            [(ngModel)]="form.actif"
+            name="actif" />
+          <span class="toggle-slider"></span>
+        </label>
+        <span>{{ form.actif ? ' Visible' : 'Masquée' }}</span>
+      </div>
+    </div>
+
+    <!-- Aperçu en temps réel -->
+    @if (form.contenu) {
+      <div class="champ">
+        <label class="champ-label">Aperçu en temps réel</label>
+        <div class="apercu-ligne"
+          [style.background]="cssApercu()">
+          <span class="apercu-texte">{{ form.contenu }}</span>
+          @if (form.lien && form.libelleLien) {
+            <span class="apercu-btn">{{ form.libelleLien }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button"
+        class="btn-annuler"
+        (click)="annuler.emit()">
+        Annuler
+      </button>
+      <button type="submit" class="btn-sauvegarder">
+        {{ estModification ? 'Modifier' : 'Publier' }}
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -144,11 +144,11 @@
           <h4 class="recap-section-title">Informations complémentaires</h4>
           <div class="recap-row">
             <span class="recap-label">Handicap signalé</span>
-            <span class="recap-value">{{ contacts?.handicap || 'NON' }}</span>
+            <span class="recap-value">{{ contacts.handicap || 'NON' }}</span>
           </div>
           <div class="recap-row">
             <span class="recap-label">Profession</span>
-            <span class="recap-value">{{ contacts?.profession || '—' }}</span>
+            <span class="recap-value">{{ contacts.profession || '—' }}</span>
           </div>
           <div class="recap-row">
             <span class="recap-label">Sports pratiqués</span>
@@ -160,11 +160,11 @@
           </div>
           <div class="recap-row">
             <span class="recap-label">Nom du père</span>
-            <span class="recap-value">{{ contacts?.nomPere || '—' }} <ng-container *ngIf="contacts?.telPere">— {{ contacts?.telPere }}</ng-container></span>
+            <span class="recap-value">{{ contacts.nomPere || '—' }} <ng-container *ngIf="contacts.telPere">— {{ contacts.telPere }}</ng-container></span>
           </div>
           <div class="recap-row">
             <span class="recap-label">Nom de la mère</span>
-            <span class="recap-value">{{ contacts?.nomMere || '—' }} <ng-container *ngIf="contacts?.telMere">— {{ contacts?.telMere }}</ng-container></span>
+            <span class="recap-value">{{ contacts.nomMere || '—' }} <ng-container *ngIf="contacts.telMere">— {{ contacts.telMere }}</ng-container></span>
           </div>
         </section>
 

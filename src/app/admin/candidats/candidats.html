@@ -1,0 +1,63 @@
+<div class="page-candidats">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Candidats inscrits</h2>
+      <p class="page-sous-titre">
+        {{ candidatsFiltres.length }} candidat(s) trouvé(s)
+      </p>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filtres-bar">
+    <input type="text"
+      class="input-recherche"
+      placeholder="Rechercher par nom, email, N° CNI..."
+      [(ngModel)]="recherche"
+      (input)="appliquerFiltres()" />
+
+    <select class="select-filtre"
+      [(ngModel)]="filtreStatut"
+      (change)="appliquerFiltres()">
+      <option value="TOUS">Tous les statuts</option>
+      @for (s of statuts; track s) {
+        <option [value]="s">{{ s }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Grille candidats -->
+  <div class="candidats-grille">
+    @for (c of candidatsFiltres; track c.id) {
+      <div class="candidat-card" (click)="voirDetail(c.id)">
+
+        <!-- Avatar initiales -->
+        <div class="candidat-avatar">
+          {{ c.prenom[0] }}{{ c.nom[0] }}
+        </div>
+
+        <div class="candidat-infos">
+          <p class="candidat-nom">{{ c.prenom }} {{ c.nom }}</p>
+          <p class="candidat-email">{{ c.email }}</p>
+          <p class="candidat-tel">{{ c.telephone }}</p>
+        </div>
+
+        <div class="candidat-footer">
+          <span [class]="'badge ' + couleurStatut(c.statut)">
+            {{ c.statut }}
+          </span>
+          @if (c.numeroInscription) {
+            <span class="numero-ins">
+              N° {{ c.numeroInscription }}
+            </span>
+          }
+        </div>
+
+      </div>
+    } @empty {
+      <div class="vide">Aucun candidat trouvé</div>
+    }
+  </div>
+
+</div>
