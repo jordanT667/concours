@@ -1,33 +1,33 @@
-name: Deploy Angular 21.2 App to Apache
+name: Deploy Angular 21 App to Apache
 
 on:
   push:
     branches:
-      - main
+      - main # Déclenche le déploiement lors d'un push sur la branche main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Récupération du code source
+      # 1. Récupération du code source depuis GitHub
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js avec cache natif npm
+      # 2. Configuration de Node.js avec mise en cache automatique de npm
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # 3. Installation propre et Build de production (Esbuild/Vite)
+      # 3. Installation propre des dépendances et Build de production
       - name: Install dependencies and build
         run: |
           npm ci
           npm run build -- --configuration=production
 
-      # 4. Nettoyage du répertoire web de springapp pour éviter les résidus de cache
+      # 4. Nettoyage du répertoire web sur le VPS pour éviter les résidus de cache
       - name: Clean remote directory
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -35,12 +35,10 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          # options expérimentales si votre serveur rejette l'algo par défaut :
-          fingerprint: ""
           script: |
             rm -rf /home/springapp/web/*
 
-      # 5. Déploiement du build moderne (dist/concours/browser/*)
+      # 5. Déploiement des fichiers compilés dans le répertoire de springapp
       - name: Deploy to VPS via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -48,21 +46,25 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script: |
-            cd /home/springapp/web
-            # Si index.html n'existe pas, on cherche n'importe quel fichier HTML restant pour faire une copie
-            if [ ! -f index.html ]; then
-              AVAILABLE_HTML=$(ls *.html 2>/dev/null | head -n 1)
-              if [ ! -z "$AVAILABLE_HTML" ]; then
-                cp "$AVAILABLE_HTML" index.html
-                echo "index.html créé à partir de $AVAILABLE_HTML"
-              else
-                echo "Aucun fichier HTML trouvé dans /home/springapp/web !"
-              fi
-            fi
-            # On s'assure qu'Apache a bien le droit de lire le fichier créé
-            chmod 644 index.html 2>/dev/null || true
           source: "dist/concours/browser/*"
           target: "/home/springapp/web"
-          # strip_components: 3 retire "dist/", "concours/" et "browser/" pour ne coller QUE le contenu
-          strip_components: 3 # Retire dist (1), concours (2), browser (3)
+          # strip_components: 3 permet de retirer 'dist/', 'concours/' et 'browser/' au transfert
+          strip_components: 3
+
+      # 6. Création de l'index.html à partir du fichier index.csr.html généré par Angular
+      - name: Rename index.csr.html to index.html
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/springapp/web
+            if [ -f index.csr.html ]; then
+              cp index.csr.html index.html
+              chmod 644 index.html
+              echo "index.html a été créé avec succès à partir de index.csr.html !"
+            else
+              echo "Attention : index.csr.html introuvable dans /home/springapp/web"
+            fi
