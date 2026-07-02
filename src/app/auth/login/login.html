@@ -1,0 +1,84 @@
+<div class="auth-page">
+
+  
+  <div class="auth-panel left-panel">
+
+    <div class="form-wrapper">
+
+
+      <p class="divider-text">ou connectez-vous avec vos coordonnees  Identifiants et mot de passe </p>
+
+      <!-- Message d'erreur -->
+      <div class="error-banner" *ngIf="errorMessage">
+        <i class="ti ti-alert-circle" aria-hidden="true"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Formulaire -->
+      <form (ngSubmit)="onSubmit()" autocomplete="off">
+
+        <div class="input-group">
+          <i class="ti ti-id-badge-2 input-icon" aria-hidden="true"></i>
+          <input
+            type="text"
+            name="matricule"
+            placeholder="Matricule"
+            [(ngModel)]="matricule"
+            required
+          />
+        </div>
+
+        <div class="input-group">
+          <i class="ti ti-lock input-icon" aria-hidden="true"></i>
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            [(ngModel)]="password"
+            required
+          />
+        </div>
+
+        <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <span *ngIf="!isLoading">SE CONNECTER</span>
+          <span *ngIf="isLoading">CONNEXION...</span>
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+ 
+  <div class="auth-panel right-panel">
+
+    <!-- Lien Connexion / Inscription côte à côte -->
+    <div class="switch-links">
+      <a routerLink="/login" class="switch-link active">Connexion</a>
+      <span class="switch-sep">|</span>
+      <a routerLink="/inscription" class="switch-link">Inscription</a>
+    </div>
+
+    <div class="right-content">
+     <div class = "MOT">
+      <h2 class="hello-title">Bonjour !</h2>
+      <p class="hello-text">
+        Entrez vos coordonnées personnelles<br/>
+        et débutez votre inscription avec nous?
+      </p>
+
+      <a routerLink="/inscription" class="btn-outline">S'INSCRIRE</a>
+    </div>
+    </div>
+
+    <!-- Décorations géométriques -->
+    <div class="shape shape-triangle"></div>
+    <div class="shape shape-circle"></div>
+    <div class="shape shape-square"></div>
+    <div class="shape shape-triangle_2"></div>
+    <div class="accent-bar"></div>
+  </div>
+
+</div>

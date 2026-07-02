@@ -1,0 +1,113 @@
+<div class="page-inscriptions">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Inscriptions au concours</h2>
+      <p class="page-sous-titre">ESTM — Année académique 2026/2027</p>
+    </div>
+    <button class="btn-export" (click)="exporterCSV()">
+      <i class="fas fa-download"></i> Exporter CSV
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filtres-bar">
+
+    <!-- Recherche -->
+    <input
+      type="text"
+      class="input-recherche"
+      placeholder="Rechercher par nom, prénom, N° reçu..."
+      [(ngModel)]="recherche"
+      (input)="appliquerFiltres()"
+    />
+
+    <!-- Filtre statut -->
+    <select class="select-filtre"
+      [(ngModel)]="filtreStatut"
+      (change)="appliquerFiltres()">
+      <option value="TOUS">Tous les statuts</option>
+      @for (s of statuts; track s) {
+        <option [value]="s">{{ libelleStatut(s) }}</option>
+      }
+    </select>
+
+    <!-- Filtre centre -->
+    <select class="select-filtre"
+      [(ngModel)]="filtreCentre"
+      (change)="appliquerFiltres()">
+      <option value="TOUS">Tous les centres</option>
+      @for (c of centres; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-wrapper">
+    @if (isLoading) {
+      <div class="loading">Chargement...</div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>N° Reçu</th>
+            <th>Candidat</th>
+            <th>Filière</th>
+            <th>Centre examen</th>
+            <th>Centre dépôt</th>
+            <th>Date inscription</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ins of inscriptionsFiltrees; track ins.id) {
+            <tr (click)="voirDetail(ins.id)" class="row-clickable">
+              <td class="td-recu">{{ ins.numeroRecu }}</td>
+              <td>
+                <div class="candidat-info">
+                  <span class="candidat-nom">
+                    {{ ins.candidat.nom }} {{ ins.candidat.prenom }}
+                  </span>
+                  <span class="candidat-email">
+                    {{ ins.candidat.email }}
+                  </span>
+                </div>
+              </td>
+              <td>{{ ins.filiere.nom }}</td>
+              <td>{{ ins.centreExamen.ville }}</td>
+              <td>{{ ins.centreDepot.ville }}</td>
+              <td>{{ ins.dateInscription | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span [class]="'badge ' + couleurStatut(ins.statut)">
+                  {{ libelleStatut(ins.statut) }}
+                </span>
+              </td>
+              <td class="td-actions">
+                @if (ins.statut === 'SOUMISE' ||
+                     ins.statut === 'EN_COURS_VERIFICATION') {
+                  <button class="btn-valider"
+                    (click)="valider(ins.id, $event)"
+                    title="Valider"><i class="fas fa-check"></i></button>
+                  <button class="btn-rejeter"
+                    (click)="rejeter(ins.id, $event)"
+                    title="Rejeter"><i class="fas fa-times"></i></button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="td-vide">
+                Aucune inscription trouvée
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+</div>

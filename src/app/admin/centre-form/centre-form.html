@@ -1,0 +1,95 @@
+<div class="form-container">
+
+  <div class="form-header">
+    <h3 class="form-titre">
+      {{ estModification ? 'Modifier le centre' : 'Nouveau centre' }}
+    </h3>
+    <button class="btn-fermer" title="Fermer" (click)="annuler.emit()"><i class="fas fa-times"></i></button>
+  </div>
+
+  <form class="form-body" (ngSubmit)="onSubmit()">
+
+    <!-- Ville -->
+    <div class="champ">
+      <label class="champ-label">Ville *</label>
+      <select class="champ-input"
+        [(ngModel)]="form.ville"
+        name="ville"
+        (change)="onVilleChange()"
+        required>
+        <option value="">Sélectionner une ville</option>
+        @for (v of villes; track v) {
+          <option [value]="v">{{ v }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Nom -->
+    <div class="champ">
+      <label class="champ-label">Nom du centre *</label>
+      <input type="text"
+        class="champ-input"
+        [(ngModel)]="form.nom"
+        name="nom"
+        placeholder="Ex: Centre de Yaoundé"
+        required />
+    </div>
+
+    <!-- Type -->
+    <div class="champ">
+      <label class="champ-label">Type de centre *</label>
+      <select class="champ-input"
+        [(ngModel)]="form.type"
+        name="type"
+        required>
+        <option value="EXAMEN_ET_DEPOT">Examen & Dépôt</option>
+        <option value="EXAMEN">Examen uniquement</option>
+        <option value="DEPOT">Dépôt uniquement</option>
+      </select>
+    </div>
+
+    <!-- Adresse -->
+    <div class="champ">
+      <label class="champ-label">Adresse</label>
+      <input type="text"
+        class="champ-input"
+        [(ngModel)]="form.adresse"
+        name="adresse"
+        placeholder="Ex: Quartier Bastos, Yaoundé" />
+    </div>
+
+    <!-- Responsable -->
+    <div class="champ">
+      <label class="champ-label">Responsable</label>
+      <input type="text"
+        class="champ-input"
+        [(ngModel)]="form.responsable"
+        name="responsable"
+        placeholder="Nom du responsable du centre" />
+    </div>
+
+    <!-- Téléphone -->
+    <div class="champ">
+      <label class="champ-label">Téléphone</label>
+      <input type="tel"
+        class="champ-input"
+        [(ngModel)]="form.telephone"
+        name="telephone"
+        placeholder="Ex: 699 000 000" />
+    </div>
+
+    <!-- Boutons -->
+    <div class="form-actions">
+      <button type="button"
+        class="btn-annuler"
+        (click)="annuler.emit()">
+        Annuler
+      </button>
+      <button type="submit" class="btn-sauvegarder">
+        {{ estModification ? 'Modifier' : 'Ajouter' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,19 @@
+<div class="layout-container" [class.sidebar-open]="sidebarOpen">
+
+  <!-- Overlay mobile (fond sombre derrière la sidebar) -->
+  <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+
+  <!-- Menu gauche fixe -->
+  <app-sidebar (closeSidebar)="closeSidebar()"></app-sidebar>
+
+  <!-- Zone droite : topbar + contenu -->
+  <div class="layout-main">
+    <app-topbar (toggleSidebar)="toggleSidebar()"></app-topbar>
+
+    <!-- Les pages s'affichent ici selon la route -->
+    <main class="layout-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>

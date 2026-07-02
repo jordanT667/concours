@@ -148,7 +148,7 @@ select.entr option {
 }
 
 .err::before {
-    content: '⚠';
+    content: '!';
     font-size: 11px;
 }
 

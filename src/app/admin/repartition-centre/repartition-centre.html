@@ -1,0 +1,35 @@
+<div class="card">
+
+  <div class="card-header">
+    <h3 class="card-titre">Répartition par centre</h3>
+    <span class="total-badge">{{ total }} total</span>
+  </div>
+
+  <div class="centres-liste">
+    @for (c of parCentre; track c.centre) {
+      <div class="centre-item">
+
+        <div class="centre-header">
+          <span class="centre-nom">{{ c.centre }}</span>
+          <span class="centre-chiffres">
+            {{ c.nombre }}
+            <span class="centre-pct">
+              ({{ pourcentage(c.nombre) }}%)
+            </span>
+          </span>
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="barre-fond">
+          <div class="barre-remplie"
+            [style.width]="largeurBarre(c.nombre)">
+          </div>
+        </div>
+
+      </div>
+    } @empty {
+      <div class="vide">Aucune donnée disponible</div>
+    }
+  </div>
+
+</div>

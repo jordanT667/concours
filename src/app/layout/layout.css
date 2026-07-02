@@ -1,0 +1,55 @@
+.layout-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f5f6fa;
+}
+
+.layout-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.layout-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* Overlay mobile */
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .layout-content {
+        padding: 16px;
+    }
+
+    /* La sidebar passe en position fixe par-dessus le contenu */
+    .layout-container app-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 200;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .layout-container.sidebar-open app-sidebar {
+        transform: translateX(0);
+    }
+
+    /* Overlay visible quand sidebar ouverte */
+    .layout-container.sidebar-open .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 199;
+    }
+}
