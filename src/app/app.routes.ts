@@ -13,21 +13,18 @@ import { Dashboard } from './admin/dashboard/dashboard';
 import { Layout } from './layout/layout';
 
 
-
-
-
 export const routes: Routes = [
 
   {
     path: 'inscription',
     component: WizardComponent,
     children: [
-    { path: 'recommandation', component: StepRecommandation },
+      { path: 'recommandation', component: StepRecommandation },
       { path: 'identification', component: StepIdentification },
       { path: 'specialisation', component: StepSpecialisation },
-      { path: 'cursus', component: StepCursus },
-      { path: 'contacts', component: StepContacts },
-      { path: 'finish', component: StepFinish },
+      { path: 'cursus',         component: StepCursus },
+      { path: 'contacts',       component: StepContacts },
+      { path: 'finish',         component: StepFinish },
       { path: '', redirectTo: 'recommandation', pathMatch: 'full' }
     ]
   },
@@ -49,6 +46,18 @@ export const routes: Routes = [
           import('./admin/dashboard/dashboard')
             .then(m => m.Dashboard)
       },
+      {
+        path: 'filieres',
+        loadComponent: () =>
+          import('./admin/filieres/filieres')
+            .then(m => m.Filieres)
+      },
+{
+  path: 'parametres',
+  loadComponent: () =>
+    import('./admin/parametres/parametres')
+      .then(m => m.ParametresComponent)
+},
       {
   path: 'annonces',
   loadComponent: () =>
@@ -78,6 +87,26 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/centres/centres')
             .then(m => m.Centres)
+      },
+      {
+        path: 'cursus',
+        loadComponent: () => import('./admin/cursus/cursus').then(m => m.CursusAdmin)
+      },
+      {
+        path: 'niveaux',
+        loadComponent: () => import('./admin/niveaux/niveaux').then(m => m.NiveauxAdmin)
+      },
+      {
+        path: 'diplomes',
+        loadComponent: () => import('./admin/diplomes/diplomes').then(m => m.DiplomesAdmin)
+      },
+      {
+        path: 'regions',
+        loadComponent: () => import('./admin/regions/regions').then(m => m.RegionsAdmin)
+      },
+      {
+        path: 'departements',
+        loadComponent: () => import('./admin/departements/departements').then(m => m.DepartementsAdmin)
       },
       {
         path: '',

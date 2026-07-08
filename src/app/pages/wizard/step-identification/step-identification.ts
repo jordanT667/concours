@@ -6,64 +6,73 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { SITUATIONS_MATRIMONIALES } from '../../../core/models/geo.constants';
+import { STORAGE_KEYS } from '../../../core/services/storage';
+import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { PaysDto } from '../../../core/models/pays.models';
+import { RegionDto, DepartementDto, LangueDto } from '../../../core/models/referentiel.models';
 
 @Component({
   selector: 'app-step-identification',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './step-identification.html',
   styleUrl: './step-identification.css'
 })
 export class StepIdentification implements OnInit {
 
-
   form!: FormGroup;
 
+  situationsMatrimoniales = SITUATIONS_MATRIMONIALES;
 
-  situationsMatrimoniales = ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf/Veuve'];
+  // Données chargées depuis l'API
+  pays: PaysDto[] = [];
+  langues: LangueDto[] = [];
+  regions: RegionDto[] = [];
+  departementsFiltres: DepartementDto[] = [];
 
-  langues = ['Français', 'Anglais', 'Arabe', 'Espagnol', 'Allemand', 'Portugais', 'Haoussa', 'Fulfuldé', 'Ewondo'];
-
-  pays = [
-    'Cameroun', 'Nigeria', 'Tchad', 'République Centrafricaine',
-    'Guinée Équatoriale', 'Gabon', 'Congo', 'RD Congo',
-    'Côte d\'Ivoire', 'Sénégal', 'Mali', 'France', 'Autre'
-  ];
-
-  regions = [
-    'Adamaoua', 'Centre', 'Est', 'Extrême-Nord',
-    'Littoral', 'Nord', 'Nord-Ouest', 'Ouest', 'Sud', 'Sud-Ouest'
-  ];
-
-
-  departements: Record<string, string[]> = {
-    'Adamaoua': ['Djerem', 'Faro-et-Déo', 'Mayo-Banyo', 'Mbéré', 'Vina'],
-    'Centre': ['Haute-Sanaga', 'Lekié', 'Mbam-et-Inoubou', 'Mbam-et-Kim', 'Méfou-et-Afamba', 'Méfou-et-Akono', 'Mfoundi', 'Nyong-et-Kellé', 'Nyong-et-Mfoumou', 'Nyong-et-So\'o'],
-    'Est': ['Boumba-et-Ngoko', 'Haut-Nyong', 'Kadey', 'Lom-et-Djérem'],
-    'Extrême-Nord': ['Diamaré', 'Logone-et-Chari', 'Mayo-Danay', 'Mayo-Kani', 'Mayo-Sava', 'Mayo-Tsanaga'],
-    'Littoral': ['Moungo', 'Nkam', 'Sanaga-Maritime', 'Wouri'],
-    'Nord': ['Bénoué', 'Faro', 'Mayo-Louti', 'Mayo-Rey'],
-    'Nord-Ouest': ['Boyo', 'Bui', 'Donga-Mantung', 'Menchum', 'Mezam', 'Momo', 'Ngo-Ketunjia'],
-    'Ouest': ['Bamboutos', 'Haut-Nkam', 'Hauts-Plateaux', 'Koung-Khi', 'Menoua', 'Mifi', 'Nde', 'Noun'],
-    'Sud': ['Dja-et-Lobo', 'Mvila', 'Océan', 'Vallée-du-Ntem'],
-    'Sud-Ouest': ['Fako', 'Koupé-Manengouba', 'Lebialem', 'Manyu', 'Meme', 'Ndian'],
-  };
-
-  // Départements filtrés selon la région choisie
-  departementsFiltres: string[] = [];
+  chargement = false;
+  erreurChargement = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
-  ) { }
+    private router: Router,
+    private ref: ConcoursReferenceService
+  ) {}
 
   ngOnInit(): void {
     this.buildForm();
+    this.chargerDonneesReference();
     this.restoreFromStorage();
   }
 
-  // Construction du formulaire //
+  private chargerDonneesReference(): void {
+    this.chargement = true;
+    this.erreurChargement = '';
+
+    this.ref.getPays().subscribe({
+      next: (data) => { this.pays = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger la liste des pays.'; }
+    });
+
+    this.ref.getLangues().subscribe({
+      next: (data) => { this.langues = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les langues.'; }
+    });
+
+    this.ref.getRegions('CMR').subscribe({
+      next: (data) => {
+        this.regions = data;
+        this.chargement = false;
+      },
+      error: () => {
+        this.erreurChargement = 'Impossible de charger les régions.';
+        this.chargement = false;
+      }
+    });
+  }
+
   private buildForm(): void {
     this.form = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
@@ -84,54 +93,60 @@ export class StepIdentification implements OnInit {
     });
   }
 
-  // ── Restaurer depuis localStorage//
   private restoreFromStorage(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('enstmo_identification');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          this.form.patchValue(data);
-          // Recharger les départements si une région était sélectionnée
-          if (data.regionOrigine) {
-            this.departementsFiltres = this.departements[data.regionOrigine] || [];
-          }
-        } catch (e) {
-          console.error('Erreur lecture localStorage', e);
-        }
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const saved = localStorage.getItem(STORAGE_KEYS.IDENTIFICATION);
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      this.form.patchValue(data);
+      if (data.regionOrigine) {
+        this.chargerDepartements(data.regionOrigine);
       }
+    } catch (e) {
+      console.error('Erreur lecture localStorage', e);
     }
   }
 
-  // Mise à jour des départements quand la région change //
   onRegionChange(event: Event): void {
-    const region = (event.target as HTMLSelectElement).value;
-    this.departementsFiltres = this.departements[region] || [];
+    const saisie = (event.target as HTMLInputElement).value.trim();
     this.form.get('departementOrigine')?.setValue('');
+    this.departementsFiltres = [];
+
+    // Cherche si la valeur saisie correspond à une région connue (libellé ou code)
+    const region = this.regions.find(
+      r => r.libelleRegionLangue1.toLowerCase() === saisie.toLowerCase()
+        || r.libelleRegionLangue2?.toLowerCase() === saisie.toLowerCase()
+        || r.codeRegion.toLowerCase() === saisie.toLowerCase()
+    );
+
+    if (region) {
+      this.chargerDepartements(region.codeRegion);
+    }
+    // Si saisie libre non reconnue, on laisse le champ libre sans département suggéré
   }
 
-  // Getter pour accéder facilement aux contrôles dans le template //
-  get f() {
-    return this.form.controls;
+  private chargerDepartements(codeRegion: string): void {
+    this.ref.getDepartements(codeRegion).subscribe({
+      next: (data) => { this.departementsFiltres = data; },
+      error: () => { this.departementsFiltres = []; }
+    });
   }
 
-  // Vérifier si un champ est invalide et a été touché //
+  get f() { return this.form.controls; }
+
   isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
     return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
   }
 
-  // Soumission : sauvegarder et passer à l'étape suivante //
   onNext(): void {
     if (this.form.invalid) {
-      // Marquer tous les champs comme touchés pour afficher les erreurs
       this.form.markAllAsTouched();
       return;
     }
-    // Sauvegarder dans localStorage
-    localStorage.setItem('enstmo_identification', JSON.stringify(this.form.value));
-    localStorage.setItem('enstmo_current_step', '2');
-   
+    localStorage.setItem(STORAGE_KEYS.IDENTIFICATION, JSON.stringify(this.form.value));
+    localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, '2');
     this.router.navigate(['/inscription/specialisation']);
   }
 

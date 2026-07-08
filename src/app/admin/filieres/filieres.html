@@ -1,0 +1,137 @@
+<div class="page-filieres">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Filières de formation</h2>
+      <p class="page-sous-titre">
+        {{ filieres.length }} filières réparties en
+        {{ departements.length }} départements — ESTM
+      </p>
+    </div>
+    <button type="button" class="btn-ajouter" (click)="ouvrirFormulaire()">
+      <i class="fa-solid fa-plus"></i> Nouvelle filière
+    </button>
+  </div>
+
+  <!-- Résumé départements -->
+  <div class="departements-resume">
+    @for (item of resumeParDept; track item.dept.code) {
+      <div
+        [class]="'dept-card ' + couleurDept(item.dept.code)"
+        [class.actif]="filtreDepartement === item.dept.code"
+        (click)="filtreDepartement = item.dept.code; appliquerFiltres()">
+        <span class="dept-code">{{ item.dept.code }}</span>
+        <span class="dept-nb">{{ item.nb }}</span>
+        <span class="dept-nom">{{ item.dept.nom }}</span>
+      </div>
+    }
+    <div
+      class="dept-card dept-gris"
+      [class.actif]="filtreDepartement === 'TOUS'"
+      (click)="filtreDepartement = 'TOUS'; appliquerFiltres()">
+      <span class="dept-code">TOUS</span>
+      <span class="dept-nb">{{ filieres.length }}</span>
+      <span class="dept-nom">Toutes les filières</span>
+    </div>
+  </div>
+
+  <!-- Recherche -->
+  <div class="recherche-bar">
+    <i class="fa-solid fa-magnifying-glass recherche-icone"></i>
+    <input type="text"
+      class="input-recherche"
+      placeholder="Rechercher une filière, un code, un département..."
+      [(ngModel)]="recherche"
+      (input)="appliquerFiltres()" />
+    @if (recherche) {
+      <button type="button" class="btn-clear"
+        (click)="recherche = ''; appliquerFiltres()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    }
+  </div>
+
+  <!-- Résultat filtré -->
+  <p class="resultat-filtre">
+    {{ filieresFiltrees.length }} filière(s) affichée(s)
+    @if (filtreDepartement !== 'TOUS') {
+      — Département : <strong>{{ filtreDepartement }}</strong>
+    }
+  </p>
+
+  <!-- Grille filières -->
+  @if (isLoading) {
+    <div class="loading">
+      <i class="fa-solid fa-spinner fa-spin"></i> Chargement des filières...
+    </div>
+  } @else {
+    <div class="filieres-grille">
+      @for (f of filieresFiltrees; track f.id) {
+        <div class="filiere-card">
+
+          <!-- Top : code + département -->
+          <div class="filiere-top">
+            <span [class]="'code-badge ' + couleurDept(f.departement.code)">
+              {{ f.code }}
+            </span>
+            <span [class]="'dept-tag ' + couleurDept(f.departement.code)">
+              {{ f.departement.code }}
+            </span>
+          </div>
+
+          <!-- Nom filière -->
+          <h3 class="filiere-nom">{{ f.nom }}</h3>
+
+          <!-- Département complet -->
+          <div class="filiere-dept">
+            <i class="fa-solid fa-building-columns dept-icone"></i>
+            <span>{{ f.departement.nom }}</span>
+          </div>
+
+          <!-- Séparateur -->
+          <div class="filiere-separator"></div>
+
+          <!-- Actions -->
+          <div class="filiere-actions">
+            <button type="button" class="btn-modifier"
+              (click)="ouvrirFormulaire(f)">
+              <i class="fa-solid fa-pen-to-square"></i> Modifier
+            </button>
+            <button type="button" class="btn-supprimer"
+              (click)="supprimer(f.id)"
+              title="Supprimer">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+
+        </div>
+      } @empty {
+        <div class="vide">
+          <i class="fa-solid fa-graduation-cap vide-icone"></i>
+          <p>Aucune filière trouvée</p>
+          <button type="button" class="btn-ajouter-vide"
+            (click)="ouvrirFormulaire()">
+            <i class="fa-solid fa-plus"></i> Ajouter une filière
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal formulaire -->
+  @if (formulaireOuvert) {
+    <div class="modal-overlay" (click)="fermerFormulaire()">
+      <div class="modal-content"
+        (click)="$event.stopPropagation()">
+        <app-filiere-form
+          [filiere]="filiereSelectionnee"
+          [departements]="departements"
+          (sauvegarder)="sauvegarder($event)"
+          (annuler)="fermerFormulaire()">
+        </app-filiere-form>
+      </div>
+    </div>
+  }
+
+</div>

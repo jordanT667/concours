@@ -1,0 +1,471 @@
+<div class="page-parametres">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Paramètres du site</h2>
+      <p class="page-sous-titre">
+        Configuration de la plateforme ESTM visible par les candidats
+      </p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-reinit" (click)="reinitialiser()">
+        <i class="fa-solid fa-rotate-left"></i> Réinitialiser
+      </button>
+      <button type="button" class="btn-sauvegarder"
+        (click)="sauvegarder()"
+        [disabled]="isSaving">
+        @if (isSaving) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Sauvegarde...
+        } @else {
+          <i class="fa-solid fa-floppy-disk"></i> Sauvegarder
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Message succès -->
+  @if (messageSauvegarde) {
+    <div class="message-succes">
+      <i class="fa-solid fa-circle-check"></i> {{ messageSauvegarde }}
+    </div>
+  }
+
+  <div class="parametres-layout">
+
+    <!-- Onglets navigation -->
+    <div class="onglets-sidebar">
+      @for (o of onglets; track o.id) {
+        <button type="button"
+          [class.actif]="ongletActif === o.id"
+          (click)="ongletActif = o.id">
+          <i [class]="'onglet-icone ' + o.icone"></i>
+          <span>{{ o.label }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Contenu onglet -->
+    <div class="onglet-contenu">
+
+      <!-- ── IDENTITÉ ÉCOLE ── -->
+      @if (ongletActif === 'identite') {
+        <div class="section">
+          <h3 class="section-titre">
+            <i class="fa-solid fa-school"></i> Identité de l'école
+          </h3>
+
+          <!-- Upload logo -->
+          <div class="logo-section">
+            <div class="logo-apercu">
+              @if (logoPreview) {
+                <img [src]="logoPreview" alt="Logo ESTM" class="logo-img" />
+              } @else {
+                <div class="logo-placeholder">
+                  <i class="fa-solid fa-image"></i>
+                </div>
+              }
+            </div>
+            <div class="logo-infos">
+              <p class="logo-titre">Logo de l'école</p>
+              <p class="logo-sous">PNG, JPG ou SVG — max 2 Mo</p>
+              <label class="btn-upload">
+                <i class="fa-solid fa-upload"></i> Choisir un logo
+                <input type="file"
+                  accept=".png,.jpg,.jpeg,.svg"
+                  (change)="onLogoChange($event)"
+                  hidden />
+              </label>
+              <p class="logo-chemin">{{ params.logoUrl }}</p>
+            </div>
+          </div>
+
+          <div class="champs-grille">
+
+            <div class="champ">
+              <label class="champ-label">Sigle *</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.sigle"
+                name="sigle"
+                placeholder="Ex: ESTM-UBe" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Nom court *</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.nomEcole"
+                name="nomEcole"
+                placeholder="Ex: ESTM" />
+            </div>
+
+            <div class="champ champ-full">
+              <label class="champ-label">Nom complet *</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.nomComplet"
+                name="nomComplet"
+                placeholder="Ex: École Supérieure des Technologies..." />
+            </div>
+
+            <!-- Couleurs -->
+            <div class="champ">
+              <label class="champ-label">Couleur primaire</label>
+              <div class="couleur-row">
+                <input type="color"
+                  [(ngModel)]="params.couleurPrimaire"
+                  name="couleurPrimaire"
+                  class="input-couleur" />
+                <input type="text" class="champ-input"
+                  [(ngModel)]="params.couleurPrimaire"
+                  name="couleurPrimaireHex"
+                  placeholder="#1aaa8a" />
+              </div>
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Couleur secondaire</label>
+              <div class="couleur-row">
+                <input type="color"
+                  [(ngModel)]="params.couleurSecondaire"
+                  name="couleurSecondaire"
+                  class="input-couleur" />
+                <input type="text" class="champ-input"
+                  [(ngModel)]="params.couleurSecondaire"
+                  name="couleurSecondaireHex"
+                  placeholder="#1a2332" />
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Aperçu couleurs -->
+          <div class="apercu-couleurs">
+            <p class="apercu-label">Aperçu des couleurs</p>
+            <div class="apercu-palette">
+              <div class="palette-bloc" [style.background]="params.couleurPrimaire">
+                <span>Primaire</span>
+                <span>{{ params.couleurPrimaire }}</span>
+              </div>
+              <div class="palette-bloc" [style.background]="params.couleurSecondaire">
+                <span>Secondaire</span>
+                <span>{{ params.couleurSecondaire }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── PLATEFORME ── -->
+      @if (ongletActif === 'plateforme') {
+        <div class="section">
+          <h3 class="section-titre">
+            <i class="fa-solid fa-globe"></i> Nom de la plateforme
+          </h3>
+
+          <div class="champs-grille">
+
+            <div class="champ champ-full">
+              <label class="champ-label">Nom de la plateforme *</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.nomPlateforme"
+                name="nomPlateforme"
+                placeholder="Ex: Concours ESTM 2026" />
+            </div>
+
+            <div class="champ champ-full">
+              <label class="champ-label">Sous-titre</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.sousTitre"
+                name="sousTitre"
+                placeholder="Ex: Plateforme d'inscription en ligne" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Année académique</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.anneeConcours"
+                name="anneeConcours"
+                placeholder="Ex: 2026/2027" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">URL de la plateforme</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.urlPlateforme"
+                name="urlPlateforme"
+                placeholder="Ex: test.estm-ube.cm" />
+            </div>
+
+          </div>
+
+          <!-- Aperçu topbar -->
+          <div class="apercu-section">
+            <p class="apercu-label">Aperçu — Topbar du site</p>
+            <div class="apercu-topbar" [style.background]="params.couleurSecondaire">
+              <div class="apercu-logo">
+                @if (logoPreview) {
+                  <img [src]="logoPreview" class="apercu-logo-img" />
+                } @else {
+                  <i class="fa-solid fa-school"></i>
+                }
+                <span class="apercu-nom">{{ params.sigle }}</span>
+              </div>
+              <span class="apercu-titre">{{ params.nomPlateforme }}</span>
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── FOOTER ── -->
+      @if (ongletActif === 'footer') {
+        <div class="section">
+          <h3 class="section-titre">
+            <i class="fa-solid fa-layer-group"></i> Footer du site
+          </h3>
+
+          <div class="champs-grille">
+
+            <div class="champ champ-full">
+              <label class="champ-label">Texte copyright *</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerTexte"
+                name="footerTexte"
+                placeholder="© 2026 ESTM-UBe. Tous droits réservés." />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Téléphone</label>
+              <input type="tel" class="champ-input"
+                [(ngModel)]="params.footerTelephone"
+                name="footerTelephone"
+                placeholder="695 73 41 50" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Email</label>
+              <input type="email" class="champ-input"
+                [(ngModel)]="params.footerEmail"
+                name="footerEmail"
+                placeholder="contact@estm-ube.cm" />
+            </div>
+
+            <div class="champ champ-full">
+              <label class="champ-label">Adresse</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerAdresse"
+                name="footerAdresse"
+                placeholder="Bertoua, Région Est, Cameroun" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Lien 1 — Libellé</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerLien1Label"
+                name="footerLien1Label"
+                placeholder="Procédure d'inscription" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Lien 1 — URL</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerLien1Url"
+                name="footerLien1Url"
+                placeholder="/procedure" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Lien 2 — Libellé</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerLien2Label"
+                name="footerLien2Label"
+                placeholder="Résultats" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Lien 2 — URL</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.footerLien2Url"
+                name="footerLien2Url"
+                placeholder="/resultats" />
+            </div>
+
+          </div>
+
+          <!-- Aperçu footer -->
+          <div class="apercu-section">
+            <p class="apercu-label">Aperçu — Footer du site</p>
+            <div class="apercu-footer" [style.background]="params.couleurSecondaire">
+
+              <div class="footer-col">
+                @if (logoPreview) {
+                  <img [src]="logoPreview" class="footer-logo" />
+                }
+                <p class="footer-nom">{{ params.sigle }}</p>
+                <p class="footer-desc">{{ params.nomComplet }}</p>
+              </div>
+
+              <div class="footer-col">
+                <p class="footer-titre-col">Liens utiles</p>
+                <a class="footer-lien">{{ params.footerLien1Label }}</a>
+                <a class="footer-lien">{{ params.footerLien2Label }}</a>
+              </div>
+
+              <div class="footer-col">
+                <p class="footer-titre-col">Contact</p>
+                <p class="footer-contact">
+                  <i class="fa-solid fa-phone"></i> {{ params.footerTelephone }}
+                </p>
+                <p class="footer-contact">
+                  <i class="fa-solid fa-envelope"></i> {{ params.footerEmail }}
+                </p>
+                <p class="footer-contact">
+                  <i class="fa-solid fa-location-dot"></i> {{ params.footerAdresse }}
+                </p>
+              </div>
+
+              <div class="footer-copyright">{{ params.footerTexte }}</div>
+
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── CONCOURS ── -->
+      @if (ongletActif === 'concours') {
+        <div class="section">
+          <h3 class="section-titre">
+            <i class="fa-solid fa-trophy"></i> Paramètres du concours
+          </h3>
+
+          <!-- Status inscription -->
+          <div class="status-card"
+            [class.ouvert]="params.inscriptionOuverte"
+            [class.ferme]="!params.inscriptionOuverte">
+            <div class="status-info">
+              <span class="status-icone">
+                @if (params.inscriptionOuverte) {
+                  <i class="fa-solid fa-circle-check" style="color:#16a34a"></i>
+                } @else {
+                  <i class="fa-solid fa-circle-xmark" style="color:#dc2626"></i>
+                }
+              </span>
+              <div>
+                <p class="status-titre">
+                  Inscriptions {{ params.inscriptionOuverte ? 'ouvertes' : 'fermées' }}
+                </p>
+                @if (params.inscriptionOuverte) {
+                  <p class="status-desc">
+                    Fermeture dans {{ joursAvantCloture }} jour(s)
+                  </p>
+                }
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox"
+                [(ngModel)]="params.inscriptionOuverte"
+                name="inscriptionOuverte" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="champs-grille">
+
+            <div class="champ">
+              <label class="champ-label">Frais d'inscription (FCFA)</label>
+              <input type="number" class="champ-input"
+                [(ngModel)]="params.fraisInscription"
+                name="fraisInscription"
+                placeholder="10000" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Nombre de places</label>
+              <input type="number" class="champ-input"
+                [(ngModel)]="params.nombrePlaces"
+                name="nombrePlaces"
+                placeholder="250" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Date d'ouverture</label>
+              <input type="date" class="champ-input"
+                [(ngModel)]="params.dateOuverture"
+                name="dateOuverture" />
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Date de clôture</label>
+              <input type="date" class="champ-input"
+                [(ngModel)]="params.dateCloture"
+                name="dateCloture" />
+            </div>
+
+            <div class="champ champ-full">
+              <label class="champ-label">Date de l'examen</label>
+              <input type="date" class="champ-input"
+                [(ngModel)]="params.dateExamen"
+                name="dateExamen" />
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+      <!-- ── NOTIFICATIONS ── -->
+      @if (ongletActif === 'notifications') {
+        <div class="section">
+          <h3 class="section-titre">
+            <i class="fa-solid fa-bell"></i> SMS &amp; Notifications
+          </h3>
+
+          <div class="champs-grille">
+
+            <div class="champ champ-full">
+              <label class="champ-label">Activer les SMS</label>
+              <div class="toggle-row">
+                <label class="toggle">
+                  <input type="checkbox"
+                    [(ngModel)]="params.smsActif"
+                    name="smsActif" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span>
+                  @if (params.smsActif) {
+                    <i class="fa-solid fa-check" style="color:#16a34a"></i> SMS activés (validation automatique)
+                  } @else {
+                    <i class="fa-solid fa-xmark" style="color:#dc2626"></i> SMS désactivés
+                  }
+                </span>
+              </div>
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Expéditeur SMS</label>
+              <input type="text" class="champ-input"
+                [(ngModel)]="params.smsExpediteur"
+                name="smsExpediteur"
+                placeholder="ESTM"
+                maxlength="11" />
+              <span class="champ-hint">Max 11 caractères, sans espaces</span>
+            </div>
+
+            <div class="champ">
+              <label class="champ-label">Email admin (alertes)</label>
+              <input type="email" class="champ-input"
+                [(ngModel)]="params.emailNotification"
+                name="emailNotification"
+                placeholder="admin@estm-ube.cm" />
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

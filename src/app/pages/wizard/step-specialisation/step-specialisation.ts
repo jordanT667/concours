@@ -6,12 +6,15 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { PaysDto } from '../../../core/models/pays.models';
+import { CursusDto, NiveauDto, DiplomeDto, FiliereDto } from '../../../core/models/referentiel.models';
 
 @Component({
   selector: 'app-step-specialisation',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './step-specialisation.html',
   styleUrl: './step-specialisation.css'
 })
@@ -19,36 +22,22 @@ export class StepSpecialisation implements OnInit {
 
   form!: FormGroup;
 
-  // ── Aperçu image uploadée ────────────────────────────────────────────
   imagePreview: string | null = null;
   imageNom: string = '';
   imageErreur: string = '';
 
-  // ── Années dynamiques ────────────────────────────────────────────────
   anneesCourantes: number[] = [];
   anneesBEPC: number[] = [];
 
-  // ── Données des listes ───────────────────────────────────────────────
-  cursusOptions = ['Ingénierie', 'Technologie', 'Sciences', 'Gestion'];
+  // Données chargées depuis l'API
+  cursusOptions: CursusDto[] = [];
+  niveauxTous: NiveauDto[] = [];
+  niveauxFiltres: NiveauDto[] = [];
+  domainesFiltres: FiliereDto[] = [];
+  diplomesAdmission: DiplomeDto[] = [];
+  paysOptions: PaysDto[] = [];
 
-  niveauxParCursus: Record<string, string[]> = {
-    'Ingénierie': ['L1', 'L3', 'M1', 'M2'],
-    'Technologie': ['L1', 'L3', 'M1', 'M2'],
-    'Sciences_de_Ingenieur': ['L1', 'L2', 'L 3'],
-
-  };
-  niveauxFiltres: string[] = [];
-
-  domainesParCursus: Record<string, string[]> = {
-    'Ingénierie': ['Génie Informatique', 'Génie Civil', 'Génie Électrique', 'Génie Mécanique'],
-    'Technologie': ['Informatique', 'Électronique', 'Maintenance Industrielle'],
-    'Sciences': ['Mathématiques', 'Physique', 'Chimie', 'Biologie'],
-
-  };
-  domainesFiltres: string[] = [];
-
-  diplomesAdmission = ['Baccalauréat', 'GCE A/Level', 'BTS', 'HND', 'Licence', 'Master'];
-
+  // Séries : restent en dur car non gérées en base
   seriesParDiplome: Record<string, string[]> = {
     'Baccalauréat': ['A', 'B', 'C', 'D', 'E', 'F', 'TI', 'TMT', 'TSGE'],
     'GCE A/Level': ['Sciences', 'Arts', 'Commercial', 'Technical'],
@@ -60,24 +49,61 @@ export class StepSpecialisation implements OnInit {
   seriesFiltrees: string[] = [];
 
   mentionsOptions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'];
-  paysOptions = ['Cameroun', 'Nigeria', 'Tchad', 'Centrafrique', 'Gabon', 'Congo', "Côte d'Ivoire", 'France', 'Autre'];
   centresConcours = ['Yaoundé', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'Ngaoundéré', 'Bertoua', 'Ebolowa', 'Buea'];
   centresDepot = ['ENSTMO Yaoundé', 'Délégation Douala', 'Délégation Bafoussam', 'Délégation Bamenda', 'Délégation Garoua', 'Délégation Maroua'];
   banquesOptions = ['CCA Bank'];
   epreuvesOptions = ['RAS', 'Mathématiques', 'Physique', 'Informatique', 'Français', 'Anglais'];
 
-  constructor(private fb: FormBuilder, private router: Router) { }
+  chargement = false;
+  erreurChargement = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private ref: ConcoursReferenceService
+  ) {}
 
   ngOnInit(): void {
     this.genererAnnees();
     this.buildForm();
-    this.restoreFromStorage();
+    this.chargerDonneesReference();
   }
 
   private genererAnnees(): void {
     const an = new Date().getFullYear();
     for (let a = an; a >= an - 15; a--) this.anneesCourantes.push(a);
     for (let a = an; a >= an - 20; a--) this.anneesBEPC.push(a);
+  }
+
+  private chargerDonneesReference(): void {
+    this.chargement = true;
+
+    this.ref.getCursus().subscribe({
+      next: (data) => { this.cursusOptions = data.filter(c => !c.annuler); },
+      error: () => { this.erreurChargement = 'Impossible de charger les cursus.'; }
+    });
+
+    this.ref.getNiveaux().subscribe({
+      next: (data) => { this.niveauxTous = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les niveaux.'; }
+    });
+
+    this.ref.getPays().subscribe({
+      next: (data) => { this.paysOptions = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les pays.'; }
+    });
+
+    this.ref.getDiplomes().subscribe({
+      next: (data) => {
+        this.diplomesAdmission = data.filter(d => !d.annuler);
+        this.chargement = false;
+        this.restoreFromStorage();
+      },
+      error: () => {
+        this.erreurChargement = 'Impossible de charger les diplômes.';
+        this.chargement = false;
+      }
+    });
   }
 
   private buildForm(): void {
@@ -103,39 +129,69 @@ export class StepSpecialisation implements OnInit {
   }
 
   private restoreFromStorage(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('enstmo_specialisation');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          this.form.patchValue(data);
-          if (data.cursus) {
-            this.niveauxFiltres = this.niveauxParCursus[data.cursus] || [];
-            this.domainesFiltres = this.domainesParCursus[data.cursus] || [];
-          }
-          if (data.diplomeAdmission) {
-            this.seriesFiltrees = this.seriesParDiplome[data.diplomeAdmission] || [];
-          }
-          if (data.imageRecu) {
-            this.imagePreview = data.imageRecu;
-            this.imageNom = data.imageNom || '';
-          }
-        } catch (e) { console.error('Erreur localStorage', e); }
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const saved = localStorage.getItem('enstmo_specialisation');
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      this.form.patchValue(data);
+      if (data.cursus) {
+        this.filtrerNiveauxEtFilieres(data.cursus, data.niveau);
       }
-    }
+      if (data.diplomeAdmission) {
+        this.seriesFiltrees = this.seriesParDiplome[data.diplomeAdmission] || [];
+      }
+      if (data.imageRecu) {
+        this.imagePreview = data.imageRecu;
+        this.imageNom = data.imageNom || '';
+      }
+    } catch (e) { console.error('Erreur localStorage', e); }
   }
 
   onCursusChange(event: Event): void {
-    const v = (event.target as HTMLSelectElement).value;
-    this.niveauxFiltres = this.niveauxParCursus[v] || [];
-    this.domainesFiltres = this.domainesParCursus[v] || [];
+    const idCursus = (event.target as HTMLSelectElement).value;
     this.form.get('niveau')?.setValue('');
     this.form.get('domaineFormation')?.setValue('');
+    this.niveauxFiltres = [];
+    this.domainesFiltres = [];
+    if (idCursus) {
+      this.filtrerNiveauxEtFilieres(idCursus, '');
+      this.ref.getDiplomes(idCursus).subscribe({
+        next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
+        error: () => {}
+      });
+    }
+  }
+
+  private filtrerNiveauxEtFilieres(idCursus: string, codeNiveau: string): void {
+    this.niveauxFiltres = this.niveauxTous.filter(n =>
+      n.codeCursus && n.codeCursus.includes(idCursus)
+    );
+    this.ref.getFilieres(idCursus, codeNiveau || '*').subscribe({
+      next: (data) => { this.domainesFiltres = data.filter(f => !f.annuler); },
+      error: () => { this.domainesFiltres = []; }
+    });
+  }
+
+  onNiveauChange(event: Event): void {
+    const codeNiveau = (event.target as HTMLSelectElement).value;
+    const idCursus = this.form.get('cursus')?.value;
+    this.form.get('domaineFormation')?.setValue('');
+    if (idCursus && codeNiveau) {
+      this.ref.getFilieres(idCursus, codeNiveau).subscribe({
+        next: (data) => { this.domainesFiltres = data.filter(f => !f.annuler); },
+        error: () => { this.domainesFiltres = []; }
+      });
+      this.ref.getDiplomes(idCursus, codeNiveau).subscribe({
+        next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
+        error: () => {}
+      });
+    }
   }
 
   onDiplomeChange(event: Event): void {
-    const v = (event.target as HTMLSelectElement).value;
-    this.seriesFiltrees = this.seriesParDiplome[v] || [];
+    const libelle = (event.target as HTMLSelectElement).value;
+    this.seriesFiltrees = this.seriesParDiplome[libelle] || [];
     this.form.get('serieDiplome')?.setValue('');
   }
 
@@ -144,11 +200,10 @@ export class StepSpecialisation implements OnInit {
     this.imageErreur = '';
     if (!input.files || !input.files.length) return;
     const fichier = input.files[0];
-
     if (fichier.size > 2 * 1024 * 1024) {
-      this.imageErreur = 'Fichier trop lourd. Maximum 2 Mo.'; return;
+      this.imageErreur = 'Fichier trop lourd. Maximum 2 Mo.';
+      return;
     }
-
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = reader.result as string;

@@ -114,6 +114,29 @@
     height: 18px;
 }
 
+.nav-separateur {
+    padding: 16px 20px 4px;
+    list-style: none;
+}
+
+.sep-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255, 255, 255, 0.45);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sep-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
 @media (max-width: 768px) {
     .sidebar {
         width: 260px;

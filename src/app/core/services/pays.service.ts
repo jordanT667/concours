@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PaysDto } from '../models/pays.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PaysService {
-  private readonly API = '/api/v1/pays';
+  private readonly API = `${environment.apiUrl}/pays`;
 
   constructor(private http: HttpClient) {}
 
