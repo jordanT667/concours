@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://boxes-upgrading-oxford-effectiveness.trycloudflare.com/api/v1'
+  apiUrl: 'localhost:8084/api/v1'
 };
