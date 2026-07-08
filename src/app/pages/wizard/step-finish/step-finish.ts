@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgIf, NgFor } from '@angular/common';
 import jsPDF from 'jspdf';
+import { InscriptionService } from '../../../core/services/inscription';
+import { SoumettreInscriptionPayload } from '../../../core/models/inscription.models';
 
 // ── Formes des données telles qu'enregistrées par chaque step précédent ──
 interface Identification {
@@ -66,7 +67,7 @@ interface Contacts {
 @Component({
   selector: 'app-step-finish',
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [],
   templateUrl: './step-finish.html',
   styleUrl: './step-finish.css',
 })
@@ -78,17 +79,8 @@ export class StepFinish implements OnInit {
   cursus: Diplome[] = [];
   contacts: Partial<Contacts> = {};
 
-  // ── Numéro de dossier (généré une seule fois par session) ────────────
+  // ── Numéro de dossier (assigné par le backend après soumission) ──────
   numeroDossier = '';
-  compteur = 1;
-  genererNumeroDossier() {
-    let compteur =
-      Number(localStorage.getItem('compteurDossier')) || 1;
-    this.numeroDossier = compteur.toString().padStart(6, '0')
-    compteur = compteur + 1;
-    localStorage.setItem('compteurDossier', compteur.toString());
-
-  }
 
   // ── États d'affichage ─────────────────────────────────────────────────
   enregistrementReussi = false;
@@ -99,14 +91,18 @@ export class StepFinish implements OnInit {
   //    Le fichier doit exister dans src/assets/logo-enstmo.png
   //    Si absent, le PDF est généré quand même, simplement sans logo.
   private logoBase64: string | null = null;
-  private readonly logoUrl = 'src/assets/enstmo.png';
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private inscriptionService: InscriptionService) { }
 
   ngOnInit(): void {
     this.chargerDonnees();
-    this.genererOuRecupererNumeroDossier();
     this.chargerLogo();
+    // Si le candidat revient sur cette page après soumission, on restaure le numéro
+    const existant = localStorage.getItem('enstmo_numero_dossier');
+    if (existant) {
+      this.numeroDossier = existant;
+      this.enregistrementReussi = true;
+    }
   }
 
   // ── Lecture de toutes les étapes précédentes ──────────────────────────
@@ -130,67 +126,43 @@ export class StepFinish implements OnInit {
     }
   }
 
-  // ── Numéro de dossier séquentiel : récupéré si déjà généré pour cette session,
-  //    sinon on incrémente le compteur global et on assigne le suivant.
-  private genererOuRecupererNumeroDossier(): void {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      this.numeroDossier = this.incrementerCompteur();
-      return;
-    }
-    // Si un numéro existe déjà pour cette session d'inscription, on le réutilise
-    const existant = localStorage.getItem('enstmo_numero_dossier');
-    if (existant) {
-      this.numeroDossier = existant;
-    } else {
-      // Nouveau dossier : on incrémente le compteur global
-      this.numeroDossier = this.incrementerCompteur();
-      localStorage.setItem('enstmo_numero_dossier', this.numeroDossier);
-    }
-  }
-
-  /**
-   * Lit le compteur global dans localStorage (clé `enstmo_compteur_dossiers`),
-   * l'incrémente, le sauvegarde, puis retourne le numéro formaté.
-   * Format : AAAA-NNNNNN  (ex: 2026-000001, 2026-000002, …)
-   */
-  private incrementerCompteur(): string {
-    const annee = new Date().getFullYear();
-    const CLE_COMPTEUR = 'enstmo_compteur_dossiers';
-    const valActuelle = localStorage.getItem(CLE_COMPTEUR);
-    const compteur = valActuelle ? parseInt(valActuelle, 10) + 1 : 1;
-    localStorage.setItem(CLE_COMPTEUR, String(compteur));
-    // Numéro séquentiel sur 6 chiffres : 000001, 000002, ...
-    const suffixe = String(compteur).padStart(6, '0');
-    return `${annee}-${suffixe}`;
-  }
-
-  // ── Chargement défensif du logo en base64 (ne bloque jamais le PDF) ──
+  // ── Chargement du logo ENSTMO en base64 pour intégration PDF ──────
   private chargerLogo(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          this.logoBase64 = canvas.toDataURL('image/png');
+    if (typeof window === 'undefined') return;
+
+    // Essaie d'abord le .jfif, puis le .png en fallback
+    const urls = ['assets/enstmo.jfif', 'assets/enstmo.png'];
+    let index = 0;
+
+    const tryLoad = (url: string) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            this.logoBase64 = canvas.toDataURL('image/png');
+          }
+        } catch (e) {
+          this.logoBase64 = null;
         }
-      } catch (e) {
-        console.warn('Logo non utilisable pour le PDF (CORS ou format) :', e);
-        this.logoBase64 = null;
-      }
+      };
+      img.onerror = () => {
+        index++;
+        if (index < urls.length) {
+          tryLoad(urls[index]);
+        } else {
+          this.logoBase64 = null;
+        }
+      };
+      img.src = url;
     };
-    img.onerror = () => {
-      console.warn(`Logo introuvable à l'emplacement ${this.logoUrl} — le PDF sera généré sans logo.`);
-      this.logoBase64 = null;
-    };
-    img.src = this.logoUrl;
+
+    tryLoad(urls[index]);
   }
 
   // ── Diplôme le plus récent (le tableau est trié décroissant par step-cursus) ─
@@ -222,24 +194,78 @@ export class StepFinish implements OnInit {
       .join(' - ');
   }
 
-  // ── Action principale : générer le PDF et marquer l'enregistrement comme fait ─
+  // ── Action principale : soumettre au backend, récupérer le numéro, générer le PDF ─
   onEnregistrer(): void {
     this.erreur = '';
     this.enCours = true;
 
-    // Petit délai pour laisser l'UI afficher l'état "en cours" avant le
-    // traitement synchrone (potentiellement un peu long) de jsPDF.
-    setTimeout(() => {
-      try {
-        this.genererPdf();
-        this.enregistrementReussi = true;
-      } catch (e) {
-        console.error('Erreur génération PDF', e);
-        this.erreur = 'Une erreur est survenue lors de la génération de votre fiche. Veuillez réessayer.';
-      } finally {
+    const payload: SoumettreInscriptionPayload = {
+      nom: this.identification.nom ?? '',
+      prenom: this.identification.prenom ?? '',
+      sexe: this.identification.sexe ?? '',
+      dateNaissance: this.identification.dateNaissance ?? '',
+      lieuNaissance: this.identification.lieuNaissance ?? '',
+      paysNationalite: this.identification.paysNationalite ?? '',
+      regionOrigine: this.identification.regionOrigine ?? '',
+      departementOrigine: this.identification.departementOrigine ?? '',
+      situationMatrimoniale: this.identification.situationMatrimoniale ?? '',
+      adresse: this.identification.adresse ?? '',
+      telephone: this.identification.telephone ?? '',
+      numeroCNI: this.identification.numeroCNI ?? '',
+      email: this.identification.email ?? '',
+      premiereLangue: this.identification.premiereLangue ?? '',
+      deuxiemeLangue: this.identification.deuxiemeLangue ?? '',
+      cursus: this.specialisation.cursus ?? '',
+      niveau: this.specialisation.niveau ?? '',
+      domaineFormation: this.specialisation.domaineFormation ?? '',
+      diplomeAdmission: this.specialisation.diplomeAdmission ?? '',
+      serieDiplome: this.specialisation.serieDiplome ?? '',
+      mentionDiplome: this.specialisation.mentionDiplome ?? '',
+      anneeObtentionDip: this.specialisation.anneeObtentionDip ?? 0,
+      etablissementObtention: this.specialisation.etablissementObtention ?? '',
+      paysObtention: this.specialisation.paysObtention ?? '',
+      anneeBEPC: this.specialisation.anneeBEPC ?? 0,
+      choixEpreuve: this.specialisation.choixEpreuve ?? '',
+      centreConcours: this.specialisation.centreConcours ?? '',
+      centreDepotDossier: this.specialisation.centreDepotDossier ?? '',
+      numeroRecuCCA: this.specialisation.numeroRecuCCA ?? '',
+      banque: this.specialisation.banque ?? '',
+      imageRecuBase64: this.specialisation.imageRecu ?? '',
+      imageNom: this.specialisation.imageNom ?? '',
+      parcoursScolaire: this.cursus,
+      loisir1: this.contacts.loisir1 ?? '',
+      loisir2: this.contacts.loisir2 ?? '',
+      activite1: this.contacts.activite1 ?? '',
+      activite2: this.contacts.activite2 ?? '',
+      handicap: this.contacts.handicap ?? '',
+      profession: this.contacts.profession ?? '',
+      nomPere: this.contacts.nomPere ?? '',
+      nomMere: this.contacts.nomMere ?? '',
+      telPere: this.contacts.telPere ?? '',
+      emailPere: this.contacts.emailPere ?? '',
+      telMere: this.contacts.telMere ?? '',
+    };
+
+    this.inscriptionService.soumettre(payload).subscribe({
+      next: (res) => {
+        this.numeroDossier = res.numeroDossier;
+        localStorage.setItem('enstmo_numero_dossier', this.numeroDossier);
+        try {
+          this.genererPdf();
+          this.enregistrementReussi = true;
+        } catch (e) {
+          console.error('Erreur génération PDF', e);
+          this.erreur = 'Inscription enregistrée mais erreur lors de la génération du PDF. Veuillez re-télécharger.';
+          this.enregistrementReussi = true;
+        }
         this.enCours = false;
-      }
-    }, 150);
+      },
+      error: (err) => {
+        console.error('Erreur soumission inscription', err);
+        this.erreur = 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.';
+        this.enCours = false;
+      },
+    });
   }
 
   // ── Permet de re-télécharger le PDF après succès sans tout refaire ───
@@ -256,43 +282,55 @@ export class StepFinish implements OnInit {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margeG = 15;
     const margeD = 195;
-    let y = 16;
+    const logoW = 32;
+    const logoH = 32;
+    const logoX = (210 - logoW) / 2; // centré sur A4 (210mm)
+    let y = 10;
 
-    // ── En-tête avec logo centré (si disponible) ────────────────────────
+    // ── Logo ENSTMO centré en haut ───────────────────────────────────────
     if (this.logoBase64) {
       try {
-        doc.addImage(this.logoBase64, 'PNG', 95, y - 4, 20, 20);
+        doc.addImage(this.logoBase64, 'PNG', logoX, y, logoW, logoH);
       } catch (e) {
         console.warn("Impossible d'insérer le logo dans le PDF :", e);
       }
     }
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('REPUBLIQUE DU CAMEROUN', margeG, y);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('Paix - Travail - Patrie', margeG, y + 4);
+    // Texte FR (gauche) et EN (droite) alignés verticalement au centre du logo
+    const yTexte = y + 6;
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('REPUBLIC OF CAMEROON', margeD, y, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('Peace - Work - Fatherland', margeD, y + 4, { align: 'right' });
-
-    y += 12;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
-    doc.text("MINISTERE DE L'ENSEIGNEMENT SUPERIEUR", margeG, y);
-    doc.text('MINISTRY OF HIGHER EDUCATION', margeD, y, { align: 'right' });
+    doc.text('REPUBLIQUE DU CAMEROUN', margeG, yTexte);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Paix - Travail - Patrie', margeG, yTexte + 5);
 
-    y += 5;
-    doc.text('ECOLE NATIONALE SUPERIEURE DES SCIENCES ET', margeG, y);
-    doc.text('NATIONAL ADVANCED SCHOOL OF MARITIME', margeD, y, { align: 'right' });
-    y += 4;
-    doc.text('TECHNIQUES MARITIMES ET OCEANIQUES (ENSTMO)', margeG, y);
-    doc.text('AND OCEAN SCIENCE AND TECHNOLOGY', margeD, y, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('REPUBLIC OF CAMEROON', margeD, yTexte, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Peace - Work - Fatherland', margeD, yTexte + 5, { align: 'right' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text("MINISTERE DE L'ENSEIGNEMENT SUPERIEUR", margeG, yTexte + 11);
+    doc.text('MINISTRY OF HIGHER EDUCATION', margeD, yTexte + 11, { align: 'right' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.text('ECOLE NATIONALE SUPERIEURE DES SCIENCES ET', margeG, yTexte + 16);
+    doc.text('NATIONAL ADVANCED SCHOOL OF MARITIME', margeD, yTexte + 16, { align: 'right' });
+    doc.text('TECHNIQUES MARITIMES ET OCEANIQUES (ENSTMO)', margeG, yTexte + 20);
+    doc.text('AND OCEAN SCIENCE AND TECHNOLOGY', margeD, yTexte + 20, { align: 'right' });
+
+    // Ligne de séparation sous l'en-tête
+    y = y + logoH + 4;
+    doc.setDrawColor(20, 60, 130);
+    doc.setLineWidth(0.5);
+    doc.line(margeG, y, margeD, y);
+    y += 2;
 
     // ── Titre / numéro de dossier ────────────────────────────────────────
     y += 11;

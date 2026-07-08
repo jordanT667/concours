@@ -1,44 +1,39 @@
 <form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+
+  @if (erreurChargement) {
+    <div class="alerte-erreur">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ erreurChargement }}
+    </div>
+  }
+
   <div class="grille">
 
     <!--LIGNE 1 : Nom / Prénom-->
     <div class="champ col6">
-      <label class="titre">
-        Nom <span class="req">*</span>
-      </label>
+      <label class="titre">Nom <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('nom')">
         <i class="fa-solid fa-user ico"></i>
-        <input
-          type="text"
-          formControlName="nom"
-          placeholder="saisir votre nom"
-          class="entr"
-        />
+        <input type="text" formControlName="nom" placeholder="saisir votre nom" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('nom')">
-        <span *ngIf="f['nom'].errors?.['required']">Le nom est obligatoire.</span>
-        <span *ngIf="f['nom'].errors?.['minlength']">Minimum 2 caractères.</span>
-      </span>
+      @if (isInvalid('nom')) {
+        <span class="err">
+          @if (f['nom'].errors?.['required']) { Le nom est obligatoire. }
+          @if (f['nom'].errors?.['minlength']) { Minimum 2 caractères. }
+        </span>
+      }
     </div>
 
     <div class="champ col6">
       <label class="titre">Prénom(s)</label>
       <div class="saisie">
         <i class="fa-solid fa-user-pen ico"></i>
-        <input
-          type="text"
-          formControlName="prenom"
-          placeholder="saisir votre prénom"
-          class="entr"
-        />
+        <input type="text" formControlName="prenom" placeholder="saisir votre prénom" class="entr"/>
       </div>
     </div>
 
     <!--LIGNE 2 : Sexe / Date / Lieu / Situation -->
     <div class="champ col3">
-      <label class="titre">
-        Sexe <span class="req">*</span>
-      </label>
+      <label class="titre">Sexe <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('sexe')">
         <i class="fa-solid fa-venus-mars ico"></i>
         <select formControlName="sexe" class="entr">
@@ -49,159 +44,133 @@
     </div>
 
     <div class="champ col3">
-      <label class="titre">
-        Date naissance <span class="req">*</span>
-      </label>
+      <label class="titre">Date naissance <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('dateNaissance')">
         <i class="fa-solid fa-calendar-days ico"></i>
-        <input
-          type="date"
-          formControlName="dateNaissance"
-          class="entr"
-        />
+        <input type="date" formControlName="dateNaissance" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('dateNaissance')">
-        La date est obligatoire.
-      </span>
+      @if (isInvalid('dateNaissance')) {
+        <span class="err">La date est obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
-      <label class="titre">
-        Lieu Naissance <span class="req">*</span>
-      </label>
+      <label class="titre">Lieu Naissance <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('lieuNaissance')">
         <i class="fa-solid fa-location-dot ico"></i>
-        <input
-          type="text"
-          formControlName="lieuNaissance"
-          placeholder="saisir votre lieu de naissance"
-          class="entr"
-        />
+        <input type="text" formControlName="lieuNaissance" placeholder="saisir votre lieu de naissance" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('lieuNaissance')">
-        Champ obligatoire.
-      </span>
+      @if (isInvalid('lieuNaissance')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
-      <label class="titre">
-        Situation matrimoniale <span class="req">*</span>
-      </label>
+      <label class="titre">Situation matrimoniale <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('situationMatrimoniale')">
         <i class="fa-solid fa-rings-wedding ico"></i>
         <select formControlName="situationMatrimoniale" class="entr">
-          <option *ngFor="let s of situationsMatrimoniales" [value]="s">{{ s }}</option>
+          <option value="">-- Choisir --</option>
+          @for (s of situationsMatrimoniales; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
         </select>
       </div>
     </div>
 
     <!--LIGNE 3 : Adresse / Téléphone / CNI + Email-->
     <div class="champ col4">
-      <label class="titre">
-        Adresse <span class="req">*</span>
-      </label>
+      <label class="titre">Adresse <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('adresse')">
         <i class="fa-solid fa-map-marker-alt ico"></i>
-        <input
-          type="text"
-          formControlName="adresse"
-          placeholder="saisir Ville / Quartier / BP"
-          class="entr"
-        />
+        <input type="text" formControlName="adresse" placeholder="saisir Ville / Quartier / BP" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('adresse')">Champ obligatoire.</span>
+      @if (isInvalid('adresse')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
-      <label class="titre titre-rouge">
-        N° téléphone du Candidat (Orange de Préférence) <span class="req">*</span>
-      </label>
+      <label class="titre titre-rouge">N° téléphone du Candidat (Orange de Préférence) <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('telephone')">
         <i class="fa-solid fa-phone ico"></i>
-        <input
-          type="tel"
-          formControlName="telephone"
-          placeholder="saisir votre numéro de téléphone"
-          class="entr"
-        />
+        <input type="tel" formControlName="telephone" placeholder="saisir votre numéro de téléphone" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('telephone')">
-        <span *ngIf="f['telephone'].errors?.['required']">Champ obligatoire.</span>
-        <span *ngIf="f['telephone'].errors?.['pattern']">Numéro invalide (9 chiffres).</span>
-      </span>
+      @if (isInvalid('telephone')) {
+        <span class="err">
+          @if (f['telephone'].errors?.['required']) { Champ obligatoire. }
+          @if (f['telephone'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
+        </span>
+      }
     </div>
 
     <div class="champ col4">
-      <label class="titre">
-        N° CNI <span class="req">*</span>
-      </label>
+      <label class="titre">N° CNI <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('numeroCNI')">
         <i class="fa-solid fa-id-card ico"></i>
-        <input
-          type="text"
-          formControlName="numeroCNI"
-          placeholder="saisir votre numéro de CNI"
-          class="entr"
-        />
+        <input type="text" formControlName="numeroCNI" placeholder="saisir votre numéro de CNI" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('numeroCNI')">Champ obligatoire.</span>
+      @if (isInvalid('numeroCNI')) {
+        <span class="err">Champ obligatoire.</span>
+      }
 
       <label class="titre" style="margin-top: 14px;">Email</label>
       <div class="saisie" [class.erreur]="isInvalid('email')">
         <i class="fa-solid fa-at ico"></i>
-        <input
-          type="email"
-          formControlName="email"
-          placeholder="saisir votre adresse email"
-          class="entr"
-        />
+        <input type="email" formControlName="email" placeholder="saisir votre adresse email" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('email')">
-        Adresse email invalide.
-      </span>
+      @if (isInvalid('email')) {
+        <span class="err">Adresse email invalide.</span>
+      }
     </div>
 
     <!--LIGNE 4 : Langues / Pays-->
     <div class="champ col4">
-      <label class="titre">
-        1ère langue <span class="req">*</span>
-      </label>
+      <label class="titre">1ère langue <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('premiereLangue')">
         <i class="fa-solid fa-language ico"></i>
         <select formControlName="premiereLangue" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let l of langues" [value]="l">{{ l }}</option>
+          @for (l of langues; track l.code) {
+            <option [value]="l.code">{{ l.libelleFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('premiereLangue')">Champ obligatoire.</span>
+      @if (isInvalid('premiereLangue')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
-      <label class="titre">
-        2ième langue <span class="req">*</span>
-      </label>
+      <label class="titre">2ième langue <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('deuxiemeLangue')">
         <i class="fa-solid fa-language ico"></i>
         <select formControlName="deuxiemeLangue" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let l of langues" [value]="l">{{ l }}</option>
+          @for (l of langues; track l.code) {
+            <option [value]="l.code">{{ l.libelleFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('deuxiemeLangue')">Champ obligatoire.</span>
+      @if (isInvalid('deuxiemeLangue')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
-      <label class="titre">
-        Pays de nationalité <span class="req">*</span>
-      </label>
+      <label class="titre">Pays de nationalité <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('paysNationalite')">
         <i class="fa-solid fa-globe ico"></i>
         <select formControlName="paysNationalite" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let p of pays" [value]="p">{{ p }}</option>
+          @for (p of pays; track p.codePays) {
+            <option [value]="p.codePays">{{ p.libelleFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('paysNationalite')">Champ obligatoire.</span>
+      @if (isInvalid('paysNationalite')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <!--LIGNE 5 : Région / Département -->
@@ -209,14 +178,19 @@
       <label class="titre">Région d'origine</label>
       <div class="saisie">
         <i class="fa-solid fa-map-pin ico"></i>
-        <select
+        <input
+          type="text"
           formControlName="regionOrigine"
+          list="liste-regions"
           class="entr"
+          placeholder="Choisir ou saisir une région"
           (change)="onRegionChange($event)"
-        >
-          <option value="">-- Choisir --</option>
-          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
-        </select>
+        />
+        <datalist id="liste-regions">
+          @for (r of regions; track r.codeRegion) {
+            <option [value]="r.libelleRegionLangue1">{{ r.libelleRegionLangue1 }}</option>
+          }
+        </datalist>
       </div>
     </div>
 
@@ -224,10 +198,18 @@
       <label class="titre">Département d'origine</label>
       <div class="saisie">
         <i class="fa-solid fa-location-crosshairs ico"></i>
-        <select formControlName="departementOrigine" class="entr">
-          <option value="">-- Choisir --</option>
-          <option *ngFor="let d of departementsFiltres" [value]="d">{{ d }}</option>
-        </select>
+        <input
+          type="text"
+          formControlName="departementOrigine"
+          list="liste-departements"
+          class="entr"
+          placeholder="Choisir ou saisir un département"
+        />
+        <datalist id="liste-departements">
+          @for (d of departementsFiltres; track d.codeDepartementGeographique) {
+            <option [value]="d.libelleDepartementGeographiqueLangue1">{{ d.libelleDepartementGeographiqueLangue1 }}</option>
+          }
+        </datalist>
       </div>
     </div>
 

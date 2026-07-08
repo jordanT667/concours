@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
+import { STORAGE_KEYS } from '../../core/services/storage';
+import { WIZARD_ROUTES } from '../../core/models/geo.constants';
 
 interface WizardStep {
   label: string;
@@ -31,7 +33,7 @@ export class WizardComponent implements OnInit {
 
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('enstmo_current_step');
+      const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_STEP);
       if (saved !== null) {
         this.currentStep = parseInt(saved, 10);
       }
@@ -39,29 +41,31 @@ export class WizardComponent implements OnInit {
     this.navigateToStep(this.currentStep);
   }
 
+  // Appelé par les étapes enfants via le router — resynchronise le parent
+  syncStep(index: number): void {
+    this.currentStep = index;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, String(index));
+    }
+  }
+
   goToStep(index: number): void {
     if (index <= this.currentStep) {
-      this.currentStep = index;
+      this.syncStep(index);
       this.navigateToStep(index);
     }
   }
 
   nextStep(): void {
     if (this.currentStep < this.steps.length - 1) {
-      this.currentStep++;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('enstmo_current_step', String(this.currentStep));
-      }
+      this.syncStep(this.currentStep + 1);
       this.navigateToStep(this.currentStep);
     }
   }
 
   prevStep(): void {
     if (this.currentStep > 0) {
-      this.currentStep--;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('enstmo_current_step', String(this.currentStep));
-      }
+      this.syncStep(this.currentStep - 1);
       this.navigateToStep(this.currentStep);
     }
   }

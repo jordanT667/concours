@@ -1,0 +1,92 @@
+.form-container { padding: 24px; }
+
+.form-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 24px;
+  padding-bottom: 16px; border-bottom: 2px solid #f3f4f6;
+}
+
+.form-titre { font-size: 18px; font-weight: 700; color: #1a2332; margin: 0; }
+.form-sous-titre { font-size: 12px; color: #9ca3af; margin: 4px 0 0; }
+
+.btn-fermer {
+  width: 32px; height: 32px; border: none;
+  background: #f3f4f6; border-radius: 50%;
+  cursor: pointer; font-size: 16px; color: #6b7280;
+  flex-shrink: 0;
+}
+.btn-fermer:hover { background: #fee2e2; color: #dc2626; }
+
+.form-body { display: flex; flex-direction: column; gap: 16px; }
+
+.champ { display: flex; flex-direction: column; gap: 6px; }
+
+.champ-label { font-size: 13px; font-weight: 600; color: #374151; }
+.champ-hint  { font-size: 11px; color: #9ca3af; }
+
+.champ-input {
+  padding: 10px 14px; border: 1px solid #e5e7eb;
+  border-radius: 8px; font-size: 14px; outline: none;
+  background: white; transition: border-color 0.2s;
+}
+.champ-input:focus { border-color: #1aaa8a; }
+
+/* Erreur */
+.erreur-msg {
+  padding: 10px 14px; background: #fee2e2;
+  color: #dc2626; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+}
+
+/* Aperçu */
+.apercu-card {
+  background: #f9fafb; border-radius: 10px;
+  padding: 14px; display: flex;
+  flex-direction: column; gap: 8px;
+}
+
+.apercu-label {
+  font-size: 11px; font-weight: 700;
+  color: #9ca3af; text-transform: uppercase;
+  margin: 0;
+}
+
+.apercu-top {
+  display: flex; align-items: center;
+  justify-content: space-between;
+}
+
+.apercu-code {
+  padding: 4px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 800;
+  font-family: monospace; color: #1a2332;
+}
+
+.apercu-dept {
+  font-size: 11px; font-weight: 700;
+  color: #9ca3af;
+}
+
+.apercu-nom {
+  font-size: 15px; font-weight: 700;
+  color: #1a2332; margin: 0;
+}
+
+.apercu-dept-nom {
+  font-size: 12px; color: #6b7280; margin: 0;
+}
+
+/* Actions */
+.form-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+.btn-annuler, .btn-sauvegarder {
+  flex: 1; padding: 12px; border: none;
+  border-radius: 8px; font-size: 14px;
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+
+.btn-annuler { background: #f3f4f6; color: #6b7280; }
+.btn-annuler:hover { background: #e5e7eb; }
+
+.btn-sauvegarder { background: #1aaa8a; color: white; }
+.btn-sauvegarder:hover { background: #148f74; }

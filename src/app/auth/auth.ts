@@ -4,11 +4,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { LoginRequest, JwtResponse } from '../core/models/auth-models'
+import { LoginRequest, JwtResponse } from '../core/models/auth-models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = '/api/v1/auth';
+  private readonly API = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) { }
 
@@ -41,9 +42,11 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
+  const token = this.getToken();
+  if (!token) return false;
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  return payload.exp * 1000 > Date.now();
+}
   getRoles(): string[] {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user).roles : [];

@@ -6,12 +6,10 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
-
 @Component({
   selector: 'app-step-contacts',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor],
+  imports: [ReactiveFormsModule],
   templateUrl: './step-contacts.html',
   styleUrl: './step-contacts.css',
 })

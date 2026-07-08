@@ -1,4 +1,11 @@
 <form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+
+  @if (erreurChargement) {
+    <div class="alerte-erreur">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ erreurChargement }}
+    </div>
+  }
+
   <div class="grille">
 
     <!-- ═══ LIGNE 1 : Cursus / Niveau / Domaine / Diplôme ═══ -->
@@ -7,23 +14,31 @@
       <div class="saisie" [class.erreur]="isInvalid('cursus')">
         <i class="fa-solid fa-circle-check ico"></i>
         <select formControlName="cursus" class="entr" (change)="onCursusChange($event)">
-          <option value=""> --- Choisir un seul --</option>
-          <option *ngFor="let c of cursusOptions" [value]="c">{{ c }}</option>
+          <option value="">--- Choisir un seul --</option>
+          @for (c of cursusOptions; track c.idCursus) {
+            <option [value]="c.idCursus">{{ c.libelle }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('cursus')">Champ obligatoire.</span>
+      @if (isInvalid('cursus')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
       <label class="titre">Niveau <span class="req">*</span></label>
       <div class="saisie" [class.erreur]="isInvalid('niveau')">
         <i class="fa-solid fa-briefcase ico"></i>
-        <select formControlName="niveau" class="entr">
-          <option value="">Faites le Choix</option>
-          <option *ngFor="let n of niveauxFiltres" [value]="n">{{ n }}</option>
+        <select formControlName="niveau" class="entr" (change)="onNiveauChange($event)">
+          <option value="">-- Choisir --</option>
+          @for (n of niveauxFiltres; track n.codeNiveau) {
+            <option [value]="n.codeNiveau">{{ n.libelleNiveau }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('niveau')">Champ obligatoire.</span>
+      @if (isInvalid('niveau')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
@@ -32,10 +47,14 @@
         <i class="fa-solid fa-briefcase ico"></i>
         <select formControlName="domaineFormation" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let d of domainesFiltres" [value]="d">{{ d }}</option>
+          @for (d of domainesFiltres; track d.codeFiliere) {
+            <option [value]="d.codeFiliere">{{ d.libelleFiliereFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('domaineFormation')">Champ obligatoire.</span>
+      @if (isInvalid('domaineFormation')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
@@ -44,10 +63,14 @@
         <i class="fa-solid fa-book-open ico"></i>
         <select formControlName="diplomeAdmission" class="entr" (change)="onDiplomeChange($event)">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let d of diplomesAdmission" [value]="d">{{ d }}</option>
+          @for (d of diplomesAdmission; track d.idDiplome) {
+            <option [value]="d.libelleFr">{{ d.libelleFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('diplomeAdmission')">Champ obligatoire.</span>
+      @if (isInvalid('diplomeAdmission')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <!-- ═══ LIGNE 2 : Série / Mention / Année dip / Établissement ═══ -->
@@ -57,10 +80,14 @@
         <i class="fa-solid fa-book-open ico"></i>
         <select formControlName="serieDiplome" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let s of seriesFiltrees" [value]="s">{{ s }}</option>
+          @for (s of seriesFiltrees; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('serieDiplome')">Champ obligatoire.</span>
+      @if (isInvalid('serieDiplome')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
@@ -69,10 +96,14 @@
         <i class="fa-solid fa-book-open ico"></i>
         <select formControlName="mentionDiplome" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let m of mentionsOptions" [value]="m">{{ m }}</option>
+          @for (m of mentionsOptions; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('mentionDiplome')">Champ obligatoire.</span>
+      @if (isInvalid('mentionDiplome')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col3">
@@ -80,7 +111,9 @@
       <div class="saisie" [class.erreur]="isInvalid('anneeObtentionDip')">
         <i class="fa-solid fa-calendar-days ico"></i>
         <select formControlName="anneeObtentionDip" class="entr">
-          <option *ngFor="let a of anneesCourantes" [value]="a">{{ a }}</option>
+          @for (a of anneesCourantes; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
         </select>
       </div>
     </div>
@@ -92,7 +125,9 @@
         <input type="text" formControlName="etablissementObtention"
                placeholder="saisir établissement du diplôme" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('etablissementObtention')">Champ obligatoire.</span>
+      @if (isInvalid('etablissementObtention')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <!-- ═══ LIGNE 3 : Pays / Année BEPC / Épreuve ═══ -->
@@ -102,10 +137,14 @@
         <i class="fa-solid fa-flag ico"></i>
         <select formControlName="paysObtention" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let p of paysOptions" [value]="p">{{ p }}</option>
+          @for (p of paysOptions; track p.codePays) {
+            <option [value]="p.codePays">{{ p.libelleFr }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('paysObtention')">Champ obligatoire.</span>
+      @if (isInvalid('paysObtention')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
@@ -113,7 +152,9 @@
       <div class="saisie" [class.erreur]="isInvalid('anneeBEPC')">
         <i class="fa-solid fa-pencil ico"></i>
         <select formControlName="anneeBEPC" class="entr">
-          <option *ngFor="let a of anneesBEPC" [value]="a">{{ a }}</option>
+          @for (a of anneesBEPC; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
         </select>
       </div>
     </div>
@@ -123,7 +164,9 @@
       <div class="saisie">
         <i class="fa-solid fa-briefcase ico"></i>
         <select formControlName="choixEpreuve" class="entr">
-          <option *ngFor="let e of epreuvesOptions" [value]="e">{{ e }}</option>
+          @for (e of epreuvesOptions; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
         </select>
       </div>
     </div>
@@ -135,10 +178,14 @@
         <i class="fa-solid fa-pencil ico"></i>
         <select formControlName="centreConcours" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let c of centresConcours" [value]="c">{{ c }}</option>
+          @for (c of centresConcours; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('centreConcours')">Champ obligatoire.</span>
+      @if (isInvalid('centreConcours')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
@@ -147,10 +194,14 @@
         <i class="fa-solid fa-pencil ico"></i>
         <select formControlName="centreDepotDossier" class="entr">
           <option value="">-- Choisir --</option>
-          <option *ngFor="let c of centresDepot" [value]="c">{{ c }}</option>
+          @for (c of centresDepot; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('centreDepotDossier')">Champ obligatoire.</span>
+      @if (isInvalid('centreDepotDossier')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col4">
@@ -160,7 +211,9 @@
         <input type="text" formControlName="numeroRecuCCA"
                placeholder="saisir n° reçu bancaire" class="entr"/>
       </div>
-      <span class="err" *ngIf="isInvalid('numeroRecuCCA')">Champ obligatoire.</span>
+      @if (isInvalid('numeroRecuCCA')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <!-- ═══ LIGNE 5 : Banque / Image reçu ═══ -->
@@ -170,43 +223,50 @@
         <i class="fa-solid fa-landmark ico"></i>
         <select formControlName="banque" class="entr">
           <option value="">Votre choix</option>
-          <option *ngFor="let b of banquesOptions" [value]="b">{{ b }}</option>
+          @for (b of banquesOptions; track b) {
+            <option [value]="b">{{ b }}</option>
+          }
         </select>
       </div>
-      <span class="err" *ngIf="isInvalid('banque')">Champ obligatoire.</span>
+      @if (isInvalid('banque')) {
+        <span class="err">Champ obligatoire.</span>
+      }
     </div>
 
     <div class="champ col6">
       <label class="titre">Image reçu bancaire <span class="req">*</span></label>
 
-      <!-- Zone upload -->
-      <div class="zone-charg" [class.upload-erreur]="isInvalid('imageRecu')" *ngIf="!imagePreview">
-        <i class="fa-solid fa-image ico-charg"></i>
-        <span class="txt-charg">PNG ou JPG · Max 2 Mo · Sans accents dans le nom</span>
-        <label class="btn-charg">
-          <i class="fa-solid fa-folder-open"></i> Choisir un fichier
-          <input type="file" accept=".png,.jpg,.jpeg" (change)="onImageChange($event)" hidden/>
-        </label>
-      </div>
-
-      <!-- Aperçu image -->
-      <div class="wrap-img" *ngIf="imagePreview">
-        <img [src]="imagePreview" alt="Aperçu reçu" class="img-prev"/>
-        <div class="info-img">
-          <i class="fa-solid fa-file-image"></i>
-          <span>{{ imageNom }}</span>
-          <button type="button" class="btn-sup" (click)="supprimerImage()">
-            <i class="fa-solid fa-xmark"></i> Supprimer
-          </button>
+      @if (!imagePreview) {
+        <div class="zone-charg" [class.upload-erreur]="isInvalid('imageRecu')">
+          <i class="fa-solid fa-image ico-charg"></i>
+          <span class="txt-charg">PNG ou JPG · Max 2 Mo · Sans accents dans le nom</span>
+          <label class="btn-charg">
+            <i class="fa-solid fa-folder-open"></i> Choisir un fichier
+            <input type="file" accept=".png,.jpg,.jpeg" (change)="onImageChange($event)" hidden/>
+          </label>
         </div>
-      </div>
+      }
 
-      <!-- Erreurs -->
-      <span class="err" *ngIf="imageErreur">{{ imageErreur }}</span>
-      <span class="err" *ngIf="isInvalid('imageRecu') && !imageErreur">
-        Le reçu bancaire est obligatoire.
-      </span>
+      @if (imagePreview) {
+        <div class="wrap-img">
+          <img [src]="imagePreview" alt="Aperçu reçu" class="img-prev"/>
+          <div class="info-img">
+            <i class="fa-solid fa-file-image"></i>
+            <span>{{ imageNom }}</span>
+            <button type="button" class="btn-sup" (click)="supprimerImage()">
+              <i class="fa-solid fa-xmark"></i> Supprimer
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (imageErreur) {
+        <span class="err">{{ imageErreur }}</span>
+      }
+      @if (isInvalid('imageRecu') && !imageErreur) {
+        <span class="err">Le reçu bancaire est obligatoire.</span>
+      }
     </div>
 
-  </div><!-- /grille -->
+  </div>
 </form>

@@ -1,0 +1,212 @@
+.page-filieres { display: flex; flex-direction: column; gap: 20px; }
+
+/* Header */
+.page-header { display: flex; justify-content: space-between; align-items: center; }
+.page-titre { font-size: 20px; font-weight: 700; color: #1a2332; margin: 0; }
+.page-sous-titre { font-size: 13px; color: #6b7280; margin: 4px 0 0; }
+
+.btn-ajouter {
+  padding: 10px 20px; background: #1aaa8a;
+  color: white; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-ajouter:hover { background: #148f74; }
+
+/* Résumé départements */
+.departements-resume {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.dept-card {
+  border-radius: 12px; padding: 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  cursor: pointer; transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.dept-card:hover { transform: translateY(-2px); }
+
+.dept-card.actif {
+  border-color: #1a2332;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.dept-code {
+  font-size: 13px; font-weight: 800;
+  font-family: monospace;
+}
+
+.dept-nb {
+  font-size: 28px; font-weight: 800;
+  line-height: 1; color: #1a2332;
+}
+
+.dept-nom {
+  font-size: 11px; color: #6b7280;
+  line-height: 1.3;
+}
+
+/* Couleurs départements */
+.dept-bleu   { background: #dbeafe; }
+.dept-vert   { background: #d1fae5; }
+.dept-orange { background: #fef3c7; }
+.dept-jaune  { background: #fef9c3; }
+.dept-violet { background: #ede9fe; }
+.dept-rose   { background: #fce7f3; }
+.dept-gris   { background: #f3f4f6; }
+
+/* Recherche */
+.recherche-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: white; border: 1px solid #e5e7eb;
+  border-radius: 10px; padding: 4px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.recherche-icone { font-size: 16px; color: #9ca3af; }
+
+.input-recherche {
+  flex: 1; border: none; outline: none;
+  font-size: 14px; padding: 8px 0;
+  background: transparent; color: #1a2332;
+}
+
+.btn-clear {
+  border: none; background: #f3f4f6;
+  border-radius: 50%; width: 24px; height: 24px;
+  cursor: pointer; font-size: 12px; color: #6b7280;
+}
+
+/* Résultat */
+.resultat-filtre {
+  font-size: 13px; color: #6b7280; margin: 0;
+}
+
+/* Grille */
+.filieres-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Carte filière */
+.filiere-card {
+  background: white; border-radius: 14px;
+  padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: flex; flex-direction: column; gap: 12px;
+  transition: all 0.2s; border: 1px solid transparent;
+}
+
+.filiere-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  transform: translateY(-3px);
+  border-color: #e5e7eb;
+}
+
+/* Top carte */
+.filiere-top {
+  display: flex; justify-content: space-between;
+  align-items: center;
+}
+
+.code-badge {
+  padding: 5px 12px; border-radius: 8px;
+  font-size: 12px; font-weight: 800;
+  font-family: monospace; letter-spacing: 0.5px;
+}
+
+.dept-tag {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+}
+
+/* Nom */
+.filiere-nom {
+  font-size: 15px; font-weight: 700;
+  color: #1a2332; margin: 0;
+  line-height: 1.4;
+}
+
+/* Département */
+.filiere-dept {
+  display: flex; align-items: flex-start;
+  gap: 6px; font-size: 12px; color: #6b7280;
+}
+
+.dept-icone { flex-shrink: 0; }
+
+/* Séparateur */
+.filiere-separator {
+  height: 1px; background: #f3f4f6;
+  margin-top: auto;
+}
+
+/* Actions */
+.filiere-actions { display: flex; gap: 8px; }
+
+.btn-modifier {
+  flex: 1; padding: 8px 12px; border: none;
+  border-radius: 8px; background: #dbeafe;
+  color: #2563eb; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-modifier:hover { background: #2563eb; color: white; }
+
+.btn-supprimer {
+  width: 36px; border: none; border-radius: 8px;
+  background: #fee2e2; color: #dc2626;
+  cursor: pointer; font-size: 14px;
+  transition: all 0.2s;
+}
+.btn-supprimer:hover { background: #dc2626; color: white; }
+
+/* Vide */
+.vide {
+  grid-column: 1 / -1; text-align: center;
+  padding: 60px; color: #9ca3af;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+.vide-icone { font-size: 52px; }
+.vide p { font-size: 16px; margin: 0; }
+
+.btn-ajouter-vide {
+  padding: 10px 20px; background: #1aaa8a;
+  color: white; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+
+/* Loading */
+.loading {
+  text-align: center; padding: 60px;
+  color: #9ca3af; font-size: 16px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center;
+  justify-content: center; z-index: 1000;
+}
+
+.modal-content {
+  background: white; border-radius: 16px;
+  width: 500px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .departements-resume { grid-template-columns: repeat(3, 1fr); }
+  .filieres-grille { grid-template-columns: 1fr; }
+}

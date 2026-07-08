@@ -1,0 +1,117 @@
+<div class="page-admin">
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Gestion des départements</h2>
+      <p class="page-sous-titre">{{ listeFiltree.length }} département(s)</p>
+    </div>
+    <button class="btn-ajouter" (click)="ouvrirCreation()">+ Ajouter un département</button>
+  </div>
+
+  @if (erreur) {
+    <div class="alerte-erreur">
+      <i class="fas fa-exclamation-circle"></i> {{ erreur }}
+      <button type="button" class="btn-fermer-erreur" (click)="erreur=''">×</button>
+    </div>
+  }
+
+  <div class="filtres-bar">
+    <input type="text" class="input-recherche" placeholder="Rechercher par code ou libellé..."
+      [(ngModel)]="recherche" (input)="appliquerFiltres()"/>
+    <select class="input-recherche" style="max-width:220px" [(ngModel)]="filtreRegion" (change)="onFiltreRegionChange()">
+      <option value="">— Toutes les régions —</option>
+      @for (r of allRegions; track r.codeRegion) {
+        <option [value]="r.codeRegion">{{ r.libelleRegionLangue1 }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="table-wrapper">
+    @if (isLoading) {
+      <div class="loading">Chargement...</div>
+    } @else {
+      <table class="table">
+        <thead><tr>
+          <th>Code</th><th>Libellé français</th><th>Libellé anglais</th><th>Région</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          @for (d of listeFiltree; track d.codeDepartementGeographique) {
+            <tr>
+              <td class="td-code">{{ d.codeDepartementGeographique }}</td>
+              <td>{{ d.libelleDepartementGeographiqueLangue1 }}</td>
+              <td class="td-en">{{ d.libelleDepartementGeographiqueLangue2 }}</td>
+              <td>{{ libelleRegion(d.codeRegion) }}</td>
+              <td class="td-actions">
+                <button class="btn-modifier" (click)="ouvrirEdition(d)" title="Modifier"><i class="fas fa-pen"></i></button>
+                @if (authService.isAdmin()) {
+                  <button class="btn-supprimer" (click)="demanderSuppression(d, $event)" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="td-vide">Aucun département trouvé</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (modalOuverte) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-titre">{{ modeEdition ? 'Modifier le département' : 'Ajouter un département' }}</h3>
+        <button class="modal-fermer" (click)="fermerModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        @if (erreur) { <div class="alerte-erreur">{{ erreur }}</div> }
+        <div class="champ">
+          <label class="label">Code département <span class="requis">*</span></label>
+          <input type="text" class="input" placeholder="ex: DEPT_CMR_MFOUNDI"
+            [(ngModel)]="form.codeDepartementGeographique" [disabled]="modeEdition"/>
+        </div>
+        <div class="champ">
+          <label class="label">Région <span class="requis">*</span></label>
+          <select class="input" [(ngModel)]="form.codeRegion">
+            <option value="">-- Choisir --</option>
+            @for (r of allRegions; track r.codeRegion) {
+              <option [value]="r.codeRegion">{{ r.libelleRegionLangue1 }}</option>
+            }
+          </select>
+        </div>
+        <div class="champ">
+          <label class="label">Libellé français <span class="requis">*</span></label>
+          <input type="text" class="input" placeholder="ex: Mfoundi" [(ngModel)]="form.libelleDepartementGeographiqueLangue1"/>
+        </div>
+        <div class="champ">
+          <label class="label">Libellé anglais</label>
+          <input type="text" class="input" placeholder="ex: Mfoundi" [(ngModel)]="form.libelleDepartementGeographiqueLangue2"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="fermerModal()">Annuler</button>
+        <button class="btn-sauvegarder" (click)="sauvegarder()" [disabled]="enSoumission">
+          {{ enSoumission ? 'Enregistrement...' : (modeEdition ? 'Modifier' : 'Ajouter') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmOuverte) {
+  <div class="modal-overlay" (click)="annulerSuppression()">
+    <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3 class="modal-titre">Confirmer la suppression</h3></div>
+      <div class="modal-body">
+        <p class="confirm-texte">Supprimer le département <strong>{{ deptASupprimer?.libelleDepartementGeographiqueLangue1 }}</strong> ?</p>
+        <p class="confirm-avertissement">Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="annulerSuppression()">Annuler</button>
+        <button class="btn-supprimer-confirm" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}
