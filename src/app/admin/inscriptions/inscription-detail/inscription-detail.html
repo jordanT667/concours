@@ -1,0 +1,87 @@
+<div class="detail-page">
+
+  <div class="detail-header">
+    <button class="btn-retour" type="button" (click)="retour()">
+      &lsaquo; Retour
+    </button>
+    <h2 class="detail-titre">Détail de l'inscription</h2>
+  </div>
+
+  @if (isLoading) {
+    <div class="loader-wrapper">
+      <span class="loader"></span>
+      <p>Chargement...</p>
+    </div>
+  } @else if (erreur) {
+    <div class="alert-erreur">
+      {{ erreur }}
+    </div>
+  } @else if (inscription) {
+
+    <div class="detail-card">
+      <div class="detail-statut">
+        <span class="badge" [class]="couleurStatut(inscription.statut)">
+          {{ libelleStatut(inscription.statut) }}
+        </span>
+        <span class="detail-numero">N° reçu : {{ inscription.numeroRecu }}</span>
+      </div>
+
+      <div class="detail-section">
+        <h3>Candidat</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Nom</span>
+            <span class="detail-val">{{ inscription.candidat.nom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prénom</span>
+            <span class="detail-val">{{ inscription.candidat.prenom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-val">{{ inscription.candidat.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Téléphone</span>
+            <span class="detail-val">{{ inscription.candidat.telephone }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">CNI</span>
+            <span class="detail-val">{{ inscription.candidat.numeroCNI }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Inscription</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Filière</span>
+            <span class="detail-val">{{ inscription.filiere.libelleFiliereFr }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Centre examen</span>
+            <span class="detail-val">{{ inscription.centreExamen.ville }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Centre dépôt</span>
+            <span class="detail-val">{{ inscription.centreDepot.ville }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date inscription</span>
+            <span class="detail-val">{{ inscription.dateInscription | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      @if (inscription.statut === 'SOUMISE' || inscription.statut === 'EN_COURS_VERIFICATION') {
+        <div class="detail-actions">
+          <button class="btn-valider" type="button" (click)="valider()">Valider</button>
+          <button class="btn-rejeter" type="button" (click)="rejeter()">Rejeter</button>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterOutlet, RouterLink } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { STORAGE_KEYS } from '../../core/services/storage';
-import { WIZARD_ROUTES } from '../../core/models/geo.constants';
 
 interface WizardStep {
   label: string;
@@ -12,27 +12,44 @@ interface WizardStep {
 @Component({
   selector: 'app-wizard',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, NgFor, NgIf],
+  imports: [RouterOutlet],
   templateUrl: './wizard.html',
   styleUrl: './wizard.css'
 })
-export class WizardComponent implements OnInit {
+export class WizardComponent implements OnInit, OnDestroy {
 
   steps: WizardStep[] = [
-    { label: 'RECOMMANDATION', route: 'recommandation' },
-    { label: 'IDENTIFICATION', route: 'identification' },
-    { label: 'SPÉCIALISATION', route: 'specialisation' },
-    { label: 'CURSUS ACADÉMIQUE', route: 'cursus' },
+    { label: 'RECOMMANDATION',        route: 'recommandation' },
+    { label: 'IDENTIFICATION',        route: 'identification' },
+    { label: 'SPÉCIALISATION',        route: 'specialisation' },
+    { label: 'CURSUS ACADÉMIQUE',     route: 'cursus' },
     { label: 'AUTRES INFOS & CONTACTS', route: 'contacts' },
-    { label: 'FINISH', route: 'finish' },
+    { label: 'FINISH',                route: 'finish' },
   ];
 
   currentStep = 0;
 
-  constructor(private router: Router) { }
+  private routerSub!: Subscription;
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    // Synchroniser l'onglet actif à chaque changement de route
+    this.routerSub = this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: NavigationEnd) => {
+      const segment = e.urlAfterRedirects.split('/').pop() ?? '';
+      const idx = this.steps.findIndex(s => s.route === segment);
+      if (idx !== -1) {
+        this.currentStep = idx;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, String(idx));
+        }
+      }
+    });
+
+    // Restaurer l'étape depuis le localStorage au premier chargement
+    if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_STEP);
       if (saved !== null) {
         this.currentStep = parseInt(saved, 10);
@@ -41,41 +58,18 @@ export class WizardComponent implements OnInit {
     this.navigateToStep(this.currentStep);
   }
 
-  // Appelé par les étapes enfants via le router — resynchronise le parent
-  syncStep(index: number): void {
-    this.currentStep = index;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, String(index));
-    }
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
+  // Permet de revenir à une étape déjà complétée
   goToStep(index: number): void {
     if (index <= this.currentStep) {
-      this.syncStep(index);
       this.navigateToStep(index);
     }
   }
 
-  nextStep(): void {
-    if (this.currentStep < this.steps.length - 1) {
-      this.syncStep(this.currentStep + 1);
-      this.navigateToStep(this.currentStep);
-    }
-  }
-
-  prevStep(): void {
-    if (this.currentStep > 0) {
-      this.syncStep(this.currentStep - 1);
-      this.navigateToStep(this.currentStep);
-    }
-  }
-
-  // NOTE : la méthode finish() a été retirée. L'enregistrement final,
-  // la validation et la génération du PDF sont désormais entièrement
-  // gérés par le composant StepFinish (bouton "Enregistrer ma préinscription").
-
   private navigateToStep(index: number): void {
-    const route = this.steps[index].route;
-    this.router.navigate(['/inscription', route]);
+    this.router.navigate(['/inscription', this.steps[index].route]);
   }
 }

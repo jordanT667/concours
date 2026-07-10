@@ -48,3 +48,13 @@ export interface LangueDto {
   libelleFr: string;
   libelleEn: string;
 }
+
+export interface EcoleDto {
+  codeEcole: string;
+  libelleFr?: string;
+  libelleEn?: string;
+  codeMat?: string;
+  dateOuverture?: string;
+  dateFermeture?: string;
+  annuler: boolean;
+}

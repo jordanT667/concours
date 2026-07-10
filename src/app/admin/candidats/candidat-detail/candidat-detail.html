@@ -1,0 +1,56 @@
+<div class="detail-page">
+
+  <div class="detail-header">
+    <button class="btn-retour" type="button" (click)="retour()">
+      &lsaquo; Retour
+    </button>
+    <h2 class="detail-titre">Détail du candidat</h2>
+  </div>
+
+  @if (isLoading) {
+    <div class="loader-wrapper">
+      <span class="loader"></span>
+      <p>Chargement...</p>
+    </div>
+  } @else if (erreur) {
+    <div class="alert-erreur">
+      {{ erreur }}
+    </div>
+  } @else if (candidat) {
+
+    <div class="detail-card">
+      <div class="detail-statut">
+        <span class="badge badge-bleu">{{ libelleStatut(candidat.statut) }}</span>
+        <span class="detail-numero">ID : {{ candidat.id }}</span>
+      </div>
+
+      <div class="detail-section">
+        <h3>Informations personnelles</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Nom</span>
+            <span class="detail-val">{{ candidat.nom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prénom</span>
+            <span class="detail-val">{{ candidat.prenom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-val">{{ candidat.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Téléphone</span>
+            <span class="detail-val">{{ candidat.telephone }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">N° CNI</span>
+            <span class="detail-val">{{ candidat.numeroCNI }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  }
+
+</div>

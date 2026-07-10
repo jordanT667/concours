@@ -1,11 +1,12 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, HostListener, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../auth/auth';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css'
 })
@@ -15,34 +16,51 @@ export class Topbar implements OnInit {
 
   nomAdmin: string = '';
   initiales: string = '';
+  roleBadge: string = '';
   menuOuvert: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    if (typeof window === 'undefined') return;
     const userStr = localStorage.getItem('user');
     if (userStr) {
-      const user = JSON.parse(userStr);
-      this.nomAdmin = `${user.prenom} ${user.nom}`;
-      this.initiales = this.calculerInitiales(this.nomAdmin);
+      try {
+        const user = JSON.parse(userStr);
+        const prenom = user.prenom ?? '';
+        const nom = user.nom ?? user.username ?? '';
+        this.nomAdmin = `${prenom} ${nom}`.trim();
+        this.initiales = this.calculerInitiales(this.nomAdmin);
+      } catch {}
     }
+    this.roleBadge = this.authService.isAdmin() ? 'Admin' : 'Saisie';
   }
 
   calculerInitiales(nom: string): string {
-    return nom
-      .split(' ')
-      .map(mot => mot[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    const mots = nom.split(' ').filter(m => m.length > 0);
+    if (mots.length === 0) return '?';
+    return mots.map(m => m[0]).join('').toUpperCase().slice(0, 2);
   }
 
   toggleMenu(): void {
     this.menuOuvert = !this.menuOuvert;
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.topbar-profil')) {
+      this.menuOuvert = false;
+    }
+  }
+
   logout(): void {
-    localStorage.clear();
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login']),
+    });
   }
 }

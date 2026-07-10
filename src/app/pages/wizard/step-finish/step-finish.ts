@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import { InscriptionService } from '../../../core/services/inscription';
 import { SoumettreInscriptionPayload } from '../../../core/models/inscription.models';
+import { ErrorResponse, ErrorCode } from '../../../core/models/error-response.models';
 
 // ── Formes des données telles qu'enregistrées par chaque step précédent ──
 interface Identification {
@@ -88,8 +89,8 @@ export class StepFinish implements OnInit {
   erreur = '';
 
   // ── Logo de l'école, chargé en base64 pour être intégré au PDF ───────
-  //    Le fichier doit exister dans src/assets/logo-enstmo.png
-  //    Si absent, le PDF est généré quand même, simplement sans logo.
+  
+  
   private logoBase64: string | null = null;
 
   constructor(private router: Router, private inscriptionService: InscriptionService) { }
@@ -224,7 +225,7 @@ export class StepFinish implements OnInit {
       anneeObtentionDip: this.specialisation.anneeObtentionDip ?? 0,
       etablissementObtention: this.specialisation.etablissementObtention ?? '',
       paysObtention: this.specialisation.paysObtention ?? '',
-      anneeBEPC: this.specialisation.anneeBEPC ?? 0,
+      anneeBEPC: this.specialisation.anneeBEPC || null,
       choixEpreuve: this.specialisation.choixEpreuve ?? '',
       centreConcours: this.specialisation.centreConcours ?? '',
       centreDepotDossier: this.specialisation.centreDepotDossier ?? '',
@@ -260,10 +261,19 @@ export class StepFinish implements OnInit {
         }
         this.enCours = false;
       },
-      error: (err) => {
-        console.error('Erreur soumission inscription', err);
-        this.erreur = 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.';
+      error: (err: ErrorResponse | any) => {
         this.enCours = false;
+        const code = (err as ErrorResponse)?.code;
+        if (code === ErrorCode.DUPLICATE_RESOURCE) {
+          this.erreur = 'Un dossier existe déjà avec cet email ou ce numéro CNI. Vérifiez vos informations ou contactez l\'administration.';
+        } else if (code === ErrorCode.VALIDATION_FAILED) {
+          const details = (err as ErrorResponse).details;
+          this.erreur = details ? `Données invalides : ${details}` : 'Certains champs sont invalides. Vérifiez votre dossier.';
+        } else if (err?.status === 0) {
+          this.erreur = 'Serveur inaccessible. Vérifiez votre connexion internet et réessayez.';
+        } else {
+          this.erreur = (err as ErrorResponse)?.message ?? 'Une erreur est survenue. Veuillez réessayer.';
+        }
       },
     });
   }

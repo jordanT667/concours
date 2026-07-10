@@ -103,10 +103,16 @@ export class Pays implements OnInit {
       : this.paysService.create(this.form);
 
     op$.subscribe({
-      next: () => {
+      next: (resultat) => {
         this.enSoumission = false;
+        if (this.modeEdition) {
+          const idx = this.liste.findIndex(p => p.codePays === this.codeOriginal);
+          if (idx !== -1) this.liste[idx] = resultat;
+        } else {
+          this.liste.push(resultat);
+        }
+        this.appliquerFiltres();
         this.fermerModal();
-        this.charger();
       },
       error: (err) => {
         this.enSoumission = false;
@@ -119,7 +125,10 @@ export class Pays implements OnInit {
     event.stopPropagation();
     if (!confirm(`Désactiver le pays "${pays.libelleFr}" ?`)) return;
     this.paysService.desactiver(pays.codePays).subscribe({
-      next: () => this.charger()
+      next: () => {
+        this.liste = this.liste.filter(p => p.codePays !== pays.codePays);
+        this.appliquerFiltres();
+      }
     });
   }
 
@@ -131,11 +140,13 @@ export class Pays implements OnInit {
 
   confirmerSuppression(): void {
     if (!this.paysASupprimer) return;
-    this.paysService.delete(this.paysASupprimer.codePays).subscribe({
+    const code = this.paysASupprimer.codePays;
+    this.paysService.delete(code).subscribe({
       next: () => {
+        this.liste = this.liste.filter(p => p.codePays !== code);
+        this.appliquerFiltres();
         this.confirmOuverte = false;
         this.paysASupprimer = null;
-        this.charger();
       },
       error: (err) => {
         console.error('Erreur suppression pays:', err);

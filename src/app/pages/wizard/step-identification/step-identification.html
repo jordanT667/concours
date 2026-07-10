@@ -37,8 +37,8 @@
       <div class="saisie" [class.erreur]="isInvalid('sexe')">
         <i class="fa-solid fa-venus-mars ico"></i>
         <select formControlName="sexe" class="entr">
-          <option value="Masculin">Masculin</option>
-          <option value="Féminin">Féminin</option>
+          <option value="M">Masculin</option>
+          <option value="F">Féminin</option>
         </select>
       </div>
     </div>
@@ -214,4 +214,10 @@
     </div>
 
   </div>
+
+  <div class="wizard-footer">
+    <button class="back" type="button" (click)="onBack()">&lsaquo; BACK</button>
+    <button class="next" type="submit">NEXT &rsaquo;</button>
+  </div>
+
 </form>

@@ -2,16 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { DashboardStats } from '../models/api-response.models';
 
-export interface DashboardStats {
-  totalInscriptions: number;
-  inscriptionsValidees: number;
-  inscriptionsEnAttente: number;
-  inscriptionsRejetees: number;
-  totalCandidats: number;
-  totalCentres: number;
-  totalFilieres: number;
-}
+export type { DashboardStats };
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {

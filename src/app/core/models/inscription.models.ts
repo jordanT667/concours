@@ -1,5 +1,5 @@
 import { Candidat } from './candidat.models';
-import { Filiere } from './filiere.models';
+import { FiliereDto as Filiere } from './filiere.models';
 import { Centre } from './centre.models';
 
 export interface Inscription {
@@ -22,23 +22,6 @@ export type StatutInscription =
   | 'VALIDEE'
   | 'REJETEE';
 
-
-export interface CreateInscriptionDto {
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  dateNaissance: string;
-  lieuNaissance: string;
-  nationalite: string;
-  sexe: 'M' | 'F';
-  numeroCNI: string;
-  filiereId: number;
-  centreExamenId: number;
-  centreDepotId: number;
-  numeroRecu: string;
-  imageRecu: File;
-}
 
 export interface UpdateStatutDto {
   statut: StatutInscription;
@@ -70,7 +53,7 @@ export interface SoumettreInscriptionPayload {
   anneeObtentionDip: number;
   etablissementObtention: string;
   paysObtention: string;
-  anneeBEPC: number;
+  anneeBEPC: number | null;
   choixEpreuve: string;
   centreConcours: string;
   centreDepotDossier: string;

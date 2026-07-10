@@ -1,0 +1,20 @@
+.detail-page { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+.detail-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.btn-retour { background: none; border: 1px solid #d1d5db; border-radius: 6px; padding: .4rem .9rem; cursor: pointer; font-size: .9rem; color: #374151; }
+.btn-retour:hover { background: #f3f4f6; }
+.detail-titre { font-size: 1.3rem; font-weight: 600; color: #111827; margin: 0; }
+.detail-card { background: #fff; border-radius: 10px; border: 1px solid #e5e7eb; padding: 1.5rem; }
+.detail-statut { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.detail-numero { color: #6b7280; font-size: .9rem; }
+.detail-section { margin-bottom: 1.5rem; }
+.detail-section h3 { font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: .75rem; padding-bottom: .4rem; border-bottom: 1px solid #e5e7eb; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.detail-item { display: flex; flex-direction: column; gap: .2rem; }
+.detail-label { font-size: .75rem; color: #9ca3af; text-transform: uppercase; letter-spacing: .04em; }
+.detail-val { font-size: .95rem; color: #111827; font-weight: 500; }
+.badge { display: inline-flex; padding: .25rem .75rem; border-radius: 9999px; font-size: .8rem; font-weight: 600; }
+.badge-bleu { background: #dbeafe; color: #1d4ed8; }
+.loader-wrapper { text-align: center; padding: 3rem; color: #6b7280; }
+.loader { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #6366f1; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.alert-erreur { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem 1.5rem; }
