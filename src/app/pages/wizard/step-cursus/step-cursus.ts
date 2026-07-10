@@ -167,8 +167,8 @@ export class StepCursus implements OnInit {
   }
 
   onNext(): void {
-    if (this.diplomes.length < this.maxDiplomes) {
-      this.erreurGlobale = `Vous devez renseigner exactement ${this.maxDiplomes} diplômes de votre parcours scolaire.`;
+    if (this.diplomes.length < 1) {
+      this.erreurGlobale = 'Vous devez renseigner au moins 1 diplôme de votre parcours scolaire.';
       return;
     }
     this.sauvegarderEnLocal();

@@ -6,14 +6,17 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PaysService {
-  private readonly API = `${environment.apiUrl}/pays`;
+  private readonly API       = `${environment.apiUrl}/pays`;
+  private readonly API_PUBLIC = `${environment.apiUrl}/concours/pays`;
 
   constructor(private http: HttpClient) {}
 
+  // Lecture publique (wizard + référentiels) → /api/v1/concours/pays
   getActifs(): Observable<PaysDto[]> {
-    return this.http.get<PaysDto[]>(`${this.API}/actifs`);
+    return this.http.get<PaysDto[]>(this.API_PUBLIC);
   }
 
+  // CRUD admin → /api/v1/pays
   create(pays: PaysDto): Observable<PaysDto> {
     return this.http.post<PaysDto>(this.API, pays);
   }

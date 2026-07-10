@@ -1,15 +1,45 @@
 .page-annonces { display: flex; flex-direction: column; gap: 24px; }
 
-.page-header { display: flex; justify-content: space-between; align-items: center; }
-.page-titre { font-size: 20px; font-weight: 700; color: #1a2332; margin: 0; }
-.page-sous-titre { font-size: 13px; color: #6b7280; margin: 4px 0 0; }
+/* Hero banner */
+.hero-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #1aaa8a 0%, #0e7490 100%);
+  border-radius: 16px; padding: 28px 32px;
+  overflow: hidden; position: relative; gap: 16px;
+}
+
+.hero-texte {
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 1;
+}
+
+.hero-titre {
+  font-size: 22px; font-weight: 800;
+  color: white; margin: 0;
+}
+
+.hero-sous-titre {
+  font-size: 14px; color: rgba(255,255,255,0.85);
+  margin: 0; line-height: 1.6;
+}
+
+.hero-sous-titre strong { color: white; font-size: 16px; }
+
+.hero-illu {
+  flex-shrink: 0; width: 140px; height: 110px;
+  opacity: 0.9;
+}
+
+.hero-illu svg { width: 100%; height: 100%; }
 
 .btn-ajouter {
-  padding: 10px 20px; background: #1aaa8a;
-  color: white; border: none; border-radius: 8px;
+  align-self: flex-start;
+  padding: 10px 20px; background: white;
+  color: #0e7490; border: none; border-radius: 8px;
   font-size: 14px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-.btn-ajouter:hover { background: #148f74; }
+.btn-ajouter:hover { background: #f0fdfa; }
 
 /* Section aperçu */
 .section-titre {

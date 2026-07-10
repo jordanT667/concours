@@ -42,11 +42,15 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-  const token = this.getToken();
-  if (!token) return false;
-  const payload = JSON.parse(atob(token.split('.')[1]));
-  return payload.exp * 1000 > Date.now();
-}
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
   getRoles(): string[] {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user).roles : [];
@@ -54,6 +58,19 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.getRoles().includes('ADMIN');
+  }
+
+  isSaisie(): boolean {
+    return this.getRoles().includes('SAISIE');
+  }
+
+  hasRole(role: string): boolean {
+    return this.getRoles().includes(role);
+  }
+
+  getUsername(): string {
+    const user = localStorage.getItem('user');
+    return user ? (JSON.parse(user).username ?? '') : '';
   }
 
   private clearSession(): void {

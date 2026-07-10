@@ -1,101 +1,88 @@
 <div class="form-container">
 
-  <!-- Header -->
   <div class="form-header">
     <div>
       <h3 class="form-titre">
         {{ estModification ? 'Modifier la filière' : 'Nouvelle filière' }}
       </h3>
-      <p class="form-sous-titre">ESTM — {{ estModification ? form.code : 'Nouvelle entrée' }}</p>
+      <p class="form-sous-titre">ESTM — {{ form.codeFiliere || 'Nouvelle entrée' }}</p>
     </div>
-    <button class="btn-fermer" (click)="annuler.emit()">✕</button>
+    <button type="button" class="btn-fermer" (click)="annuler.emit()">✕</button>
   </div>
 
   <form class="form-body" (ngSubmit)="onSubmit()">
 
-    <!-- Département -->
-    <div class="champ">
-      <label class="champ-label">Département *</label>
-      <select class="champ-input"
-        [(ngModel)]="departementId"
-        name="departementId"
-        (change)="onDeptChange()"
-        required>
-        <option [value]="0" disabled>
-          — Sélectionner un département —
-        </option>
-        @for (d of departements; track d.id) {
-          <option [value]="d.id">
-            {{ d.code }} — {{ d.nom }}
-          </option>
-        }
-      </select>
-    </div>
-
-    <!-- Code filière -->
     <div class="champ">
       <label class="champ-label">Code filière *</label>
       <input type="text"
         class="champ-input"
-        [(ngModel)]="form.code"
-        name="code"
+        [(ngModel)]="form.codeFiliere"
+        name="codeFiliere"
         placeholder="Ex: TOPO"
         (input)="onCodeInput()"
-        maxlength="15"
+        maxlength="20"
+        [disabled]="estModification"
         required />
-      <span class="champ-hint">
-        Lettres majuscules et tirets uniquement
-      </span>
+      @if (estModification) {
+        <span class="champ-hint">Le code ne peut pas être modifié</span>
+      }
     </div>
 
-    <!-- Nom filière -->
     <div class="champ">
-      <label class="champ-label">Nom de la filière *</label>
+      <label class="champ-label">Libellé français *</label>
       <input type="text"
         class="champ-input"
-        [(ngModel)]="form.nom"
-        name="nom"
+        [(ngModel)]="form.libelleFiliereFr"
+        name="libelleFiliereFr"
         placeholder="Ex: Topographie"
         required />
     </div>
 
-    <!-- Erreur -->
+    <div class="champ">
+      <label class="champ-label">Libellé anglais</label>
+      <input type="text"
+        class="champ-input"
+        [(ngModel)]="form.libelleFiliereEn"
+        name="libelleFiliereEn"
+        placeholder="Ex: Topography" />
+    </div>
+
+    <div class="champ">
+      <label class="champ-label">Cursus</label>
+      <select class="champ-input" [(ngModel)]="form.idCursus" name="idCursus" title="Cursus">
+        <option value="">-- Sélectionner --</option>
+        @for (c of allCursus; track c.idCursus) {
+          <option [value]="c.idCursus">{{ c.libelle }} ({{ c.idCursus }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="champ">
+      <label class="champ-label">Niveau</label>
+      <select class="champ-input" [(ngModel)]="form.codeNiveau" name="codeNiveau" title="Niveau">
+        <option value="">-- Sélectionner --</option>
+        @for (n of allNiveaux; track n.codeNiveau) {
+          <option [value]="n.codeNiveau">{{ n.libelleNiveau }} ({{ n.codeNiveau }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="champ">
+      <label class="champ-label">École</label>
+      <select class="champ-input" [(ngModel)]="form.codeEcole" name="codeEcole" title="École">
+        <option value="">-- Sélectionner --</option>
+        @for (e of allEcoles; track e.codeEcole) {
+          <option [value]="e.codeEcole">{{ e.libelleFr || e.codeEcole }} ({{ e.codeEcole }})</option>
+        }
+      </select>
+    </div>
+
     @if (erreur) {
-      <div class="erreur-msg"> {{ erreur }}</div>
+      <div class="erreur-msg">{{ erreur }}</div>
     }
 
-    <!-- Aperçu carte -->
-    @if (form.nom || form.code) {
-      <div class="apercu-card"
-        [style.border-left-color]="couleurDept()"
-        [style.border-left-width]="'4px'"
-        [style.border-left-style]="'solid'">
-        <p class="apercu-label">Aperçu</p>
-        <div class="apercu-top">
-          <span class="apercu-code"
-            [style.background]="couleurDept()">
-            {{ form.code || '—' }}
-          </span>
-          <span class="apercu-dept">
-            {{ form.departement?.code || '—' }}
-          </span>
-        </div>
-        <p class="apercu-nom">
-          {{ form.nom || 'Nom de la filière' }}
-        </p>
-        <p class="apercu-dept-nom">
-           {{ form.departement?.nom || 'Département non sélectionné' }}
-        </p>
-      </div>
-    }
-
-    <!-- Actions -->
     <div class="form-actions">
-      <button type="button"
-        class="btn-annuler"
-        (click)="annuler.emit()">
-        Annuler
-      </button>
+      <button type="button" class="btn-annuler" (click)="annuler.emit()">Annuler</button>
       <button type="submit" class="btn-sauvegarder">
         {{ estModification ? '✓ Modifier' : '+ Ajouter' }}
       </button>

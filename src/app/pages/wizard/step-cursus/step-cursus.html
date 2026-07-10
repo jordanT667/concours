@@ -65,6 +65,12 @@
     </button>
   </div>
 
+  <!-- Navigation -->
+  <div class="wizard-footer">
+    <button class="back" type="button" (click)="onBack()">&lsaquo; BACK</button>
+    <button class="next" type="button" (click)="onNext()">NEXT &rsaquo;</button>
+  </div>
+
   <!-- Modale d'ajout de diplôme -->
   @if (showModal) {
     <div class="fond-mod" (click)="onOverlayClick($event)">

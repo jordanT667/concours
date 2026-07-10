@@ -1,0 +1,82 @@
+<div class="page-admin">
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Sessions actives</h2>
+      <p class="page-sous-titre">{{ liste.length }} session(s) ouverte(s)</p>
+    </div>
+    <button class="btn-rafraichir" (click)="charger()">
+      <i class="fas fa-sync-alt"></i> Rafraîchir
+    </button>
+  </div>
+
+  @if (erreur) {
+    <div class="alerte-erreur">
+      <i class="fas fa-exclamation-circle"></i> {{ erreur }}
+      <button type="button" class="btn-fermer-erreur" (click)="erreur=''">×</button>
+    </div>
+  }
+
+  <div class="table-wrapper">
+    @if (isLoading) {
+      <div class="loading">Chargement...</div>
+    } @else {
+      <table class="table">
+        <thead><tr>
+          <th>Appareil</th>
+          <th>Navigateur</th>
+          <th>Système</th>
+          <th>IP</th>
+          <th>Dernière activité</th>
+          <th>Expiration</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody>
+          @for (s of liste; track s.sessionId) {
+            <tr>
+              <td>
+                <div class="appareil">
+                  <i class="fas {{ iconeAppareil(s.deviceInfo?.deviceClass) }} icone-appareil"></i>
+                  <span>{{ s.deviceInfo?.deviceClass || '—' }}</span>
+                </div>
+              </td>
+              <td>{{ s.deviceInfo?.browserName }} {{ s.deviceInfo?.browserVersion }}</td>
+              <td>{{ s.deviceInfo?.osName }} {{ s.deviceInfo?.osVersion }}</td>
+              <td class="td-code">{{ s.deviceInfo?.ipAddress || '—' }}</td>
+              <td>{{ s.lastUsedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ s.expiresAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button class="btn-revoquer" (click)="demanderRevocation(s)" title="Révoquer cette session">
+                  <i class="fas fa-sign-out-alt"></i> Révoquer
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="td-vide">Aucune session active</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (confirmSession) {
+  <div class="modal-overlay" (click)="annulerRevocation()">
+    <div class="modal-confirm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-titre">Révoquer la session</h3>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-texte">
+          Révoquer la session <strong>{{ confirmSession.deviceInfo?.browserName }}</strong>
+          sur <strong>{{ confirmSession.deviceInfo?.osName }}</strong>
+          ({{ confirmSession.deviceInfo?.ipAddress }}) ?
+        </p>
+        <p class="confirm-avertissement">Cette session sera déconnectée immédiatement.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="annulerRevocation()">Annuler</button>
+        <button class="btn-revoquer-confirm" (click)="confirmerRevocation()">Révoquer</button>
+      </div>
+    </div>
+  </div>
+}

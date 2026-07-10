@@ -2,12 +2,17 @@
 
   @if (isLoading) {
     <div class="loading-global">Chargement du tableau de bord...</div>
+  } @else if (erreur) {
+    <div class="alerte-erreur">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ erreur }}
+      <button type="button" (click)="chargerDashboard()">Réessayer</button>
+    </div>
   } @else {
 
     <!-- Bandeau de bienvenue -->
     <app-welcome-banner
-      [prenom]="prenomAdmin",
-      [nom]="nomAdmin",
+      [prenom]="prenomAdmin"
+      [nom]="nomAdmin"
       [totalInscrits]="stats.totalInscrits">
     </app-welcome-banner>
 
@@ -18,7 +23,7 @@
     <div class="dashboard-grille">
 
       <app-inscriptions-recentes
-        [inscriptions]="inscriptionsRecentes"
+        [inscriptions]="[]"
         (voirTout)="allerInscriptions()">
       </app-inscriptions-recentes>
 
@@ -45,9 +50,7 @@
           <span class="action-flèche">→</span>
         </button>
 
-        <button class="action-card"
-          routerLink="/admin/resultats">
-         
+        <button class="action-card" disabled title="Fonctionnalité à venir">
           <span class="action-label">Publier les résultats</span>
           <span class="action-flèche">→</span>
         </button>

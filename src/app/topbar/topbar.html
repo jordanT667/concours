@@ -36,10 +36,16 @@
     </button>
 
     <!-- Profil admin -->
-    <div class="profil-wrapper">
+    <div class="profil-wrapper topbar-profil">
       <button class="btn-profil" (click)="toggleMenu()">
         <div class="avatar">{{ initiales }}</div>
-        <span class="admin-nom">{{ nomAdmin }}</span>
+        <div class="profil-info">
+          <span class="admin-nom">{{ nomAdmin }}</span>
+          <span class="role-badge" [class.role-admin]="roleBadge === 'Admin'"
+                                   [class.role-saisie]="roleBadge === 'Saisie'">
+            {{ roleBadge }}
+          </span>
+        </div>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
           viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
           class="chevron" [class.rotate]="menuOuvert">
@@ -50,10 +56,10 @@
 
       @if (menuOuvert) {
         <div class="dropdown-menu">
-          <a href="#" class="dropdown-item">
+          <a routerLink="/admin/profil" class="dropdown-item">
             Mon profil
           </a>
-          <a href="#" class="dropdown-item">
+          <a routerLink="/admin/parametres" class="dropdown-item">
             Paramètres
           </a>
           <hr class="dropdown-divider" />

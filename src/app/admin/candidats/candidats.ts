@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Candidat, StatutCandidat } from '../../core/models/candidat.models'
+import { StatutCandidat } from '../../core/models/candidat.models';
+import { CandidatsService, CandidatDto } from '../../core/services/candidats';
 
 @Component({
   selector: 'app-candidats',
@@ -13,9 +14,10 @@ import { Candidat, StatutCandidat } from '../../core/models/candidat.models'
 })
 export class Candidats implements OnInit {
 
-  candidats: Candidat[] = [];
-  candidatsFiltres: Candidat[] = [];
+  candidats: CandidatDto[] = [];
+  candidatsFiltres: CandidatDto[] = [];
   isLoading = false;
+  erreur = '';
   recherche = '';
   filtreStatut = 'TOUS';
 
@@ -23,7 +25,10 @@ export class Candidats implements OnInit {
     'EN_ATTENTE', 'VALIDE', 'REJETE', 'ADMIS', 'NON_ADMIS'
   ];
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private candidatsService: CandidatsService
+  ) {}
 
   ngOnInit(): void {
     this.chargerCandidats();
@@ -31,17 +36,26 @@ export class Candidats implements OnInit {
 
   chargerCandidats(): void {
     this.isLoading = true;
-    // TODO: CandidatService.getCandidats()
-    this.isLoading = false;
+    this.erreur = '';
+    this.candidatsService.getAll().subscribe({
+      next: (data) => {
+        this.candidats = data;
+        this.candidatsFiltres = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement candidats', err);
+        this.erreur = 'Impossible de charger la liste des candidats.';
+        this.isLoading = false;
+      }
+    });
   }
 
   appliquerFiltres(): void {
     this.candidatsFiltres = this.candidats.filter(c => {
-      const matchStatut = this.filtreStatut === 'TOUS'
-        || c.statut === this.filtreStatut;
+      const matchStatut = this.filtreStatut === 'TOUS' || c.statut === this.filtreStatut;
       const matchRecherche = this.recherche === ''
-        || `${c.nom} ${c.prenom}`.toLowerCase()
-          .includes(this.recherche.toLowerCase())
+        || `${c.nom} ${c.prenom}`.toLowerCase().includes(this.recherche.toLowerCase())
         || c.email.toLowerCase().includes(this.recherche.toLowerCase())
         || c.numeroCNI.includes(this.recherche);
       return matchStatut && matchRecherche;
@@ -55,10 +69,10 @@ export class Candidats implements OnInit {
   couleurStatut(statut: StatutCandidat): string {
     const map: Record<StatutCandidat, string> = {
       'EN_ATTENTE': 'badge-orange',
-      'VALIDE': 'badge-bleu',
-      'REJETE': 'badge-rouge',
-      'ADMIS': 'badge-vert',
-      'NON_ADMIS': 'badge-gris'
+      'VALIDE':     'badge-bleu',
+      'REJETE':     'badge-rouge',
+      'ADMIS':      'badge-vert',
+      'NON_ADMIS':  'badge-gris'
     };
     return map[statut];
   }

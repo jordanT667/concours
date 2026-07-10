@@ -76,15 +76,15 @@ export class StepIdentification implements OnInit {
   private buildForm(): void {
     this.form = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
-      prenom: [''],
-      sexe: ['Masculin', Validators.required],
+      prenom: ['', Validators.required],
+      sexe: ['M', Validators.required],
       dateNaissance: ['', Validators.required],
       lieuNaissance: ['', Validators.required],
       situationMatrimoniale: ['Célibataire', Validators.required],
       adresse: ['', Validators.required],
       telephone: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
       numeroCNI: ['', Validators.required],
-      email: ['', [Validators.email]],
+      email: ['', [Validators.required, Validators.email]],
       premiereLangue: ['', Validators.required],
       deuxiemeLangue: ['', Validators.required],
       paysNationalite: ['', Validators.required],

@@ -8,9 +8,15 @@ import { StepCursus } from './pages/wizard/step-cursus/step-cursus';
 import { StepContacts } from './pages/wizard/step-contacts/step-contacts';
 import { StepFinish } from './pages/wizard/step-finish/step-finish';
 import { Login } from './auth/login/login';
-import { authGuard } from './core/guards/guard-guard';
-import { Dashboard } from './admin/dashboard/dashboard';
+import { authGuard, adminOnlyGuard } from './core/guards/guard-guard';
 import { Layout } from './layout/layout';
+import {
+  wizardIdentificationGuard,
+  wizardSpecialisationGuard,
+  wizardCursusGuard,
+  wizardContactsGuard,
+  wizardFinishGuard,
+} from './core/guards/wizard-step.guard';
 
 
 export const routes: Routes = [
@@ -20,11 +26,11 @@ export const routes: Routes = [
     component: WizardComponent,
     children: [
       { path: 'recommandation', component: StepRecommandation },
-      { path: 'identification', component: StepIdentification },
-      { path: 'specialisation', component: StepSpecialisation },
-      { path: 'cursus',         component: StepCursus },
-      { path: 'contacts',       component: StepContacts },
-      { path: 'finish',         component: StepFinish },
+      { path: 'identification', component: StepIdentification,  canActivate: [wizardIdentificationGuard] },
+      { path: 'specialisation', component: StepSpecialisation,  canActivate: [wizardSpecialisationGuard] },
+      { path: 'cursus',         component: StepCursus,          canActivate: [wizardCursusGuard] },
+      { path: 'contacts',       component: StepContacts,        canActivate: [wizardContactsGuard] },
+      { path: 'finish',         component: StepFinish,          canActivate: [wizardFinishGuard] },
       { path: '', redirectTo: 'recommandation', pathMatch: 'full' }
     ]
   },
@@ -48,16 +54,25 @@ export const routes: Routes = [
       },
       {
         path: 'filieres',
+        canActivate: [adminOnlyGuard],
         loadComponent: () =>
           import('./admin/filieres/filieres')
             .then(m => m.Filieres)
       },
-{
-  path: 'parametres',
-  loadComponent: () =>
-    import('./admin/parametres/parametres')
-      .then(m => m.ParametresComponent)
-},
+      {
+        path: 'ecoles',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () =>
+          import('./admin/ecoles/ecoles')
+            .then(m => m.EcolesAdmin)
+      },
+      {
+        path: 'parametres',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () =>
+          import('./admin/parametres/parametres')
+            .then(m => m.ParametresComponent)
+      },
       {
   path: 'annonces',
   loadComponent: () =>
@@ -71,42 +86,68 @@ export const routes: Routes = [
             .then(m => m.Inscriptions)
       },
       {
+        path: 'inscriptions/:id',
+        loadComponent: () =>
+          import('./admin/inscriptions/inscription-detail/inscription-detail')
+            .then(m => m.InscriptionDetail)
+      },
+      {
         path: 'candidats',
         loadComponent: () =>
           import('./admin/candidats/candidats')
             .then(m => m.Candidats)
       },
       {
+        path: 'candidats/:id',
+        loadComponent: () =>
+          import('./admin/candidats/candidat-detail/candidat-detail')
+            .then(m => m.CandidatDetail)
+      },
+      {
         path: 'pays',
+        canActivate: [adminOnlyGuard],
         loadComponent: () =>
           import('./admin/pays/pays')
             .then(m => m.Pays)
       },
       {
         path: 'centres',
+        canActivate: [adminOnlyGuard],
         loadComponent: () =>
           import('./admin/centres/centres')
             .then(m => m.Centres)
       },
       {
         path: 'cursus',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/cursus/cursus').then(m => m.CursusAdmin)
       },
       {
         path: 'niveaux',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/niveaux/niveaux').then(m => m.NiveauxAdmin)
       },
       {
         path: 'diplomes',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/diplomes/diplomes').then(m => m.DiplomesAdmin)
       },
       {
         path: 'regions',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/regions/regions').then(m => m.RegionsAdmin)
       },
       {
         path: 'departements',
+        canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/departements/departements').then(m => m.DepartementsAdmin)
+      },
+      {
+        path: 'sessions',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () =>
+          import('./admin/sessions/sessions')
+            .then(m => m.Sessions)
       },
       {
         path: '',

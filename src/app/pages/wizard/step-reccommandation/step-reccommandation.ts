@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AnnonceService } from '../../../core/services/annonce.service';
 import { Annonce } from '../../../core/models/annonce.models';
 
@@ -14,7 +15,7 @@ export class StepRecommandation implements OnInit {
 
   annonces: Annonce[] = [];
 
-  constructor(private annonceService: AnnonceService) {}
+  constructor(private annonceService: AnnonceService, private router: Router) {}
 
   ngOnInit(): void {
     this.annonceService.annonces$.subscribe(liste => {
@@ -39,5 +40,9 @@ export class StepRecommandation implements OnInit {
 
   ouvrirLien(lien: string): void {
     window.open(lien, '_blank');
+  }
+
+  onNext(): void {
+    this.router.navigate(['/inscription/identification']);
   }
 }

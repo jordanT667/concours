@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Filiere, Departement } from '../../core/models/filiere.models';
+import { FiliereDto } from '../../core/models/filiere.models';
 import { FiliereFormComponent } from '../filiere-form/filiere-form';
 import { FiliereService } from '../../core/services/filiere';
 
@@ -14,48 +14,46 @@ import { FiliereService } from '../../core/services/filiere';
 })
 export class Filieres implements OnInit {
 
-  filieres: Filiere[] = [];
-  filieresFiltrees: Filiere[] = [];
+  filieres: FiliereDto[] = [];
+  filieresFiltrees: FiliereDto[] = [];
   recherche = '';
-  filtreDepartement = 'TOUS';
-  formulaireOuvert = false;
-  filiereSelectionnee: Filiere | null = null;
   isLoading = false;
-
-  departements: Departement[] = [];
+  erreur = '';
+  formulaireOuvert = false;
+  filiereSelectionnee: FiliereDto | null = null;
 
   constructor(private filiereService: FiliereService) {}
 
   ngOnInit(): void {
+    this.charger();
+  }
+
+  charger(): void {
     this.isLoading = true;
-    this.filiereService.getDepartements().subscribe({
-      next: (deps) => this.departements = deps,
-      error: () => {}
-    });
+    this.erreur = '';
     this.filiereService.getAll().subscribe({
       next: (data) => {
         this.filieres = data;
-        this.filieresFiltrees = [...data];
+        this.appliquerFiltres();
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: () => {
+        this.erreur = 'Impossible de charger les filières.';
+        this.isLoading = false;
+      }
     });
   }
 
   appliquerFiltres(): void {
-    this.filieresFiltrees = this.filieres.filter(f => {
-      const matchRecherche = this.recherche === ''
-        || f.nom.toLowerCase().includes(this.recherche.toLowerCase())
-        || f.code.toLowerCase().includes(this.recherche.toLowerCase())
-        || f.departement.nom.toLowerCase()
-            .includes(this.recherche.toLowerCase());
-      const matchDept = this.filtreDepartement === 'TOUS'
-        || f.departement.code === this.filtreDepartement;
-      return matchRecherche && matchDept;
-    });
+    const q = this.recherche.toLowerCase();
+    this.filieresFiltrees = this.filieres.filter(f =>
+      !q
+      || f.codeFiliere.toLowerCase().includes(q)
+      || (f.libelleFiliereFr ?? '').toLowerCase().includes(q)
+    );
   }
 
-  ouvrirFormulaire(f?: Filiere): void {
+  ouvrirFormulaire(f?: FiliereDto): void {
     this.filiereSelectionnee = f ?? null;
     this.formulaireOuvert = true;
   }
@@ -65,55 +63,28 @@ export class Filieres implements OnInit {
     this.filiereSelectionnee = null;
   }
 
-  sauvegarder(f: Filiere): void {
-    const op$ = f.id
-      ? this.filiereService.update(f.id, f)
+  sauvegarder(f: FiliereDto): void {
+    const op$ = this.filiereSelectionnee
+      ? this.filiereService.update(f.codeFiliere, f)
       : this.filiereService.create(f);
 
     op$.subscribe({
       next: () => {
-        this.ngOnInit();
         this.fermerFormulaire();
+        this.charger();
       },
-      error: () => {}
+      error: () => { this.erreur = 'Erreur lors de la sauvegarde.'; }
     });
   }
 
-  supprimer(id: number): void {
+  supprimer(codeFiliere: string): void {
     if (!confirm('Supprimer cette filière ?')) return;
-    this.filiereService.delete(id).subscribe({
+    this.filiereService.delete(codeFiliere).subscribe({
       next: () => {
-        this.filieres = this.filieres.filter(f => f.id !== id);
+        this.filieres = this.filieres.filter(f => f.codeFiliere !== codeFiliere);
         this.appliquerFiltres();
       },
-      error: () => {}
+      error: () => { this.erreur = 'Erreur lors de la suppression.'; }
     });
-  }
-
-  // Nombre de filières par département
-  nbParDept(code: string): number {
-    return this.filieres
-      .filter(f => f.departement.code === code).length;
-  }
-
-  // Couleur CSS par département
-  couleurDept(code: string): string {
-    const map: Record<string, string> = {
-      GMG: 'dept-bleu',
-      GPM: 'dept-vert',
-      GMR: 'dept-orange',
-      ENR: 'dept-jaune',
-      GMM: 'dept-violet',
-      EAM: 'dept-rose',
-    };
-    return map[code] ?? 'dept-gris';
-  }
-
-  // Filières du département actif (pour stats)
-  get resumeParDept(): { dept: Departement; nb: number }[] {
-    return this.departements.map(d => ({
-      dept: d,
-      nb: this.nbParDept(d.code)
-    }));
   }
 }

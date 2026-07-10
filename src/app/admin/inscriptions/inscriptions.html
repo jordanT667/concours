@@ -77,7 +77,7 @@
                   </span>
                 </div>
               </td>
-              <td>{{ ins.filiere.nom }}</td>
+              <td>{{ ins.filiere.libelleFiliereFr }}</td>
               <td>{{ ins.centreExamen.ville }}</td>
               <td>{{ ins.centreDepot.ville }}</td>
               <td>{{ ins.dateInscription | date:'dd/MM/yyyy' }}</td>
@@ -87,8 +87,8 @@
                 </span>
               </td>
               <td class="td-actions">
-                @if (ins.statut === 'SOUMISE' ||
-                     ins.statut === 'EN_COURS_VERIFICATION') {
+                @if (authService.isAdmin() && (ins.statut === 'SOUMISE' ||
+                     ins.statut === 'EN_COURS_VERIFICATION')) {
                   <button class="btn-valider"
                     (click)="valider(ins.id, $event)"
                     title="Valider"><i class="fas fa-check"></i></button>
