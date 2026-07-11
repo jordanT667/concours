@@ -242,3 +242,444 @@ body {
         padding: 14px 16px 20px;
     }
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE — overrides globaux pour toutes les pages admin
+   Cible les classes codées en dur sans modifier chaque CSS
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Layout de base ── */
+[data-theme='dark'] .layout-container,
+[data-theme='dark'] .layout-content,
+[data-theme='dark'] .layout-main {
+  background-color: var(--bg-page);
+}
+
+/* ── Sidebar ── */
+[data-theme='dark'] .sidebar {
+  background: linear-gradient(135deg, #0f2027 0%, #1a2e3b 100%);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.4);
+}
+
+/* ── Cards / Tableaux / Wrappers blancs ── */
+[data-theme='dark'] .card,
+[data-theme='dark'] .table-wrapper,
+[data-theme='dark'] .modal,
+[data-theme='dark'] .detail-card,
+[data-theme='dark'] .sk-card,
+[data-theme='dark'] .candidat-card,
+[data-theme='dark'] .action-card,
+[data-theme='dark'] .chart-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* ── Textes titres & labels ── */
+[data-theme='dark'] .page-titre,
+[data-theme='dark'] .card-titre,
+[data-theme='dark'] .chart-titre,
+[data-theme='dark'] .section-titre,
+[data-theme='dark'] .modal-titre,
+[data-theme='dark'] .detail-titre,
+[data-theme='dark'] .candidat-nom,
+[data-theme='dark'] .ins-nom,
+[data-theme='dark'] .detail-val,
+[data-theme='dark'] .td-code,
+[data-theme='dark'] .stat-valeur,
+[data-theme='dark'] .timeline-label,
+[data-theme='dark'] .action-card {
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .page-sous-titre,
+[data-theme='dark'] .candidat-email,
+[data-theme='dark'] .candidat-tel,
+[data-theme='dark'] .ins-detail,
+[data-theme='dark'] .ins-date,
+[data-theme='dark'] .stat-label,
+[data-theme='dark'] .stat-evolution,
+[data-theme='dark'] .detail-label,
+[data-theme='dark'] .detail-numero,
+[data-theme='dark'] .td-en,
+[data-theme='dark'] .td-recu,
+[data-theme='dark'] .label,
+[data-theme='dark'] .timeline-desc {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .td-vide,
+[data-theme='dark'] .vide,
+[data-theme='dark'] .numero-ins,
+[data-theme='dark'] .chart-vide {
+  color: var(--text-muted) !important;
+}
+
+/* ── Thead tableau ── */
+[data-theme='dark'] .table thead tr {
+  background: var(--bg-hover) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .table th {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .table td {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .row-clickable:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* ── Séparateurs / borders internes ── */
+[data-theme='dark'] .ins-item,
+[data-theme='dark'] .candidat-footer,
+[data-theme='dark'] .detail-actions,
+[data-theme='dark'] .modal-header,
+[data-theme='dark'] .modal-footer,
+[data-theme='dark'] .detail-section h3 {
+  border-color: var(--border-color) !important;
+}
+
+/* ── Inputs & selects ── */
+[data-theme='dark'] .input-recherche,
+[data-theme='dark'] .select-filtre,
+[data-theme='dark'] .input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-input) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .input-recherche::placeholder { color: var(--text-muted) !important; }
+[data-theme='dark'] .input-recherche:focus,
+[data-theme='dark'] .input:focus {
+  border-color: var(--accent) !important;
+}
+[data-theme='dark'] .input:disabled {
+  background: var(--bg-hover) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ── Boutons annuler / secondaires ── */
+[data-theme='dark'] .btn-annuler,
+[data-theme='dark'] .btn-retour {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .btn-annuler:hover,
+[data-theme='dark'] .btn-retour:hover {
+  background: var(--border-color) !important;
+}
+
+/* ── Bouton refresh ── */
+[data-theme='dark'] .btn-refresh {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ── Modal overlay ── */
+[data-theme='dark'] .modal-overlay {
+  background: rgba(0,0,0,0.65) !important;
+}
+
+[data-theme='dark'] .modal-fermer {
+  color: var(--text-muted) !important;
+}
+[data-theme='dark'] .modal-fermer:hover {
+  color: var(--text-primary) !important;
+}
+
+/* ── Stat cards couleurs atténuées en dark ── */
+[data-theme='dark'] .stat-card.bleu   { background: rgba(59,130,246,0.15) !important; }
+[data-theme='dark'] .stat-card.vert   { background: rgba(52,211,153,0.15) !important; }
+[data-theme='dark'] .stat-card.orange { background: rgba(251,191,36,0.15) !important; }
+[data-theme='dark'] .stat-card.rouge  { background: rgba(248,113,113,0.15) !important; }
+
+/* ── Badges statut — version dark (contraste renforcé) ── */
+[data-theme='dark'] .badge-orange { background: rgba(251,191,36,0.18);  color: #fbbf24; }
+[data-theme='dark'] .badge-bleu   { background: rgba(96,165,250,0.18);  color: #60a5fa; }
+[data-theme='dark'] .badge-vert   { background: rgba(52,211,153,0.18);  color: #34d399; }
+[data-theme='dark'] .badge-rouge  { background: rgba(248,113,113,0.18); color: #f87171; }
+[data-theme='dark'] .badge-gris   { background: rgba(148,163,184,0.18); color: #94a3b8; }
+
+/* ── Actions rapides dashboard ── */
+[data-theme='dark'] .action-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme='dark'] .action-card:hover {
+  border-color: var(--warning) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* ── Inscription détail / Candidat détail ── */
+[data-theme='dark'] .detail-section h3 {
+  color: var(--text-secondary) !important;
+}
+[data-theme='dark'] .detail-val,
+[data-theme='dark'] .detail-titre {
+  color: var(--text-primary) !important;
+}
+
+/* ── Loader spinner ── */
+[data-theme='dark'] .loader {
+  border-color: var(--border-color) !important;
+  border-top-color: var(--accent) !important;
+}
+
+/* ── Aide / texte secondaire formulaires ── */
+[data-theme='dark'] .aide,
+[data-theme='dark'] .confirm-texte { color: var(--text-secondary) !important; }
+[data-theme='dark'] .confirm-avertissement { color: var(--warning) !important; }
+
+/* ── Welcome banner (reste sombre, s'adapte juste légèrement) ── */
+[data-theme='dark'] .banner {
+  background: linear-gradient(135deg, #0c1624 0%, #162334 100%) !important;
+}
+
+/* ── Inscriptions récentes ── */
+[data-theme='dark'] .ins-item { border-bottom-color: var(--border-color) !important; }
+
+/* ── Pages wizard (fond blanc) ── */
+[data-theme='dark'] .wizard-card,
+[data-theme='dark'] .site-header,
+[data-theme='dark'] .site-footer {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .wizard-stepper {
+  background: var(--bg-hover) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .stepper-circle {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .logo-text,
+[data-theme='dark'] .page-title,
+[data-theme='dark'] .breadcrumb-current { color: var(--text-primary) !important; }
+
+[data-theme='dark'] .breadcrumb-link { color: var(--accent) !important; }
+
+/* ── Steps wizard — champs et labels ── */
+[data-theme='dark'] .grille,
+[data-theme='dark'] .form-section {
+  color: var(--text-primary);
+}
+
+/* ── Page suivi ── */
+[data-theme='dark'] .suivi-page   { background: var(--bg-page) !important; }
+[data-theme='dark'] .suivi-header { background: var(--bg-card) !important; border-color: var(--border-color) !important; }
+[data-theme='dark'] .suivi-card   { background: var(--bg-card) !important; border-color: var(--border-color) !important; }
+[data-theme='dark'] .suivi-logo-text,
+[data-theme='dark'] .suivi-titre  { color: var(--text-primary) !important; }
+[data-theme='dark'] .suivi-sous-titre { color: var(--text-secondary) !important; }
+[data-theme='dark'] .champ-input  { background: var(--bg-input) !important; border-color: var(--border-input) !important; color: var(--text-primary) !important; }
+[data-theme='dark'] .champ-input::placeholder { color: var(--text-muted) !important; }
+[data-theme='dark'] .champ-label  { color: var(--text-secondary) !important; }
+[data-theme='dark'] .dossier-nom  { color: var(--text-primary) !important; }
+[data-theme='dark'] .dossier-num,
+[data-theme='dark'] .meta-label   { color: var(--text-muted) !important; }
+[data-theme='dark'] .meta-val     { color: var(--text-primary) !important; }
+[data-theme='dark'] .timeline-dot { background: var(--bg-card) !important; border-color: var(--border-color) !important; }
+[data-theme='dark'] .timeline-line { background: var(--border-color) !important; }
+[data-theme='dark'] .timeline-line.done { background: var(--success) !important; }
+[data-theme='dark'] .timeline-item.done .timeline-dot { background: var(--success) !important; border-color: var(--success) !important; }
+[data-theme='dark'] .timeline-item.current .timeline-dot { background: var(--accent) !important; border-color: var(--accent) !important; }
+[data-theme='dark'] .timeline-label { color: var(--text-secondary) !important; }
+[data-theme='dark'] .timeline-item.done .timeline-label,
+[data-theme='dark'] .timeline-item.current .timeline-label { color: var(--text-primary) !important; }
+
+/* ── Pages 404 / 500 ── */
+[data-theme='dark'] .error-page    { background: var(--bg-page) !important; }
+[data-theme='dark'] .error-card    { background: var(--bg-card) !important; border-color: var(--border-color) !important; }
+[data-theme='dark'] .error-titre   { color: var(--text-primary) !important; }
+[data-theme='dark'] .error-desc    { color: var(--text-secondary) !important; }
+[data-theme='dark'] .error-code    { color: var(--border-color) !important; }
+[data-theme='dark'] .error-footer  { color: var(--text-muted) !important; }
+[data-theme='dark'] .btn-secondary {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+[data-theme='dark'] .btn-secondary:hover { background: var(--bg-hover) !important; }
+
+/* ── Steps wizard — champs et formulaires ── */
+[data-theme='dark'] .saisie {
+  background: var(--bg-input) !important;
+  border-color: var(--border-input) !important;
+}
+
+[data-theme='dark'] .saisie:focus-within {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(59, 158, 218, 0.15) !important;
+}
+
+[data-theme='dark'] .saisie.erreur {
+  background: rgba(248, 113, 113, 0.08) !important;
+  border-color: var(--danger) !important;
+}
+
+[data-theme='dark'] .entr {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+[data-theme='dark'] .entr::placeholder { color: var(--text-muted) !important; }
+
+[data-theme='dark'] select.entr option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .titre { color: var(--text-secondary) !important; }
+
+[data-theme='dark'] .ico { color: var(--text-muted) !important; }
+
+/* Section headers dans les steps */
+[data-theme='dark'] .section-header,
+[data-theme='dark'] .form-section-title,
+[data-theme='dark'] h2.step-title,
+[data-theme='dark'] h3.step-title {
+  color: var(--text-primary) !important;
+}
+
+/* Step cursus — table diplômes */
+[data-theme='dark'] .table-diplomes {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme='dark'] .alerte {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: var(--info) !important;
+}
+
+/* Modal cursus */
+[data-theme='dark'] .modal-overlay { background: rgba(0,0,0,0.65) !important; }
+[data-theme='dark'] .modal {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+}
+[data-theme='dark'] .modal-header { border-color: var(--border-color) !important; }
+[data-theme='dark'] .modal-footer { border-color: var(--border-color) !important; }
+
+/* Pages admin génériques (pays, filieres, centres, cursus, niveaux, diplomes…) */
+[data-theme='dark'] .page-pays,
+[data-theme='dark'] .page-inscriptions,
+[data-theme='dark'] .page-candidats {
+  color: var(--text-primary);
+}
+
+/* Refresh / ajouter boutons */
+[data-theme='dark'] .btn-refresh {
+  background: var(--bg-hover) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ── Boutons valider / rejeter (inscriptions) ── */
+[data-theme='dark'] .btn-valider {
+  background: rgba(52, 211, 153, 0.15) !important;
+  color: var(--success) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+[data-theme='dark'] .btn-valider:hover {
+  background: var(--success) !important;
+  color: #fff !important;
+}
+[data-theme='dark'] .btn-rejeter {
+  background: rgba(248, 113, 113, 0.15) !important;
+  color: var(--danger) !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+}
+[data-theme='dark'] .btn-rejeter:hover {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
+/* ── Bouton export ── */
+[data-theme='dark'] .btn-export {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+[data-theme='dark'] .btn-export:hover {
+  background: var(--warning) !important;
+  color: #1a2332 !important;
+  border-color: var(--warning) !important;
+}
+
+/* ── Stepper ligne de connexion ── */
+[data-theme='dark'] .stepper-line { background: var(--border-color) !important; }
+[data-theme='dark'] .stepper-line.done { background: var(--success) !important; }
+[data-theme='dark'] .stepper-label { color: var(--text-muted) !important; }
+[data-theme='dark'] .stepper-step.active .stepper-label { color: var(--accent) !important; }
+[data-theme='dark'] .stepper-step.completed .stepper-label { color: var(--success) !important; }
+[data-theme='dark'] .stepper-step.active .stepper-circle {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+[data-theme='dark'] .stepper-step.completed .stepper-circle {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  color: #fff !important;
+}
+
+/* ── Textes loading / spinner ── */
+[data-theme='dark'] .loading-global,
+[data-theme='dark'] .loading { color: var(--text-secondary) !important; }
+
+/* ── Header et footer du wizard ── */
+[data-theme='dark'] .header-menu { color: var(--text-secondary) !important; }
+[data-theme='dark'] .header-menu:hover { background: var(--bg-hover) !important; color: var(--text-primary) !important; }
+[data-theme='dark'] .breadcrumb { color: var(--text-muted) !important; }
+[data-theme='dark'] .breadcrumb-sep { color: var(--border-color) !important; }
+
+/* ── Bouton sauvegarder / confirmer ── */
+[data-theme='dark'] .btn-sauvegarder {
+  /* fond vert déjà visible en dark, on ajuste le hover */
+}
+[data-theme='dark'] .btn-sauvegarder:hover:not(:disabled) {
+  color: #fff !important;
+}
+
+/* ── Page login ── */
+[data-theme='dark'] .left-panel {
+  background: var(--bg-card) !important;
+}
+[data-theme='dark'] .left-panel .logo-icon,
+[data-theme='dark'] .left-panel .brand-name,
+[data-theme='dark'] .left-panel .forgot-link {
+  color: var(--text-primary) !important;
+}
+[data-theme='dark'] .input-group input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+[data-theme='dark'] .input-group input::placeholder {
+  color: var(--text-muted) !important;
+}
+[data-theme='dark'] .input-group input:focus {
+  background: var(--bg-input) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ── Scrollbars (Webkit) ── */
+[data-theme='dark'] ::-webkit-scrollbar { width: 6px; height: 6px; }
+[data-theme='dark'] ::-webkit-scrollbar-track { background: var(--bg-page); }
+[data-theme='dark'] ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
