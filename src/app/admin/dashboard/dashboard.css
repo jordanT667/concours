@@ -18,6 +18,13 @@
     gap: 20px;
 }
 
+/* Charts row */
+.dashboard-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
 /* Actions rapides */
 .section-titre {
     font-size: 16px;

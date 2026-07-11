@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener, Output, EventEmitter } from '@angular/
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth';
+import { ThemeService } from '../core/services/theme.service';
 
 @Component({
   selector: 'app-topbar',
@@ -21,7 +22,8 @@ export class Topbar implements OnInit {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {

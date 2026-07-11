@@ -11,7 +11,7 @@ export interface Candidat {
   nationalite: string;
   sexe: 'M' | 'F';
   numeroCNI: string;
-  numeroInscription?: string;    // généré après validation
+  numeroInscription?: string;    
   statut: StatutCandidat;
 }
 

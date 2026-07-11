@@ -1,76 +1,92 @@
 <div class="dashboard">
 
-  @if (isLoading) {
-    <div class="loading-global">Chargement du tableau de bord...</div>
-  } @else if (erreur) {
-    <div class="alerte-erreur">
-      <i class="fa-solid fa-triangle-exclamation"></i> {{ erreur }}
-      <button type="button" (click)="chargerDashboard()">Réessayer</button>
-    </div>
-  } @else {
+  @if (dashboardState$ | async; as state) {
 
-    <!-- Bandeau de bienvenue -->
-    <app-welcome-banner
-      [prenom]="prenomAdmin"
-      [nom]="nomAdmin"
-      [totalInscrits]="stats.totalInscrits">
-    </app-welcome-banner>
+    @switch (state.dataState) {
 
-    <!-- 4 cartes statistiques -->
-    <app-stats-overview [stats]="stats"></app-stats-overview>
+      @case ('LOADING') {
+        <app-dashboard-skeleton></app-dashboard-skeleton>
+      }
 
-    <!-- Ligne : inscriptions récentes + répartition centres -->
-    <div class="dashboard-grille">
+      @case ('ERROR') {
+        <div class="alerte-erreur">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          {{ state.error }}
+          <button type="button" (click)="chargerDashboard()">Réessayer</button>
+        </div>
+      }
 
-      <app-inscriptions-recentes
-        [inscriptions]="[]"
-        (voirTout)="allerInscriptions()">
-      </app-inscriptions-recentes>
+      @case ('LOADED') {
 
-      <app-repartition-centres
-        [parCentre]="stats.parCentre">
-      </app-repartition-centres>
+        <!-- Bandeau de bienvenue -->
+        <app-welcome-banner
+          [prenom]="prenomAdmin"
+          [nom]="nomAdmin"
+          [totalInscrits]="state.data!.totalInscrits">
+        </app-welcome-banner>
 
-    </div>
+        <!-- 4 cartes statistiques -->
+        <app-stats-overview [stats]="state.data!"></app-stats-overview>
 
-    <!-- Raccourcis actions rapides -->
-    <div class="actions-rapides">
-      <h3 class="section-titre">Actions rapides</h3>
-      <div class="actions-grille">
+        <!-- Ligne : inscriptions récentes + répartition centres -->
+        <div class="dashboard-grille">
 
-        <button class="action-card" (click)="allerInscriptions()">
-          
-          <span class="action-label">Voir toutes les inscriptions</span>
-          <span class="action-flèche">→</span>
-        </button>
+          <app-inscriptions-recentes
+            [inscriptions]="[]"
+            (voirTout)="allerInscriptions()">
+          </app-inscriptions-recentes>
 
-        <button class="action-card" (click)="allerCandidats()">
-          
-          <span class="action-label">Gérer les candidats</span>
-          <span class="action-flèche">→</span>
-        </button>
+          <app-repartition-centres
+            [parCentre]="state.data!.parCentre">
+          </app-repartition-centres>
 
-        <button class="action-card" disabled title="Fonctionnalité à venir">
-          <span class="action-label">Publier les résultats</span>
-          <span class="action-flèche">→</span>
-        </button>
+        </div>
 
-        <button class="action-card"
-          routerLink="/admin/centres">
+        <!-- Ligne : graphiques répartitions -->
+        <div class="dashboard-charts">
+          <app-repartition-filieres
+            [parFiliere]="state.data!.parFiliere">
+          </app-repartition-filieres>
+        </div>
 
-          <span class="action-label">Gérer les centres</span>
-          <span class="action-flèche">→</span>
-        </button>
+        <!-- Raccourcis actions rapides -->
+        <div class="actions-rapides">
+          <h3 class="section-titre">Actions rapides</h3>
+          <div class="actions-grille">
 
-        <button class="action-card"
-          routerLink="/admin/annonces">
-          <span class="action-icone">+</span>
-          <span class="action-label">Gérer les annonces</span>
-          <span class="action-flèche">→</span>
-        </button>
+            <button type="button" class="action-card" (click)="allerInscriptions()">
+              <span class="action-label">Voir toutes les inscriptions</span>
+              <span class="action-flèche">→</span>
+            </button>
 
-      </div>
-    </div>
+            <button type="button" class="action-card" (click)="allerCandidats()">
+              <span class="action-label">Gérer les candidats</span>
+              <span class="action-flèche">→</span>
+            </button>
+
+            <button type="button" class="action-card" disabled title="Fonctionnalité à venir">
+              <span class="action-label">Publier les résultats</span>
+              <span class="action-flèche">→</span>
+            </button>
+
+            <button type="button" class="action-card" routerLink="/admin/centres">
+              <span class="action-label">Gérer les centres</span>
+              <span class="action-flèche">→</span>
+            </button>
+
+            <button type="button" class="action-card" routerLink="/admin/annonces">
+              <span class="action-icone">+</span>
+              <span class="action-label">Gérer les annonces</span>
+              <span class="action-flèche">→</span>
+            </button>
+
+          </div>
+        </div>
+
+      }
+
+    }
 
   }
+
 </div>

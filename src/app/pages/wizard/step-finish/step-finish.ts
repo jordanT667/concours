@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import { InscriptionService } from '../../../core/services/inscription';
 import { SoumettreInscriptionPayload } from '../../../core/models/inscription.models';
 import { ErrorResponse, ErrorCode } from '../../../core/models/error-response.models';
+import { LoggerService } from '../../../core/services/logger.service';
 
 // ── Formes des données telles qu'enregistrées par chaque step précédent ──
 interface Identification {
@@ -93,7 +94,11 @@ export class StepFinish implements OnInit {
   
   private logoBase64: string | null = null;
 
-  constructor(private router: Router, private inscriptionService: InscriptionService) { }
+  constructor(
+    private router: Router,
+    private inscriptionService: InscriptionService,
+    private logger: LoggerService
+  ) { }
 
   ngOnInit(): void {
     this.chargerDonnees();
@@ -122,7 +127,7 @@ export class StepFinish implements OnInit {
       const brut = localStorage.getItem(cle);
       return brut ? (JSON.parse(brut) as T) : null;
     } catch (e) {
-      console.error('Erreur lecture localStorage', cle, e);
+      this.logger.error('Erreur lecture localStorage', cle, e);
       return null;
     }
   }
@@ -255,7 +260,7 @@ export class StepFinish implements OnInit {
           this.genererPdf();
           this.enregistrementReussi = true;
         } catch (e) {
-          console.error('Erreur génération PDF', e);
+          this.logger.error('Erreur génération PDF', e);
           this.erreur = 'Inscription enregistrée mais erreur lors de la génération du PDF. Veuillez re-télécharger.';
           this.enregistrementReussi = true;
         }
@@ -302,7 +307,7 @@ export class StepFinish implements OnInit {
       try {
         doc.addImage(this.logoBase64, 'PNG', logoX, y, logoW, logoH);
       } catch (e) {
-        console.warn("Impossible d'insérer le logo dans le PDF :", e);
+        this.logger.warn("Impossible d'insérer le logo dans le PDF :", e);
       }
     }
 

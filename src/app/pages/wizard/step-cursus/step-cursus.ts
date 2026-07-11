@@ -7,8 +7,12 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
 import { DiplomeDto } from '../../../core/models/referentiel.models';
+import { LoggerService } from '../../../core/services/logger.service';
+import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
+import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
 
 export interface Diplome {
   annee: number;
@@ -20,7 +24,7 @@ export interface Diplome {
 @Component({
   selector: 'app-step-cursus',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, AutosaveIndicator],
   templateUrl: './step-cursus.html',
   styleUrl: './step-cursus.css'
 })
@@ -37,13 +41,18 @@ export class StepCursus implements OnInit {
   diplomesOptions: DiplomeDto[] = [];
   mentionsOptions = ['Passable', 'Assez-bien', 'Bien', 'Très Bien', 'Excellent'];
 
+  autosaveStatus$!: Observable<AutosaveStatus>;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private ref: ConcoursReferenceService
+    private ref: ConcoursReferenceService,
+    private logger: LoggerService,
+    private autosave: AutosaveService
   ) {}
 
   ngOnInit(): void {
+    this.autosaveStatus$ = this.autosave.status$;
     this.genererAnnees();
     this.buildModalForm();
     this.chargerDiplomes();
@@ -81,7 +90,7 @@ export class StepCursus implements OnInit {
         try {
           this.diplomes = JSON.parse(saved);
         } catch (e) {
-          console.error('Erreur localStorage', e);
+          this.logger.error('Erreur localStorage', e);
         }
       }
     }
@@ -146,7 +155,7 @@ export class StepCursus implements OnInit {
   }
 
   private sauvegarderEnLocal(): void {
-    localStorage.setItem('enstmo_cursus', JSON.stringify(this.diplomes));
+    this.autosave.saveNow('enstmo_cursus', this.diplomes);
   }
 
   get mf() { return this.modalForm.controls; }

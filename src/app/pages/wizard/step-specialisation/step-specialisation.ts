@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   FormBuilder,
@@ -7,18 +7,22 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
 import { PaysDto } from '../../../core/models/pays.models';
 import { CursusDto, NiveauDto, DiplomeDto, FiliereDto } from '../../../core/models/referentiel.models';
+import { LoggerService } from '../../../core/services/logger.service';
+import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
+import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
 
 @Component({
   selector: 'app-step-specialisation',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, AutosaveIndicator],
   templateUrl: './step-specialisation.html',
   styleUrl: './step-specialisation.css'
 })
-export class StepSpecialisation implements OnInit {
+export class StepSpecialisation implements OnInit, OnDestroy {
 
   form!: FormGroup;
 
@@ -57,17 +61,28 @@ export class StepSpecialisation implements OnInit {
   chargement = false;
   erreurChargement = '';
 
+  autosaveStatus$!: Observable<AutosaveStatus>;
+  private formSub?: Subscription;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private ref: ConcoursReferenceService
+    private ref: ConcoursReferenceService,
+    private logger: LoggerService,
+    private autosave: AutosaveService
   ) {}
 
   ngOnInit(): void {
+    this.autosaveStatus$ = this.autosave.status$;
     this.genererAnnees();
     this.buildForm();
     this.chargerDonneesReference();
+    this.formSub = this.form.valueChanges.subscribe(val => {
+      if (this.form.dirty) this.autosave.schedule('enstmo_specialisation', { ...val, imageNom: this.imageNom });
+    });
   }
+
+  ngOnDestroy(): void { this.formSub?.unsubscribe(); }
 
   private genererAnnees(): void {
     const an = new Date().getFullYear();
@@ -145,7 +160,7 @@ export class StepSpecialisation implements OnInit {
         this.imagePreview = data.imageRecu;
         this.imageNom = data.imageNom || '';
       }
-    } catch (e) { console.error('Erreur localStorage', e); }
+    } catch (e) { this.logger.error('Erreur localStorage', e); }
   }
 
   onCursusChange(event: Event): void {
@@ -230,7 +245,7 @@ export class StepSpecialisation implements OnInit {
 
   onNext(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    localStorage.setItem('enstmo_specialisation', JSON.stringify({ ...this.form.value, imageNom: this.imageNom }));
+    this.autosave.saveNow('enstmo_specialisation', { ...this.form.value, imageNom: this.imageNom });
     localStorage.setItem('enstmo_current_step', '3');
     this.router.navigate(['/inscription/cursus']);
   }

@@ -39,6 +39,12 @@ export const routes: Routes = [
   // Page de connexion (publique)
   { path: 'login', component: Login },
 
+  // Suivi de dossier (publique)
+  {
+    path: 'suivi',
+    loadComponent: () => import('./pages/suivi/suivi').then(m => m.Suivi)
+  },
+
 
   // Routes admin protégées par le guard
   {
@@ -158,7 +164,17 @@ export const routes: Routes = [
     ]
   },
 
-  { path: '**', redirectTo: 'login' }
+  // Page erreur serveur (accessible depuis l'intercepteur d'erreurs)
+  {
+    path: '500',
+    loadComponent: () => import('./pages/server-error/server-error').then(m => m.ServerError)
+  },
+
+  // 404 — doit rester en dernier
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFound)
+  }
 
 
 

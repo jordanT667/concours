@@ -1,4 +1,9 @@
 <div class="cursus">
+
+  <div class="step-header-bar">
+    <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
+  </div>
+
   <!-- Alerte d'information -->
   <div class="alerte">
     <div class="ico-alerte">
