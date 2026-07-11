@@ -1,5 +1,9 @@
 <form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
 
+  <div class="step-header-bar">
+    <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
+  </div>
+
   @if (erreurChargement) {
     <div class="alerte-erreur">
       <i class="fa-solid fa-triangle-exclamation"></i> {{ erreurChargement }}

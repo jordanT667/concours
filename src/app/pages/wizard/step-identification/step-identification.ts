@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   FormBuilder,
@@ -7,26 +7,30 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { SITUATIONS_MATRIMONIALES } from '../../../core/models/geo.constants';
 import { STORAGE_KEYS } from '../../../core/services/storage';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
 import { PaysDto } from '../../../core/models/pays.models';
 import { RegionDto, DepartementDto, LangueDto } from '../../../core/models/referentiel.models';
+import { LoggerService } from '../../../core/services/logger.service';
+import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
+import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-step-identification',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, AutosaveIndicator],
   templateUrl: './step-identification.html',
   styleUrl: './step-identification.css'
 })
-export class StepIdentification implements OnInit {
+export class StepIdentification implements OnInit, OnDestroy {
 
   form!: FormGroup;
 
   situationsMatrimoniales = SITUATIONS_MATRIMONIALES;
 
-  // Données chargées depuis l'API
   pays: PaysDto[] = [];
   langues: LangueDto[] = [];
   regions: RegionDto[] = [];
@@ -35,16 +39,32 @@ export class StepIdentification implements OnInit {
   chargement = false;
   erreurChargement = '';
 
+  autosaveStatus$!: Observable<AutosaveStatus>;
+
+  private formSub?: Subscription;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private ref: ConcoursReferenceService
+    private ref: ConcoursReferenceService,
+    private logger: LoggerService,
+    private autosave: AutosaveService
   ) {}
 
   ngOnInit(): void {
+    this.autosaveStatus$ = this.autosave.status$;
     this.buildForm();
     this.chargerDonneesReference();
     this.restoreFromStorage();
+    this.formSub = this.form.valueChanges.subscribe(val => {
+      if (this.form.dirty) {
+        this.autosave.schedule(STORAGE_KEYS.IDENTIFICATION, val);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
   }
 
   private chargerDonneesReference(): void {
@@ -104,7 +124,7 @@ export class StepIdentification implements OnInit {
         this.chargerDepartements(data.regionOrigine);
       }
     } catch (e) {
-      console.error('Erreur lecture localStorage', e);
+      this.logger.error('Erreur lecture localStorage', e);
     }
   }
 
@@ -113,7 +133,6 @@ export class StepIdentification implements OnInit {
     this.form.get('departementOrigine')?.setValue('');
     this.departementsFiltres = [];
 
-    // Cherche si la valeur saisie correspond à une région connue (libellé ou code)
     const region = this.regions.find(
       r => r.libelleRegionLangue1.toLowerCase() === saisie.toLowerCase()
         || r.libelleRegionLangue2?.toLowerCase() === saisie.toLowerCase()
@@ -123,7 +142,6 @@ export class StepIdentification implements OnInit {
     if (region) {
       this.chargerDepartements(region.codeRegion);
     }
-    // Si saisie libre non reconnue, on laisse le champ libre sans département suggéré
   }
 
   private chargerDepartements(codeRegion: string): void {
@@ -145,7 +163,7 @@ export class StepIdentification implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    localStorage.setItem(STORAGE_KEYS.IDENTIFICATION, JSON.stringify(this.form.value));
+    this.autosave.saveNow(STORAGE_KEYS.IDENTIFICATION, this.form.value);
     localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, '2');
     this.router.navigate(['/inscription/specialisation']);
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   FormBuilder,
@@ -6,14 +6,19 @@ import {
   Validators,
   ReactiveFormsModule
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
+import { LoggerService } from '../../../core/services/logger.service';
+import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
+import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
 @Component({
   selector: 'app-step-contacts',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule, AutosaveIndicator],
   templateUrl: './step-contacts.html',
   styleUrl: './step-contacts.css',
 })
-export class StepContacts implements OnInit {
+export class StepContacts implements OnInit, OnDestroy {
   form!: FormGroup;
 
   loisirOptions = ['Voyage', 'Lecture', 'Musique', 'Cinéma', 'Cuisine', 'Jardinage', 'Peinture', 'Photographie'];
@@ -21,15 +26,26 @@ export class StepContacts implements OnInit {
   handicapOptions = ['NON', 'OUI'];
   professionOptions = ['NON', 'Enseignant', 'Médecin', 'Ingénieur', 'Avocat', 'Commerçant', 'Autre'];
 
+  autosaveStatus$!: Observable<AutosaveStatus>;
+  private formSub?: Subscription;
+
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private logger: LoggerService,
+    private autosave: AutosaveService
   ) { }
 
   ngOnInit(): void {
+    this.autosaveStatus$ = this.autosave.status$;
     this.buildForm();
     this.restoreFromStorage();
+    this.formSub = this.form.valueChanges.subscribe(val => {
+      if (this.form.dirty) this.autosave.schedule('enstmo_contacts', val);
+    });
   }
+
+  ngOnDestroy(): void { this.formSub?.unsubscribe(); }
 
   private buildForm(): void {
     this.form = this.fb.group({
@@ -55,7 +71,7 @@ export class StepContacts implements OnInit {
           const data = JSON.parse(saved);
           this.form.patchValue(data);
         } catch (e) {
-          console.error('Erreur lecture localStorage contacts', e);
+          this.logger.error('Erreur lecture localStorage contacts', e);
         }
       }
     }
@@ -63,7 +79,7 @@ export class StepContacts implements OnInit {
 
   onLoisirChange(event: Event): void {
     const val = (event.target as HTMLSelectElement).value;
-    console.log('Loisir selectionné:', val);
+    this.logger.log('Loisir selectionné:', val);
   }
 
   isInvalid(field: string): boolean {
@@ -80,10 +96,8 @@ export class StepContacts implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('enstmo_contacts', JSON.stringify(this.form.value));
-      localStorage.setItem('enstmo_current_step', '5');
-    }
+    this.autosave.saveNow('enstmo_contacts', this.form.value);
+    if (typeof window !== 'undefined') localStorage.setItem('enstmo_current_step', '5');
     this.router.navigate(['/inscription/finish']);
   }
 

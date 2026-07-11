@@ -1,0 +1,45 @@
+<div class="error-page">
+  <div class="error-card">
+
+    <!-- Illustration SVG -->
+    <div class="error-illustration">
+      <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Sol -->
+        <ellipse cx="100" cy="128" rx="80" ry="8" fill="#e5e7eb" opacity="0.6"/>
+        <!-- Corps document -->
+        <rect x="55" y="30" width="90" height="110" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="2"/>
+        <!-- Lignes document -->
+        <rect x="68" y="50" width="50" height="6" rx="3" fill="#e5e7eb"/>
+        <rect x="68" y="63" width="65" height="6" rx="3" fill="#e5e7eb"/>
+        <rect x="68" y="76" width="40" height="6" rx="3" fill="#e5e7eb"/>
+        <!-- Coin plié -->
+        <path d="M125 30 L145 50 L125 50 Z" fill="#e5e7eb"/>
+        <path d="M125 30 L145 50" stroke="#d1d5db" stroke-width="1.5" fill="none"/>
+        <!-- Grand X rouge -->
+        <circle cx="100" cy="95" r="22" fill="#fee2e2" stroke="#fecaca" stroke-width="2"/>
+        <path d="M91 86 L109 104 M109 86 L91 104" stroke="#dc2626" stroke-width="3.5"
+          stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="error-code">404</div>
+    <h1 class="error-titre">Page introuvable</h1>
+    <p class="error-desc">
+      La page que vous cherchez n'existe pas ou a été déplacée.
+    </p>
+
+    <div class="error-actions">
+      <button type="button" class="btn-primary" (click)="retour()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+        </svg>
+        Retour à l'accueil
+      </button>
+    </div>
+
+  </div>
+
+
+</div>

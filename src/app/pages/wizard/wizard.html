@@ -19,23 +19,43 @@
 <main class="wizard-container">
   <div class="wizard-card">
 
-    <nav class="wizard-nav" role="tablist" aria-label="Étapes d'inscription">
+    <!-- ── Stepper visuel ── -->
+    <nav class="wizard-stepper" role="tablist" aria-label="Étapes d'inscription">
       @for (step of steps; track step.route; let i = $index) {
+
+        <!-- Ligne de connexion (avant chaque step sauf le premier) -->
+        @if (i > 0) {
+          <div class="stepper-line" [class.done]="currentStep > i - 1"></div>
+        }
+
+        <!-- Cercle + label -->
         <button
           type="button"
-          class="wizard-tab"
+          class="stepper-step"
           [class.active]="currentStep === i"
           [class.completed]="currentStep > i"
           [attr.aria-selected]="currentStep === i"
+          [attr.aria-label]="'Étape ' + (i + 1) + ' : ' + step.label"
           role="tab"
-          (click)="goToStep(i)"
-        >
-          {{ step.label }}
+          (click)="goToStep(i)">
+
+          <div class="stepper-circle">
+            @if (currentStep > i) {
+              <!-- Coche checkmark -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+
+          <span class="stepper-label">{{ step.label }}</span>
+
         </button>
       }
     </nav>
-
-    <div class="wizard-divider"></div>
 
     <div class="wizard-body">
       <router-outlet></router-outlet>

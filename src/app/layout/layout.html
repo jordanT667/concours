@@ -10,10 +10,42 @@
   <div class="layout-main">
     <app-topbar (toggleSidebar)="toggleSidebar()"></app-topbar>
 
-    <!-- Les pages s'affichent ici selon la route -->
     <main class="layout-content">
       <router-outlet></router-outlet>
     </main>
-
   </div>
 </div>
+
+<!-- ── Modale Session Timeout ── -->
+@if (sessionTimeout.showWarning$ | async) {
+  <div class="timeout-backdrop">
+    <div class="timeout-modal" role="alertdialog" aria-labelledby="timeout-title" aria-modal="true">
+
+      <div class="timeout-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+      </div>
+
+      <h2 class="timeout-title" id="timeout-title">Session sur le point d'expirer</h2>
+
+      <p class="timeout-desc">
+        Votre session va expirer dans
+        <strong class="timeout-countdown">{{ sessionTimeout.secondesRestantes$ | async }}s</strong>.
+        Souhaitez-vous rester connecté ?
+      </p>
+
+      <div class="timeout-actions">
+        <button type="button" class="btn-timeout-stay" (click)="sessionTimeout.resterConnecte()">
+          Rester connecté
+        </button>
+        <button type="button" class="btn-timeout-logout" (click)="sessionTimeout.expirer()">
+          Se déconnecter
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

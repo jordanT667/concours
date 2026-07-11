@@ -2,8 +2,118 @@
     display: flex;
     height: 100vh;
     overflow: hidden;
-    background-color: #f5f6fa;
+    background-color: var(--bg-page);
+    transition: background-color 0.25s;
 }
+
+/* ── Modale Session Timeout ── */
+.timeout-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.timeout-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.timeout-icon {
+    width: 56px;
+    height: 56px;
+    background: #fef3c7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: #f59e0b;
+}
+
+[data-theme='dark'] .timeout-icon {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.timeout-icon svg { width: 28px; height: 28px; }
+
+.timeout-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+}
+
+.timeout-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 28px;
+    line-height: 1.6;
+}
+
+.timeout-countdown {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--danger);
+    display: inline-block;
+    min-width: 48px;
+}
+
+.timeout-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-timeout-stay {
+    flex: 1;
+    height: 42px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-timeout-stay:hover { opacity: 0.85; }
+
+.btn-timeout-logout {
+    flex: 1;
+    height: 42px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-timeout-logout:hover { background: var(--bg-hover); }
 
 .layout-main {
     flex: 1;
@@ -11,12 +121,15 @@
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
+    background: var(--bg-page);
+    transition: background-color 0.25s;
 }
 
 .layout-content {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
+    background: var(--bg-page);
 }
 
 /* Overlay mobile */

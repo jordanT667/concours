@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Sidebar } from '../sidebar/sidebar';
 import { Topbar } from '../topbar/topbar';
+import { SessionTimeoutService } from '../core/services/session-timeout.service';
 
 @Component({
   selector: 'app-layout',
@@ -11,14 +12,14 @@ import { Topbar } from '../topbar/topbar';
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })
-export class Layout {
+export class Layout implements OnInit, OnDestroy {
   sidebarOpen = false;
 
-  toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
+  constructor(public sessionTimeout: SessionTimeoutService) {}
 
-  closeSidebar(): void {
-    this.sidebarOpen = false;
-  }
+  ngOnInit(): void { this.sessionTimeout.start(); }
+  ngOnDestroy(): void { this.sessionTimeout.stop(); }
+
+  toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
+  closeSidebar(): void  { this.sidebarOpen = false; }
 }

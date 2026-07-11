@@ -1,4 +1,9 @@
 <form [formGroup]="form" (ngSubmit)="onNext()" novalidate>
+
+  <div class="step-header-bar">
+    <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
+  </div>
+
   <div class="grille">
 
     <!-- LIGNE 1 -->

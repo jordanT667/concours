@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PaysService } from '../../core/services/pays.service';
 import { AuthService } from '../../auth/auth';
 import { PaysDto } from '../../core/models/pays.models';
+import { LoggerService } from '../../core/services/logger.service';
 
 @Component({
   selector: 'app-pays',
@@ -35,7 +36,8 @@ export class Pays implements OnInit {
 
   constructor(
     private paysService: PaysService,
-    public authService: AuthService
+    public authService: AuthService,
+    private logger: LoggerService
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +151,7 @@ export class Pays implements OnInit {
         this.paysASupprimer = null;
       },
       error: (err) => {
-        console.error('Erreur suppression pays:', err);
+        this.logger.error('Erreur suppression pays:', err);
         this.erreur = err?.error?.message ?? `Erreur ${err?.status} — suppression impossible.`;
         this.confirmOuverte = false;
       }
