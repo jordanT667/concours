@@ -156,6 +156,56 @@ export const routes: Routes = [
             .then(m => m.Sessions)
       },
       {
+        path: 'series',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/series/series').then(m => m.SeriesAdmin)
+      },
+      {
+        path: 'banques',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/banques/banques').then(m => m.BanquesAdmin)
+      },
+      {
+        path: 'sports',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/sports/sports').then(m => m.SportsAdmin)
+      },
+      {
+        path: 'loisirs',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/loisirs/loisirs').then(m => m.LoisirsAdmin)
+      },
+      {
+        path: 'handicaps',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/handicaps/handicaps').then(m => m.HandicapsAdmin)
+      },
+      {
+        path: 'mentions',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/mentions/mentions').then(m => m.MentionsAdmin)
+      },
+      {
+        path: 'sites-depot',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/sites-depot/sites-depot').then(m => m.SitesDepotAdmin)
+      },
+      {
+        path: 'centres-examen',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/centres-examen/centres-examen').then(m => m.CentresExamenAdmin)
+      },
+      {
+        path: 'matieres',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/matieres/matieres').then(m => m.MatieresAdmin)
+      },
+      {
+        path: 'epreuves',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/epreuves/epreuves').then(m => m.EpreuvesAdmin)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

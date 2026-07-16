@@ -17,59 +17,31 @@
   <div class="filtres-bar">
     <input type="text"
       class="input-recherche"
-      placeholder="Rechercher une ville..."
+      placeholder="Rechercher un centre..."
       [(ngModel)]="recherche"
       (input)="appliquerFiltres()" />
-
-    <select class="select-filtre"
-      [(ngModel)]="filtreType"
-      (change)="appliquerFiltres()">
-      <option value="TOUS">Tous les types</option>
-      <option value="EXAMEN_ET_DEPOT">Examen & Dépôt</option>
-      <option value="EXAMEN">Examen uniquement</option>
-      <option value="DEPOT">Dépôt uniquement</option>
-    </select>
   </div>
 
   <!-- Grille des centres -->
   <div class="centres-grille">
-    @for (centre of centresFiltres; track centre.id) {
+    @for (centre of centresFiltres; track centre.idCexam) {
       <div class="centre-card">
 
-        <!-- Icône + ville -->
+        <!-- Icône + libellé -->
         <div class="centre-header">
           <div class="centre-icone"></div>
           <div>
-            <h3 class="centre-ville">{{ centre.ville }}</h3>
-            <p class="centre-region">
-              {{ regionDeVille(centre.ville) }}
-            </p>
+            <h3 class="centre-ville">{{ centre.libeleFiliereFr }}</h3>
+            <p class="centre-region">Code : {{ centre.idCexam }}</p>
           </div>
-          <span [class]="'badge ' + couleurType(centre.type)">
-            {{ libelleType(centre.type) }}
-          </span>
         </div>
 
         <!-- Infos -->
         <div class="centre-infos">
-          <div class="info-ligne">
-            <span class="info-label">Nom</span>
-            <span class="info-valeur">{{ centre.nom }}</span>
-          </div>
-          <div class="info-ligne">
-            <span class="info-label">Adresse</span>
-            <span class="info-valeur">{{ centre.adresse }}</span>
-          </div>
-          @if (centre.responsable) {
+          @if (centre.codeNiveaux && centre.codeNiveaux.length > 0) {
             <div class="info-ligne">
-              <span class="info-label">Responsable</span>
-              <span class="info-valeur">{{ centre.responsable }}</span>
-            </div>
-          }
-          @if (centre.telephone) {
-            <div class="info-ligne">
-              <span class="info-label">Téléphone</span>
-              <span class="info-valeur">{{ centre.telephone }}</span>
+              <span class="info-label">Niveaux</span>
+              <span class="info-valeur">{{ centre.codeNiveaux.join(', ') }}</span>
             </div>
           }
         </div>
@@ -81,7 +53,7 @@
             Modifier
           </button>
           <button class="btn-supprimer"
-            (click)="supprimer(centre.id)">
+            (click)="supprimer(centre.idCexam)">
             Supprimer
           </button>
         </div>

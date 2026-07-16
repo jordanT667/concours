@@ -141,8 +141,9 @@
               <div class="saisie" [class.erreur]="isInvalid('mention')">
                 <i class="fa-solid fa-award ico"></i>
                 <select formControlName="mention" class="entr" title="Mention obtenue">
-                  @for (opt of mentionsOptions; track opt) {
-                    <option [value]="opt">{{ opt }}</option>
+                  <option value="">-- Choisir --</option>
+                  @for (opt of mentionsOptions; track opt.idMention) {
+                    <option [value]="opt.idMention">{{ opt.libelleFr }}</option>
                   }
                 </select>
               </div>

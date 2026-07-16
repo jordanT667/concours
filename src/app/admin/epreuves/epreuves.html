@@ -1,0 +1,95 @@
+<div class="page-admin">
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Gestion des épreuves / matières</h2>
+      <p class="page-sous-titre">Associer des matières à une filière-cursus-niveau-diplôme</p>
+    </div>
+  </div>
+
+  @if (erreur) {
+    <div class="alerte-erreur">
+      <i class="fas fa-exclamation-circle"></i> {{ erreur }}
+      <button type="button" class="btn-fermer-erreur" (click)="erreur=''">×</button>
+    </div>
+  }
+
+  <div class="filtres-bar">
+    <select class="input-recherche" [(ngModel)]="idcursus">
+      <option value="">-- Cursus --</option>
+      @for (c of cursusListe; track c.idCursus) {
+        <option [value]="c.idCursus">{{ c.libelle }}</option>
+      }
+    </select>
+    <select class="input-recherche" [(ngModel)]="codeNiveau">
+      <option value="">-- Niveau --</option>
+      @for (n of niveauxListe; track n.codeNiveau) {
+        <option [value]="n.codeNiveau">{{ n.libelleNiveau }}</option>
+      }
+    </select>
+    <select class="input-recherche" [(ngModel)]="codefilere">
+      <option value="">-- Filière --</option>
+      @for (f of filieresListe; track f.codeFiliere) {
+        <option [value]="f.codeFiliere">{{ f.libelleFiliereFr }}</option>
+      }
+    </select>
+    <select class="input-recherche" [(ngModel)]="iddiplome">
+      <option value="">-- Diplôme --</option>
+      @for (d of diplomesListe; track d.idDiplome) {
+        <option [value]="d.idDiplome">{{ d.libelleFr }}</option>
+      }
+    </select>
+    <button class="btn-ajouter" (click)="rechercher()">Rechercher</button>
+  </div>
+
+  <div class="table-wrapper">
+    @if (isLoading) {
+      <div class="loading">Chargement...</div>
+    } @else if (hasSearched) {
+      <table class="table">
+        <thead><tr>
+          <th style="width:40px;"></th><th>Code matière</th><th>Libellé</th>
+        </tr></thead>
+        <tbody>
+          @for (m of matieres; track m.idMatiere) {
+            <tr>
+              <td><input type="checkbox" [checked]="isSelected(m.idMatiere)" (change)="toggleMatiere(m.idMatiere)"/></td>
+              <td class="td-code">{{ m.idMatiere }}</td>
+              <td>{{ m.libelle }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="td-vide">Aucune matière trouvée pour cette combinaison</td></tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="td-vide">Sélectionnez les filtres puis cliquez sur "Rechercher"</div>
+    }
+  </div>
+
+  @if (hasSearched && !isLoading) {
+    <div class="modal-footer" style="justify-content:flex-start; padding:0; border:none;">
+      <button class="btn-sauvegarder" (click)="enregistrer()" [disabled]="enSoumission">
+        {{ enSoumission ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+      @if (authService.isAdmin()) {
+        <button class="btn-supprimer-confirm" (click)="demanderSuppression()">Supprimer l'association</button>
+      }
+    </div>
+  }
+</div>
+
+@if (confirmOuverte) {
+  <div class="modal-overlay" (click)="annulerSuppression()">
+    <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3 class="modal-titre">Confirmer la suppression</h3></div>
+      <div class="modal-body">
+        <p class="confirm-texte">Supprimer définitivement cette association épreuve-matières ?</p>
+        <p class="confirm-avertissement">Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="annulerSuppression()">Annuler</button>
+        <button class="btn-supprimer-confirm" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}

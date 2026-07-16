@@ -8,6 +8,8 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
+import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { LoisirDto, SportDto, HandicapDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
 import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
 import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
@@ -21,9 +23,9 @@ import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-i
 export class StepContacts implements OnInit, OnDestroy {
   form!: FormGroup;
 
-  loisirOptions = ['Voyage', 'Lecture', 'Musique', 'Cinéma', 'Cuisine', 'Jardinage', 'Peinture', 'Photographie'];
-  sportOptions = ['FootBall', 'Basketball', 'Tennis', 'Natation', 'Volleyball', 'Athlétisme', 'Cyclisme', 'Arts martiaux'];
-  handicapOptions = ['NON', 'OUI'];
+  loisirOptions: LoisirDto[] = [];
+  sportOptions: SportDto[] = [];
+  handicapOptions: HandicapDto[] = [];
   professionOptions = ['NON', 'Enseignant', 'Médecin', 'Ingénieur', 'Avocat', 'Commerçant', 'Autre'];
 
   autosaveStatus$!: Observable<AutosaveStatus>;
@@ -32,6 +34,7 @@ export class StepContacts implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private ref: ConcoursReferenceService,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) { }
@@ -39,9 +42,25 @@ export class StepContacts implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.autosaveStatus$ = this.autosave.status$;
     this.buildForm();
+    this.chargerDonneesReference();
     this.restoreFromStorage();
     this.formSub = this.form.valueChanges.subscribe(val => {
       if (this.form.dirty) this.autosave.schedule('enstmo_contacts', val);
+    });
+  }
+
+  private chargerDonneesReference(): void {
+    this.ref.getLoisirs().subscribe({
+      next: (data) => { this.loisirOptions = data.filter(l => !l.annuler); },
+      error: () => {}
+    });
+    this.ref.getSports().subscribe({
+      next: (data) => { this.sportOptions = data.filter(s => !s.annuler); },
+      error: () => {}
+    });
+    this.ref.getHandicaps().subscribe({
+      next: (data) => { this.handicapOptions = data.filter(h => !h.annuler); },
+      error: () => {}
     });
   }
 
@@ -49,11 +68,11 @@ export class StepContacts implements OnInit, OnDestroy {
 
   private buildForm(): void {
     this.form = this.fb.group({
-      loisir1: ['Voyage', Validators.required],
-      loisir2: ['Voyage'],
-      activite1: ['FootBall', Validators.required],
-      activite2: ['FootBall'],
-      handicap: ['NON', Validators.required],
+      loisir1: ['', Validators.required],
+      loisir2: [''],
+      activite1: ['', Validators.required],
+      activite2: [''],
+      handicap: [''],
       profession: ['NON', Validators.required],
       nomPere: ['', Validators.required],
       nomMere: ['', Validators.required],

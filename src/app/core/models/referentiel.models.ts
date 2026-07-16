@@ -58,3 +58,66 @@ export interface EcoleDto {
   dateFermeture?: string;
   annuler: boolean;
 }
+
+export interface SerieDto {
+  idSerie: string;
+  libelleFr?: string;
+  libelleEn?: string;
+  annuler: boolean;
+  codeDiplomes?: string[];
+}
+
+export interface BanqueDto {
+  idBanque: string;
+  libelleBanque?: string;
+  annuler: boolean;
+}
+
+export interface SportDto {
+  idSport: string;
+  libelleFr?: string;
+  libelleEn?: string;
+  annuler: boolean;
+}
+
+export interface LoisirDto {
+  idLoisir: string;
+  libelleFr?: string;
+  libelleEn?: string;
+  annuler: boolean;
+}
+
+export interface HandicapDto {
+  idHandicap: string;
+  libelleFr?: string;
+  libelleEn?: string;
+  annuler: boolean;
+}
+
+export interface MentionDto {
+  idMention: string;
+  libelleFr?: string;
+  libelleEn?: string;
+}
+
+export interface SiteDepotDto {
+  idSiteDepot: string;
+  libelle?: string;
+  codeCursus?: string[];
+}
+
+export interface CentreExamenDto {
+  idCexam: string;
+  libeleFiliereFr: string;
+  codeNiveaux?: string[];
+}
+
+export interface MatiereDto {
+  idMatiere: string;
+  libelle?: string;
+}
+
+export interface EpreuveMatiereDto {
+  idMatiere: string;
+  libelle?: string;
+}

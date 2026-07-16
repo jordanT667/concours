@@ -12,8 +12,9 @@
       <div class="saisie" [class.erreur]="isInvalid('loisir1')">
         <i class="fa-solid fa-masks-theater ico"></i>
         <select formControlName="loisir1" class="entr" title="1er loisir">
-          @for (opt of loisirOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
+          <option value="">-- Choisir --</option>
+          @for (opt of loisirOptions; track opt.idLoisir) {
+            <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
           }
         </select>
       </div>
@@ -27,8 +28,9 @@
       <div class="saisie" [class.erreur]="isInvalid('activite1')">
         <i class="fa-solid fa-futbol ico"></i>
         <select formControlName="activite1" class="entr" title="1ère activité sportive">
-          @for (opt of sportOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
+          <option value="">-- Choisir --</option>
+          @for (opt of sportOptions; track opt.idSport) {
+            <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
           }
         </select>
       </div>
@@ -42,8 +44,9 @@
       <div class="saisie" [class.erreur]="isInvalid('handicap')">
         <i class="fa-solid fa-wheelchair ico"></i>
         <select formControlName="handicap" class="entr" title="Handicap">
-          @for (opt of handicapOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
+          <option value="">-- Aucun --</option>
+          @for (opt of handicapOptions; track opt.idHandicap) {
+            <option [value]="opt.idHandicap">{{ opt.libelleFr }}</option>
           }
         </select>
       </div>
@@ -73,8 +76,9 @@
       <div class="saisie">
         <i class="fa-solid fa-masks-theater ico"></i>
         <select formControlName="loisir2" class="entr" title="2ième loisir">
-          @for (opt of loisirOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
+          <option value="">-- Choisir --</option>
+          @for (opt of loisirOptions; track opt.idLoisir) {
+            <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
           }
         </select>
       </div>
@@ -85,8 +89,9 @@
       <div class="saisie">
         <i class="fa-solid fa-futbol ico"></i>
         <select formControlName="activite2" class="entr" title="2ième activité sportive">
-          @for (opt of sportOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
+          <option value="">-- Choisir --</option>
+          @for (opt of sportOptions; track opt.idSport) {
+            <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
           }
         </select>
       </div>

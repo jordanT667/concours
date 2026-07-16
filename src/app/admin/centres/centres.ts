@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Centre } from '../../core/models/centre.models';
+import { CentreExamenDto } from '../../core/models/referentiel.models';
 import { CentreService } from '../../core/services/centre.service';
 import { CentreForm } from '../centre-form/centre-form';
 
@@ -14,13 +14,12 @@ import { CentreForm } from '../centre-form/centre-form';
 })
 export class Centres implements OnInit {
 
-  centres: Centre[] = [];
-  centresFiltres: Centre[] = [];
+  centres: CentreExamenDto[] = [];
+  centresFiltres: CentreExamenDto[] = [];
   recherche = '';
-  filtreType = 'TOUS';
   isLoading = false;
   formulaireOuvert = false;
-  centreSelectionne: Centre | null = null;
+  centreSelectionne: CentreExamenDto | null = null;
 
   constructor(private centreService: CentreService) {}
 
@@ -44,15 +43,13 @@ export class Centres implements OnInit {
 
   appliquerFiltres(): void {
     this.centresFiltres = this.centres.filter(c => {
-      const matchRecherche = this.recherche === ''
-        || c.ville.toLowerCase().includes(this.recherche.toLowerCase())
-        || c.nom.toLowerCase().includes(this.recherche.toLowerCase());
-      const matchType = this.filtreType === 'TOUS' || c.type === this.filtreType;
-      return matchRecherche && matchType;
+      return this.recherche === ''
+        || c.libeleFiliereFr.toLowerCase().includes(this.recherche.toLowerCase())
+        || c.idCexam.toLowerCase().includes(this.recherche.toLowerCase());
     });
   }
 
-  ouvrirFormulaire(centre?: Centre): void {
+  ouvrirFormulaire(centre?: CentreExamenDto): void {
     this.centreSelectionne = centre ?? null;
     this.formulaireOuvert = true;
   }
@@ -62,9 +59,9 @@ export class Centres implements OnInit {
     this.centreSelectionne = null;
   }
 
-  sauvegarder(centre: Centre): void {
-    const op$ = centre.id
-      ? this.centreService.update(centre.id, centre)
+  sauvegarder(centre: CentreExamenDto): void {
+    const op$ = this.centreSelectionne
+      ? this.centreService.update(centre.idCexam, centre)
       : this.centreService.create(centre);
 
     op$.subscribe({
@@ -75,45 +72,10 @@ export class Centres implements OnInit {
     });
   }
 
-  supprimer(id: number): void {
+  supprimer(idCexam: string): void {
     if (!confirm('Confirmer la suppression de ce centre ?')) return;
-    this.centreService.delete(id).subscribe({
+    this.centreService.delete(idCexam).subscribe({
       next: () => this.charger()
     });
-  }
-
-  libelleType(type: string): string {
-    const map: Record<string, string> = {
-      'EXAMEN':          'Examen uniquement',
-      'DEPOT':           'Dépôt uniquement',
-      'EXAMEN_ET_DEPOT': 'Examen & Dépôt',
-    };
-    return map[type] ?? type;
-  }
-
-  couleurType(type: string): string {
-    const map: Record<string, string> = {
-      'EXAMEN':          'badge-bleu',
-      'DEPOT':           'badge-orange',
-      'EXAMEN_ET_DEPOT': 'badge-vert',
-    };
-    return map[type] ?? '';
-  }
-
-  regionDeVille(ville: string): string {
-    const map: Record<string, string> = {
-      'Bafoussam':  'Région Ouest',
-      'Bamenda':    'Région Nord-Ouest',
-      'Batouri':    'Région Est',
-      'Bertoua':    'Région Est',
-      'Buea':       'Région Sud-Ouest',
-      'Douala':     'Région Littoral',
-      'Ebolowa':    'Région Sud',
-      'Garoua':     'Région Nord',
-      'Maroua':     'Région Extrême-Nord',
-      'Ngaoundéré': 'Région Adamaoua',
-      'Yaoundé':    'Région Centre',
-    };
-    return map[ville] ?? '';
   }
 }

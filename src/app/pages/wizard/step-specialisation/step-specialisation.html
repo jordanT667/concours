@@ -68,7 +68,7 @@
         <select formControlName="diplomeAdmission" class="entr" (change)="onDiplomeChange($event)">
           <option value="">-- Choisir --</option>
           @for (d of diplomesAdmission; track d.idDiplome) {
-            <option [value]="d.libelleFr">{{ d.libelleFr }}</option>
+            <option [value]="d.idDiplome">{{ d.libelleFr }}</option>
           }
         </select>
       </div>
@@ -84,8 +84,8 @@
         <i class="fa-solid fa-book-open ico"></i>
         <select formControlName="serieDiplome" class="entr">
           <option value="">-- Choisir --</option>
-          @for (s of seriesFiltrees; track s) {
-            <option [value]="s">{{ s }}</option>
+          @for (s of seriesFiltrees; track s.idSerie) {
+            <option [value]="s.idSerie">{{ s.libelleFr }}</option>
           }
         </select>
       </div>
@@ -100,8 +100,8 @@
         <i class="fa-solid fa-book-open ico"></i>
         <select formControlName="mentionDiplome" class="entr">
           <option value="">-- Choisir --</option>
-          @for (m of mentionsOptions; track m) {
-            <option [value]="m">{{ m }}</option>
+          @for (m of mentionsOptions; track m.idMention) {
+            <option [value]="m.idMention">{{ m.libelleFr }}</option>
           }
         </select>
       </div>
@@ -168,8 +168,9 @@
       <div class="saisie">
         <i class="fa-solid fa-briefcase ico"></i>
         <select formControlName="choixEpreuve" class="entr">
-          @for (e of epreuvesOptions; track e) {
-            <option [value]="e">{{ e }}</option>
+          <option value="RAS">RAS</option>
+          @for (e of epreuvesOptions; track e.idMatiere) {
+            <option [value]="e.idMatiere">{{ e.libelle }}</option>
           }
         </select>
       </div>
@@ -182,8 +183,8 @@
         <i class="fa-solid fa-pencil ico"></i>
         <select formControlName="centreConcours" class="entr">
           <option value="">-- Choisir --</option>
-          @for (c of centresConcours; track c) {
-            <option [value]="c">{{ c }}</option>
+          @for (c of centresConcours; track c.idCexam) {
+            <option [value]="c.idCexam">{{ c.libeleFiliereFr }}</option>
           }
         </select>
       </div>
@@ -198,8 +199,8 @@
         <i class="fa-solid fa-pencil ico"></i>
         <select formControlName="centreDepotDossier" class="entr">
           <option value="">-- Choisir --</option>
-          @for (c of centresDepot; track c) {
-            <option [value]="c">{{ c }}</option>
+          @for (c of centresDepot; track c.idSiteDepot) {
+            <option [value]="c.idSiteDepot">{{ c.libelle }}</option>
           }
         </select>
       </div>
@@ -227,8 +228,8 @@
         <i class="fa-solid fa-landmark ico"></i>
         <select formControlName="banque" class="entr">
           <option value="">Votre choix</option>
-          @for (b of banquesOptions; track b) {
-            <option [value]="b">{{ b }}</option>
+          @for (b of banquesOptions; track b.idBanque) {
+            <option [value]="b.idBanque">{{ b.libelleBanque }}</option>
           }
         </select>
       </div>

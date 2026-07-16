@@ -1,0 +1,102 @@
+<div class="page-admin">
+  <div class="page-header">
+    <div>
+      <h2 class="page-titre">Gestion des banques</h2>
+      <p class="page-sous-titre">{{ listeFiltree.length }} banques</p>
+    </div>
+    <button class="btn-ajouter" (click)="ouvrirCreation()">+ Ajouter une banque</button>
+  </div>
+
+  @if (erreur) {
+    <div class="alerte-erreur">
+      <i class="fas fa-exclamation-circle"></i> {{ erreur }}
+      <button type="button" class="btn-fermer-erreur" (click)="erreur=''">×</button>
+    </div>
+  }
+
+  <div class="filtres-bar">
+    <input type="text" class="input-recherche" placeholder="Rechercher par code ou libellé..."
+      [(ngModel)]="recherche" (input)="appliquerFiltres()"/>
+  </div>
+
+  <div class="table-wrapper">
+    @if (isLoading) {
+      <div class="loading">Chargement...</div>
+    } @else {
+      <table class="table">
+        <thead><tr>
+          <th>Code</th><th>Libellé</th><th>Statut</th><th>Actions</th>
+        </tr></thead>
+        <tbody>
+          @for (c of listeFiltree; track c.idBanque) {
+            <tr>
+              <td class="td-code">{{ c.idBanque }}</td>
+              <td>{{ c.libelleBanque }}</td>
+              <td><span [class]="c.annuler ? 'badge-inactif' : 'badge-actif'">{{ c.annuler ? 'Inactif' : 'Actif' }}</span></td>
+              <td class="td-actions">
+                <button class="btn-modifier" (click)="ouvrirEdition(c)" title="Modifier"><i class="fas fa-pen"></i></button>
+                <button [class]="c.annuler ? 'btn-activer' : 'btn-desactiver'" (click)="toggleActif(c, $event)"
+                  [title]="c.annuler ? 'Activer' : 'Désactiver'">
+                  <i [class]="c.annuler ? 'fas fa-check' : 'fas fa-ban'"></i>
+                </button>
+                @if (authService.isAdmin()) {
+                  <button class="btn-supprimer" (click)="demanderSuppression(c, $event)" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="td-vide">Aucune banque trouvée</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (modalOuverte) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-titre">{{ modeEdition ? 'Modifier la banque' : 'Ajouter une banque' }}</h3>
+        <button class="modal-fermer" (click)="fermerModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        @if (erreur) { <div class="alerte-erreur">{{ erreur }}</div> }
+        <div class="champ">
+          <label class="label">Code banque <span class="requis">*</span></label>
+          <input type="text" class="input" placeholder="ex: BQ01" maxlength="10"
+            [(ngModel)]="form.idBanque" [disabled]="modeEdition" style="text-transform:uppercase"/>
+          <span class="aide">Max 10 caractères</span>
+        </div>
+        <div class="champ">
+          <label class="label">Libellé <span class="requis">*</span></label>
+          <input type="text" class="input" placeholder="ex: Banque centrale" [(ngModel)]="form.libelleBanque"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="fermerModal()">Annuler</button>
+        <button class="btn-sauvegarder" (click)="sauvegarder()" [disabled]="enSoumission">
+          {{ enSoumission ? 'Enregistrement...' : (modeEdition ? 'Modifier' : 'Ajouter') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmOuverte) {
+  <div class="modal-overlay" (click)="annulerSuppression()">
+    <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3 class="modal-titre">Confirmer la suppression</h3></div>
+      <div class="modal-body">
+        <p class="confirm-texte">Supprimer définitivement la banque <strong>{{ itemASupprimer?.libelleBanque }}</strong> ?</p>
+        <p class="confirm-avertissement">Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-annuler" (click)="annulerSuppression()">Annuler</button>
+        <button class="btn-supprimer-confirm" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}
