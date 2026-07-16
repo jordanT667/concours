@@ -10,7 +10,10 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
 import { PaysDto } from '../../../core/models/pays.models';
-import { CursusDto, NiveauDto, DiplomeDto, FiliereDto } from '../../../core/models/referentiel.models';
+import {
+  CursusDto, NiveauDto, DiplomeDto, FiliereDto,
+  SerieDto, MentionDto, BanqueDto, CentreExamenDto, SiteDepotDto, EpreuveMatiereDto
+} from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
 import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
 import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
@@ -41,22 +44,13 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   diplomesAdmission: DiplomeDto[] = [];
   paysOptions: PaysDto[] = [];
 
-  // Séries : restent en dur car non gérées en base
-  seriesParDiplome: Record<string, string[]> = {
-    'Baccalauréat': ['A', 'B', 'C', 'D', 'E', 'F', 'TI', 'TMT', 'TSGE'],
-    'GCE A/Level': ['Sciences', 'Arts', 'Commercial', 'Technical'],
-    'BTS': ['Informatique', 'Finance', 'Commerce', 'Maintenance'],
-    'HND': ['Informatique', 'Finance', 'Commerce', 'Maintenance'],
-    'Licence': ['Informatique', 'Mathématiques', 'Gestion', 'Droit'],
-    'Master': ['Informatique', 'Gestion', 'Sciences'],
-  };
-  seriesFiltrees: string[] = [];
-
-  mentionsOptions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'];
-  centresConcours = ['Yaoundé', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'Ngaoundéré', 'Bertoua', 'Ebolowa', 'Buea'];
-  centresDepot = ['ENSTMO Yaoundé', 'Délégation Douala', 'Délégation Bafoussam', 'Délégation Bamenda', 'Délégation Garoua', 'Délégation Maroua'];
-  banquesOptions = ['CCA Bank'];
-  epreuvesOptions = ['RAS', 'Mathématiques', 'Physique', 'Informatique', 'Français', 'Anglais'];
+  // Données dynamiques depuis l'API
+  seriesFiltrees: SerieDto[] = [];
+  mentionsOptions: MentionDto[] = [];
+  centresConcours: CentreExamenDto[] = [];
+  centresDepot: SiteDepotDto[] = [];
+  banquesOptions: BanqueDto[] = [];
+  epreuvesOptions: EpreuveMatiereDto[] = [];
 
   chargement = false;
   erreurChargement = '';
@@ -85,9 +79,20 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   ngOnDestroy(): void { this.formSub?.unsubscribe(); }
 
   private genererAnnees(): void {
-    const an = new Date().getFullYear();
-    for (let a = an; a >= an - 15; a--) this.anneesCourantes.push(a);
-    for (let a = an; a >= an - 20; a--) this.anneesBEPC.push(a);
+    this.ref.getAnnees(15).subscribe({
+      next: (data) => { this.anneesCourantes = data; },
+      error: () => {
+        const an = new Date().getFullYear();
+        for (let a = an; a >= an - 15; a--) this.anneesCourantes.push(a);
+      }
+    });
+    this.ref.getAnnees(20).subscribe({
+      next: (data) => { this.anneesBEPC = data; },
+      error: () => {
+        const an = new Date().getFullYear();
+        for (let a = an; a >= an - 20; a--) this.anneesBEPC.push(a);
+      }
+    });
   }
 
   private chargerDonneesReference(): void {
@@ -106,6 +111,26 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     this.ref.getPays().subscribe({
       next: (data) => { this.paysOptions = data; },
       error: () => { this.erreurChargement = 'Impossible de charger les pays.'; }
+    });
+
+    this.ref.getMentions().subscribe({
+      next: (data) => { this.mentionsOptions = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les mentions.'; }
+    });
+
+    this.ref.getBanques().subscribe({
+      next: (data) => { this.banquesOptions = data.filter(b => !b.annuler); },
+      error: () => { this.erreurChargement = 'Impossible de charger les banques.'; }
+    });
+
+    this.ref.getCentresExamen().subscribe({
+      next: (data) => { this.centresConcours = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les centres d\'examen.'; }
+    });
+
+    this.ref.getSitesDepot().subscribe({
+      next: (data) => { this.centresDepot = data; },
+      error: () => { this.erreurChargement = 'Impossible de charger les sites de dépôt.'; }
     });
 
     this.ref.getDiplomes().subscribe({
@@ -152,9 +177,22 @@ export class StepSpecialisation implements OnInit, OnDestroy {
       this.form.patchValue(data);
       if (data.cursus) {
         this.filtrerNiveauxEtFilieres(data.cursus, data.niveau);
+        this.ref.getSitesDepotByCursus(data.cursus).subscribe({
+          next: (sites) => { this.centresDepot = sites; },
+          error: () => {}
+        });
+      }
+      if (data.niveau) {
+        this.ref.getCentresExamenByNiveau(data.niveau).subscribe({
+          next: (centres) => { this.centresConcours = centres; },
+          error: () => {}
+        });
       }
       if (data.diplomeAdmission) {
-        this.seriesFiltrees = this.seriesParDiplome[data.diplomeAdmission] || [];
+        this.ref.getSeriesByDiplome(data.diplomeAdmission).subscribe({
+          next: (series) => { this.seriesFiltrees = series.filter(s => !s.annuler); },
+          error: () => {}
+        });
       }
       if (data.imageRecu) {
         this.imagePreview = data.imageRecu;
@@ -173,6 +211,10 @@ export class StepSpecialisation implements OnInit, OnDestroy {
       this.filtrerNiveauxEtFilieres(idCursus, '');
       this.ref.getDiplomes(idCursus).subscribe({
         next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
+        error: () => {}
+      });
+      this.ref.getSitesDepotByCursus(idCursus).subscribe({
+        next: (data) => { this.centresDepot = data; },
         error: () => {}
       });
     }
@@ -201,13 +243,23 @@ export class StepSpecialisation implements OnInit, OnDestroy {
         next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
         error: () => {}
       });
+      this.ref.getCentresExamenByNiveau(codeNiveau).subscribe({
+        next: (data) => { this.centresConcours = data; },
+        error: () => {}
+      });
     }
   }
 
   onDiplomeChange(event: Event): void {
-    const libelle = (event.target as HTMLSelectElement).value;
-    this.seriesFiltrees = this.seriesParDiplome[libelle] || [];
+    const idDiplome = (event.target as HTMLSelectElement).value;
     this.form.get('serieDiplome')?.setValue('');
+    this.seriesFiltrees = [];
+    if (idDiplome) {
+      this.ref.getSeriesByDiplome(idDiplome).subscribe({
+        next: (data) => { this.seriesFiltrees = data.filter(s => !s.annuler); },
+        error: () => { this.seriesFiltrees = []; }
+      });
+    }
   }
 
   onImageChange(event: Event): void {

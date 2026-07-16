@@ -72,7 +72,7 @@ export class Inscriptions implements OnInit {
   appliquerFiltres(): void {
     this.inscriptionsFiltrees = this.toutesLesInscriptions.filter(ins => {
       const matchStatut    = this.filtreStatut === 'TOUS' || ins.statut === this.filtreStatut;
-      const matchCentre    = this.filtreCentre === 'TOUS' || ins.centreExamen?.ville === this.filtreCentre;
+      const matchCentre    = this.filtreCentre === 'TOUS' || ins.centreExamen?.libeleFiliereFr === this.filtreCentre;
       const matchRecherche = this.recherche === ''
         || ins.candidat?.nom?.toLowerCase().includes(this.recherche.toLowerCase())
         || ins.candidat?.prenom?.toLowerCase().includes(this.recherche.toLowerCase())
@@ -116,7 +116,7 @@ export class Inscriptions implements OnInit {
       i.numeroRecu,
       i.candidat?.nom ?? '',
       i.candidat?.prenom ?? '',
-      i.centreExamen?.ville ?? '',
+      i.centreExamen?.libeleFiliereFr ?? '',
       this.libelleStatut(i.statut),
       i.dateInscription ? new Date(i.dateInscription).toLocaleDateString('fr-FR') : ''
     ]);

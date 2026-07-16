@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Centre } from '../../core/models/centre.models'
+import { CentreExamenDto, NiveauDto } from '../../core/models/referentiel.models';
+import { ConcoursReferenceService } from '../../core/services/concours-reference.service';
 
 @Component({
   selector: 'app-centre-form',
@@ -12,46 +13,50 @@ import { Centre } from '../../core/models/centre.models'
 })
 export class CentreForm implements OnInit {
 
-  @Input() centre: Centre | null = null;
-  @Output() sauvegarder = new EventEmitter<Centre>();
+  @Input() centre: CentreExamenDto | null = null;
+  @Output() sauvegarder = new EventEmitter<CentreExamenDto>();
   @Output() annuler = new EventEmitter<void>();
 
-  // Villes réelles ESTM
-  villes = [
-    'Bafoussam', 'Bamenda',  'Batouri',
-    'Bertoua',   'Buea',     'Douala',
-    'Ebolowa',   'Garoua',   'Maroua',
-    'Ngaoundéré','Yaoundé',
-  ];
+  niveauxDisponibles: NiveauDto[] = [];
 
-  form: Centre = {
-    id: 0,
-    nom: '',
-    ville: '',
-    type: 'EXAMEN_ET_DEPOT',
-    adresse: '',
-    responsable: '',
-    telephone: '',
+  form: CentreExamenDto = {
+    idCexam: '',
+    libeleFiliereFr: '',
+    codeNiveaux: [],
   };
 
   estModification = false;
 
+  constructor(private ref: ConcoursReferenceService) {}
+
   ngOnInit(): void {
+    this.ref.getNiveaux().subscribe({
+      next: (data) => { this.niveauxDisponibles = data; },
+      error: () => {}
+    });
     if (this.centre) {
-      this.form = { ...this.centre };
+      this.form = { ...this.centre, codeNiveaux: [...(this.centre.codeNiveaux || [])] };
       this.estModification = true;
     }
   }
 
-  // Auto-remplir le nom depuis la ville
-  onVilleChange(): void {
-    if (!this.estModification) {
-      this.form.nom = `Centre de ${this.form.ville}`;
+  toggleNiveau(codeNiveau: string): void {
+    const niveaux = this.form.codeNiveaux || [];
+    const index = niveaux.indexOf(codeNiveau);
+    if (index >= 0) {
+      niveaux.splice(index, 1);
+    } else {
+      niveaux.push(codeNiveau);
     }
+    this.form.codeNiveaux = [...niveaux];
+  }
+
+  isNiveauSelected(codeNiveau: string): boolean {
+    return (this.form.codeNiveaux || []).includes(codeNiveau);
   }
 
   onSubmit(): void {
-    if (!this.form.ville || !this.form.nom) return;
+    if (!this.form.idCexam || !this.form.libeleFiliereFr) return;
     this.sauvegarder.emit({ ...this.form });
   }
 }

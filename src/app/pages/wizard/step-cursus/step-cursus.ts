@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
-import { DiplomeDto } from '../../../core/models/referentiel.models';
+import { DiplomeDto, MentionDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
 import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
 import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
@@ -39,7 +39,7 @@ export class StepCursus implements OnInit {
 
   annees: number[] = [];
   diplomesOptions: DiplomeDto[] = [];
-  mentionsOptions = ['Passable', 'Assez-bien', 'Bien', 'Très Bien', 'Excellent'];
+  mentionsOptions: MentionDto[] = [];
 
   autosaveStatus$!: Observable<AutosaveStatus>;
 
@@ -56,6 +56,7 @@ export class StepCursus implements OnInit {
     this.genererAnnees();
     this.buildModalForm();
     this.chargerDiplomes();
+    this.chargerMentions();
     this.restoreFromStorage();
   }
 
@@ -66,11 +67,21 @@ export class StepCursus implements OnInit {
     });
   }
 
+  private chargerMentions(): void {
+    this.ref.getMentions().subscribe({
+      next: (data) => { this.mentionsOptions = data; },
+      error: () => {}
+    });
+  }
+
   private genererAnnees(): void {
-    const an = new Date().getFullYear();
-    for (let a = an; a >= an - 30; a--) {
-      this.annees.push(a);
-    }
+    this.ref.getAnnees(30).subscribe({
+      next: (data) => { this.annees = data; },
+      error: () => {
+        const an = new Date().getFullYear();
+        for (let a = an; a >= an - 30; a--) this.annees.push(a);
+      }
+    });
   }
 
   private buildModalForm(): void {
@@ -79,7 +90,7 @@ export class StepCursus implements OnInit {
       annee: [an, Validators.required],
       etablissement: ['', Validators.required],
       diplome: ['', Validators.required],
-      mention: ['Assez-bien', Validators.required],
+      mention: ['', Validators.required],
     });
   }
 
