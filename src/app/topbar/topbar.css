@@ -85,7 +85,7 @@
 
 /* Theme toggle — accent ring on hover */
 .btn-theme:hover {
-    color: var(--warning);
+    color: var(--accent);
 }
 
 .badge {
@@ -123,8 +123,8 @@
 .avatar {
     width: 36px;
     height: 36px;
-    background: #1a2332;
-    color: #f59e0b;
+    background: var(--accent-hover);
+    color: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;

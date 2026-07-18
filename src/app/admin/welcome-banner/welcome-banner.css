@@ -34,9 +34,9 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245, 158, 11, 0.2);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #f59e0b;
+    background: var(--accent-ring);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 13px;
@@ -46,7 +46,7 @@
 .badge-point {
     width: 8px;
     height: 8px;
-    background: #f59e0b;
+    background: var(--accent);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
 }
@@ -80,7 +80,7 @@
 .cercle-1 {
     width: 120px;
     height: 120px;
-    background: #f59e0b;
+    background: var(--accent);
     top: 0;
     right: 0;
 }
@@ -96,7 +96,7 @@
 .cercle-3 {
     width: 50px;
     height: 50px;
-    background: #f59e0b;
+    background: var(--accent);
     top: 20px;
     right: 60px;
 }

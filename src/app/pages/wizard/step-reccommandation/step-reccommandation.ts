@@ -39,7 +39,7 @@ export class StepRecommandation implements OnInit {
   }
 
   ouvrirLien(lien: string): void {
-    window.open(lien, '_blank');
+    window.open(lien, '_blank', 'noopener,noreferrer');
   }
 
   onNext(): void {
