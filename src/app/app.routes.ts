@@ -81,6 +81,7 @@ export const routes: Routes = [
       },
       {
   path: 'annonces',
+  canActivate: [adminOnlyGuard],
   loadComponent: () =>
     import('./admin/annonces/annonces')
       .then(m => m.Annonces)

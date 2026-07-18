@@ -42,17 +42,13 @@
 .timeout-icon {
     width: 56px;
     height: 56px;
-    background: #fef3c7;
+    background: var(--accent-ring);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    color: #f59e0b;
-}
-
-[data-theme='dark'] .timeout-icon {
-    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
 }
 
 .timeout-icon svg { width: 28px; height: 28px; }

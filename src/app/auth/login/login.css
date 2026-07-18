@@ -1,12 +1,4 @@
-/* ===================== VARIABLES ===================== */
 :host {
-    --teal: #2ec4a6;
-    --teal-dark: #25a890;
-    --teal-light: #e9f8f4;
-    --coral: #ff6f6f;
-    --text-dark: #2c3e50;
-    --text-grey: #8c97a3;
-    --input-bg: #f4f6f8;
     display: block;
     height: 100vh;
 }
@@ -29,7 +21,7 @@
 
 /* ===================== PANNEAU GAUCHE ===================== */
 .left-panel {
-    background: #ffffff;
+    background: var(--bg-card);
     align-items: center;
     justify-content: center;
     padding: 40px;
@@ -47,26 +39,26 @@
 .logo-icon {
     width: 28px;
     height: 28px;
-    border: 1.5px solid var(--text-dark);
+    border: 1.5px solid var(--text-primary);
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
-    color: var(--text-dark);
+    color: var(--text-primary);
 }
 
 .brand-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--text-primary);
 }
 
 .form-wrapper {
     width: 100%;
     max-width: 480px;
     text-align: center;
-    border: 9px solid #79d4c5;
+    border: 9px solid var(--accent);
     padding: 20px;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.09);
@@ -75,7 +67,7 @@
 .title {
     font-size: 26px;
     font-weight: 700;
-    color: var(--teal);
+    color: var(--accent);
     margin-bottom: 24px;
 }
 
@@ -91,24 +83,24 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1px solid #e2e6ea;
+    border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-grey);
+    color: var(--text-secondary);
     font-size: 16px;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .social-btn:hover {
-    border-color: var(--teal);
-    color: var(--teal);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .divider-text {
     font-size: 12px;
-    color: var(--text-grey);
+    color: var(--text-secondary);
     margin-bottom: 20px;
     letter-spacing: 0.02em;
 }
@@ -118,8 +110,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #fdecec;
-    color: #c0392b;
+    background: rgba(220, 38, 38, 0.08);
+    color: var(--danger);
     font-size: 12px;
     padding: 8px 12px;
     border-radius: 6px;
@@ -138,7 +130,7 @@
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-grey);
+    color: var(--text-secondary);
     font-size: 16px;
     pointer-events: none;
 }
@@ -146,29 +138,30 @@
 .input-group input {
     width: 100%;
     padding: 14px 16px 14px 42px;
-    border: none;
+    border: 1px solid var(--border-input);
     border-radius: 6px;
-    background: var(--input-bg);
+    background: var(--bg-input);
     font-size: 13px;
-    color: var(--text-dark);
+    color: var(--text-primary);
     outline: none;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s;
     box-sizing: border-box;
 }
 
 .input-group input::placeholder {
-    color: #aab3bc;
+    color: var(--text-muted);
 }
 
 .input-group input:focus {
-    background: #ecf0f3;
-    box-shadow: 0 0 0 2px rgba(46, 196, 166, 0.25);
+    background: var(--bg-input);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .forgot-link {
     display: block;
     font-size: 12px;
-    color: var(--text-dark);
+    color: var(--text-primary);
     text-decoration: underline;
     margin: 6px 0 22px;
 }
@@ -179,7 +172,7 @@
     padding: 13px 0;
     border: none;
     border-radius: 24px;
-    background: var(--teal);
+    background: var(--accent);
     color: #ffffff;
     font-size: 12px;
     font-weight: 700;
@@ -189,7 +182,7 @@
 }
 
 .btn-submit:hover:not(:disabled) {
-    background: var(--teal-dark);
+    background: var(--accent-hover);
 }
 
 .btn-submit:active:not(:disabled) {
@@ -203,7 +196,7 @@
 
 /* ===================== PANNEAU DROIT ===================== */
 .right-panel {
-    background: linear-gradient(135deg, #38c2a8 0%, #239e87 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
     color: #ffffff;
     align-items: center;
     justify-content: center;
@@ -281,7 +274,7 @@
 
 .btn-outline:hover {
     background: #ffffff;
-    color: var(--teal-dark);
+    color: var(--accent-hover);
 }
 
 /* ----- Décorations géométriques ----- */
@@ -343,7 +336,7 @@
     right: 0;
     width: 6px;
     height: 100%;
-    background: var(--coral);
+    background: var(--warning);
 }
 
 /* ===================== RESPONSIVE ===================== */

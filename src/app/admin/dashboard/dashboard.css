@@ -7,7 +7,7 @@
 .loading-global {
     text-align: center;
     padding: 60px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 16px;
 }
 
@@ -29,7 +29,7 @@
 .section-titre {
     font-size: 16px;
     font-weight: 700;
-    color: #1a2332;
+    color: var(--text-primary);
     margin: 0 0 14px;
 }
 
@@ -44,19 +44,19 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
     font-size: 14px;
     font-weight: 600;
-    color: #1a2332;
+    color: var(--text-primary);
 }
 
 .action-card:hover {
-    border-color: #f59e0b;
+    border-color: var(--accent);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
 }
@@ -70,7 +70,7 @@
 }
 
 .action-flèche {
-    color: #f59e0b;
+    color: var(--accent);
     font-size: 18px;
     font-weight: 700;
 }

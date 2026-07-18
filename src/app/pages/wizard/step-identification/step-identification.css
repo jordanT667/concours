@@ -61,15 +61,15 @@
 .titre {
     font-size: 13px;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-secondary);
 }
 
 .titre-rouge {
-    color: #c0392b;
+    color: var(--danger);
 }
 
 .req {
-    color: #c0392b;
+    color: var(--danger);
     font-weight: 700;
 }
 
@@ -79,30 +79,30 @@
 .saisie {
     display: flex;
     align-items: center;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--border-input);
     border-radius: 4px;
-    background: #fff;
+    background: var(--bg-input);
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .saisie:focus-within {
-    border-color: #2980b9;
-    box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.12);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .saisie.erreur {
-    border-color: #c0392b;
-    background: #fff8f8;
+    border-color: var(--danger);
+    background: rgba(220, 38, 38, 0.04);
 }
 
 .saisie.erreur:focus-within {
-    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 /* ICÔNES DANS LES CHAMPS */
 .ico {
-    color: #8B5E3C;
+    color: var(--text-muted);
     font-size: 14px;
     padding: 0 10px;
     flex-shrink: 0;
@@ -117,13 +117,13 @@
     outline: none;
     background: transparent;
     font-size: 13px;
-    color: #2c3e50;
+    color: var(--text-primary);
     padding: 9px 10px 9px 4px;
     min-width: 0;
 }
 
 .entr::placeholder {
-    color: #aab0b8;
+    color: var(--text-muted);
     font-size: 12px;
 }
 
@@ -138,13 +138,14 @@ select.entr {
 }
 
 select.entr option {
-    color: #2c3e50;
+    color: var(--text-primary);
+    background: var(--bg-card);
 }
 
 /* MESSAGES D'ERREUR */
 .err {
     font-size: 11px;
-    color: #c0392b;
+    color: var(--danger);
     margin-top: 2px;
     display: flex;
     align-items: center;
