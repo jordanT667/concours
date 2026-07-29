@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { timeout } from 'rxjs/operators';
 import jsPDF from 'jspdf';
-import { InscriptionService } from '../../../core/services/inscription';
-import { SoumettreInscriptionPayload } from '../../../core/models/inscription.models';
+import { PreinscriptionService } from '../../../core/services/preinscription.service';
+import { PreinscriptionDto } from '../../../core/models/preinscription.models';
 import { ErrorResponse, ErrorCode } from '../../../core/models/error-response.models';
 import { LoggerService } from '../../../core/services/logger.service';
 
@@ -69,7 +71,7 @@ interface Contacts {
 @Component({
   selector: 'app-step-finish',
   standalone: true,
-  imports: [],
+  imports: [FormsModule, RouterLink],
   templateUrl: './step-finish.html',
   styleUrl: './step-finish.css',
 })
@@ -83,30 +85,31 @@ export class StepFinish implements OnInit {
 
   // ── Numéro de dossier (assigné par le backend après soumission) ──────
   numeroDossier = '';
+  motDePasse = '';
 
   // ── États d'affichage ─────────────────────────────────────────────────
   enregistrementReussi = false;
   enCours = false;
   erreur = '';
+  attestation = false;
 
-  // ── Logo de l'école, chargé en base64 pour être intégré au PDF ───────
-  
-  
   private logoBase64: string | null = null;
+  private logoCharge: Promise<void> = Promise.resolve();
 
   constructor(
     private router: Router,
-    private inscriptionService: InscriptionService,
+    private preinscriptionService: PreinscriptionService,
     private logger: LoggerService
   ) { }
 
   ngOnInit(): void {
     this.chargerDonnees();
-    this.chargerLogo();
+    this.logoCharge = this.chargerLogo();
     // Si le candidat revient sur cette page après soumission, on restaure le numéro
     const existant = localStorage.getItem('enstmo_numero_dossier');
     if (existant) {
       this.numeroDossier = existant;
+      this.motDePasse = localStorage.getItem('enstmo_mot_de_passe') ?? '';
       this.enregistrementReussi = true;
     }
   }
@@ -133,14 +136,10 @@ export class StepFinish implements OnInit {
   }
 
   // ── Chargement du logo ENSTMO en base64 pour intégration PDF ──────
-  private chargerLogo(): void {
-    if (typeof window === 'undefined') return;
+  private chargerLogo(): Promise<void> {
+    if (typeof window === 'undefined') return Promise.resolve();
 
-    // Essaie d'abord le .jfif, puis le .png en fallback
-    const urls = ['assets/enstmo.jfif', 'assets/enstmo.png'];
-    let index = 0;
-
-    const tryLoad = (url: string) => {
+    return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
@@ -151,24 +150,19 @@ export class StepFinish implements OnInit {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0);
-            this.logoBase64 = canvas.toDataURL('image/png');
+            this.logoBase64 = canvas.toDataURL('image/jpeg');
           }
         } catch (e) {
           this.logoBase64 = null;
         }
+        resolve();
       };
       img.onerror = () => {
-        index++;
-        if (index < urls.length) {
-          tryLoad(urls[index]);
-        } else {
-          this.logoBase64 = null;
-        }
+        this.logoBase64 = null;
+        resolve();
       };
-      img.src = url;
-    };
-
-    tryLoad(urls[index]);
+      img.src = 'enstmo.jfif';
+    });
   }
 
   // ── Diplôme le plus récent (le tableau est trié décroissant par step-cursus) ─
@@ -200,63 +194,68 @@ export class StepFinish implements OnInit {
       .join(' - ');
   }
 
-  // ── Action principale : soumettre au backend, récupérer le numéro, générer le PDF ─
+  // ── Action principale : soumettre au backend, récupérer le matricule, générer le PDF ─
   onEnregistrer(): void {
     this.erreur = '';
     this.enCours = true;
 
-    const payload: SoumettreInscriptionPayload = {
+    const annee = new Date().getFullYear();
+    const payload: PreinscriptionDto = {
       nom: this.identification.nom ?? '',
       prenom: this.identification.prenom ?? '',
-      sexe: this.identification.sexe ?? '',
-      dateNaissance: this.identification.dateNaissance ?? '',
-      lieuNaissance: this.identification.lieuNaissance ?? '',
-      paysNationalite: this.identification.paysNationalite ?? '',
-      regionOrigine: this.identification.regionOrigine ?? '',
-      departementOrigine: this.identification.departementOrigine ?? '',
-      situationMatrimoniale: this.identification.situationMatrimoniale ?? '',
-      adresse: this.identification.adresse ?? '',
-      telephone: this.identification.telephone ?? '',
-      numeroCNI: this.identification.numeroCNI ?? '',
+      sexe: (this.identification.sexe ?? '').charAt(0).toUpperCase(),
+      dateNaiss: this.identification.dateNaissance ?? '',
+      lieuNaiss: this.identification.lieuNaissance ?? '',
+      numCni: this.identification.numeroCNI ?? '',
       email: this.identification.email ?? '',
-      premiereLangue: this.identification.premiereLangue ?? '',
-      deuxiemeLangue: this.identification.deuxiemeLangue ?? '',
-      cursus: this.specialisation.cursus ?? '',
+      numTel: this.identification.telephone ?? '',
+      adresse: this.identification.adresse ?? '',
+      paysNationalite: this.identification.paysNationalite ?? '',
+      region: this.identification.regionOrigine ?? '',
+      departementGeographique: this.identification.departementOrigine ?? '',
+      situationMatrimoniale: this.identification.situationMatrimoniale ?? '',
+      lang1: this.identification.premiereLangue ?? '',
+      lang2: this.identification.deuxiemeLangue ?? '',
+      cycles: this.specialisation.cursus ?? '',
       niveau: this.specialisation.niveau ?? '',
-      domaineFormation: this.specialisation.domaineFormation ?? '',
+      choixFormation1: this.specialisation.domaineFormation ?? '',
       diplomeAdmission: this.specialisation.diplomeAdmission ?? '',
-      serieDiplome: this.specialisation.serieDiplome ?? '',
-      mentionDiplome: this.specialisation.mentionDiplome ?? '',
-      anneeObtentionDip: this.specialisation.anneeObtentionDip ?? 0,
-      etablissementObtention: this.specialisation.etablissementObtention ?? '',
-      paysObtention: this.specialisation.paysObtention ?? '',
-      anneeBEPC: this.specialisation.anneeBEPC || null,
-      choixEpreuve: this.specialisation.choixEpreuve ?? '',
-      centreConcours: this.specialisation.centreConcours ?? '',
-      centreDepotDossier: this.specialisation.centreDepotDossier ?? '',
-      numeroRecuCCA: this.specialisation.numeroRecuCCA ?? '',
-      banque: this.specialisation.banque ?? '',
-      imageRecuBase64: this.specialisation.imageRecu ?? '',
-      imageNom: this.specialisation.imageNom ?? '',
-      parcoursScolaire: this.cursus,
+      typeBacc: this.specialisation.serieDiplome ?? '',
+      mention: this.specialisation.mentionDiplome ?? '',
+      anneeObtentionDipl: this.specialisation.anneeObtentionDip ? String(this.specialisation.anneeObtentionDip) : '',
+      etablissementDipl: this.specialisation.etablissementObtention ?? '',
+      paysObtentionDipl: this.specialisation.paysObtention ?? '',
+      centredexamen: this.specialisation.centreConcours ?? '',
+      lieudepot: this.specialisation.centreDepotDossier ?? '',
+      numRecu: this.specialisation.numeroRecuCCA ?? '',
+      anneeDipAnt: this.specialisation.anneeBEPC ? String(this.specialisation.anneeBEPC) : '',
       loisir1: this.contacts.loisir1 ?? '',
       loisir2: this.contacts.loisir2 ?? '',
-      activite1: this.contacts.activite1 ?? '',
-      activite2: this.contacts.activite2 ?? '',
-      handicap: this.contacts.handicap ?? '',
-      profession: this.contacts.profession ?? '',
-      nomPere: this.contacts.nomPere ?? '',
-      nomMere: this.contacts.nomMere ?? '',
-      telPere: this.contacts.telPere ?? '',
-      emailPere: this.contacts.emailPere ?? '',
-      telMere: this.contacts.telMere ?? '',
+      sport1: this.contacts.activite1 ?? '',
+      sport2: this.contacts.activite2 ?? '',
+      activiteSportive: !!(this.contacts.activite1 || this.contacts.activite2),
+      handicap: !!this.contacts.handicap && this.contacts.handicap !== 'Aucun',
+      typeHandicap: this.contacts.handicap !== 'Aucun' ? (this.contacts.handicap ?? '') : '',
+      activiteProfessionnelle: this.contacts.profession ?? '',
+      nomParent1: this.contacts.nomPere ?? '',
+      telParent1: this.contacts.telPere ?? '',
+      emailPersonneAContacter: this.contacts.emailPere ?? '',
+      nomParent2: this.contacts.nomMere ?? '',
+      telParent2: this.contacts.telMere ?? '',
+      anneeAcademique: `${annee}/${annee + 1}`,
+      ecole: 'E',
     };
 
-    this.inscriptionService.soumettre(payload).subscribe({
-      next: (res) => {
-        this.numeroDossier = res.numeroDossier;
+    this.preinscriptionService.create(payload).pipe(
+      timeout(30000)
+    ).subscribe({
+      next: async (res) => {
+        this.numeroDossier = res.matricule ?? '';
+        this.motDePasse = res.pwd ?? '';
         localStorage.setItem('enstmo_numero_dossier', this.numeroDossier);
+        localStorage.setItem('enstmo_mot_de_passe', this.motDePasse);
         try {
+          await this.logoCharge;
           this.genererPdf();
           this.enregistrementReussi = true;
         } catch (e) {
@@ -268,6 +267,10 @@ export class StepFinish implements OnInit {
       },
       error: (err: ErrorResponse | any) => {
         this.enCours = false;
+        if (err?.name === 'TimeoutError') {
+          this.erreur = 'Le serveur met trop de temps à répondre. Veuillez réessayer.';
+          return;
+        }
         const code = (err as ErrorResponse)?.code;
         if (code === ErrorCode.DUPLICATE_RESOURCE) {
           this.erreur = 'Un dossier existe déjà avec cet email ou ce numéro CNI. Vérifiez vos informations ou contactez l\'administration.';
@@ -283,9 +286,13 @@ export class StepFinish implements OnInit {
     });
   }
 
-  // ── Permet de re-télécharger le PDF après succès sans tout refaire ───
-  onRetelecharger(): void {
+  async onRetelecharger(): Promise<void> {
+    await this.logoCharge;
     this.genererPdf();
+  }
+
+  copier(texte: string): void {
+    navigator.clipboard.writeText(texte);
   }
 
   onBack(): void {
@@ -305,7 +312,7 @@ export class StepFinish implements OnInit {
     // ── Logo ENSTMO centré en haut ───────────────────────────────────────
     if (this.logoBase64) {
       try {
-        doc.addImage(this.logoBase64, 'PNG', logoX, y, logoW, logoH);
+        doc.addImage(this.logoBase64, 'JPEG', logoX, y, logoW, logoH);
       } catch (e) {
         this.logger.warn("Impossible d'insérer le logo dans le PDF :", e);
       }

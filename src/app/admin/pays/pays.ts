@@ -118,7 +118,7 @@ export class Pays implements OnInit {
       },
       error: (err) => {
         this.enSoumission = false;
-        this.erreur = err?.error?.message ?? 'Une erreur est survenue.';
+        this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.';
       }
     });
   }
@@ -152,7 +152,7 @@ export class Pays implements OnInit {
       },
       error: (err) => {
         this.logger.error('Erreur suppression pays:', err);
-        this.erreur = err?.error?.message ?? `Erreur ${err?.status} — suppression impossible.`;
+        this.erreur = err?.message ?? err?.error?.message ?? `Erreur ${err?.status} — suppression impossible.`;
         this.confirmOuverte = false;
       }
     });

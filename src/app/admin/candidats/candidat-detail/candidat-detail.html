@@ -7,12 +7,7 @@
     <h2 class="detail-titre">Détail du candidat</h2>
   </div>
 
-  @if (isLoading) {
-    <div class="loader-wrapper">
-      <span class="loader"></span>
-      <p>Chargement...</p>
-    </div>
-  } @else if (erreur) {
+  @if (erreur) {
     <div class="alert-erreur">
       {{ erreur }}
     </div>

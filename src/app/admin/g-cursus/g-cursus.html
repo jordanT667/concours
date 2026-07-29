@@ -1,0 +1,266 @@
+<div class="g-cursus-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div>
+        <h2 class="page-titre">G_Cursus</h2>
+        <p class="page-sous-titre">Création d'une offre de formation complète</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-chip">
+        <i class="fas fa-graduation-cap stat-icon"></i>
+        <span class="stat-number">{{ allCursus.length }}</span>
+        <span class="stat-label">Cursus</span>
+      </div>
+      <div class="stat-chip">
+        <i class="fas fa-signal stat-icon"></i>
+        <span class="stat-number">{{ allNiveaux.length }}</span>
+        <span class="stat-label">Niveaux</span>
+      </div>
+      <div class="stat-chip accent">
+        <i class="fas fa-list-check stat-icon"></i>
+        <span class="stat-number">{{ lignes.length }}</span>
+        <span class="stat-label">Ajoutés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertes -->
+  @if (erreur) {
+    <div class="alerte alerte-erreur">
+      <i class="fas fa-circle-exclamation"></i>
+      <span>{{ erreur }}</span>
+      <button type="button" class="alerte-close" title="Fermer l'alerte" (click)="erreur = ''"><i class="fas fa-xmark"></i></button>
+    </div>
+  }
+  @if (succes) {
+    <div class="alerte alerte-succes">
+      <i class="fas fa-circle-check"></i>
+      <span>{{ succes }}</span>
+    </div>
+  }
+
+  <!-- Formulaire de création en cascade -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-title-row">
+        <i class="fas fa-wand-magic-sparkles form-header-icon"></i>
+        <div>
+          <h3 class="form-card-titre">
+            {{ editIndex !== null ? 'Modifier la combinaison' : 'Nouvelle combinaison' }}
+          </h3>
+          <p class="form-card-desc">Renseignez les informations pour créer la chaîne Cursus → Niveau → Filière</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-body">
+
+        <!-- ÉTAPE 1 : CURSUS -->
+        <div class="form-step">
+          <div class="step-indicator">
+            <span class="step-number" [class.step-done]="formCursus.code && formCursus.libelle">
+              @if (formCursus.code && formCursus.libelle) {
+                <i class="fas fa-check"></i>
+              } @else {
+                1
+              }
+            </span>
+            <div class="step-connector" [class.connector-done]="formCursus.code && formCursus.libelle"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-header">
+              <i class="fas fa-graduation-cap step-icon"></i>
+              <label class="step-label">Cursus <span class="requis">*</span></label>
+            </div>
+            <div class="step-fields">
+              <div class="field-group">
+                <label class="field-label">Code</label>
+                <input type="text" class="field-input code-input" placeholder="ex: ING"
+                  [(ngModel)]="formCursus.code" maxlength="10" (input)="formCursus.code = formCursus.code.toUpperCase()"/>
+              </div>
+              <div class="field-group field-grow">
+                <label class="field-label">Libellé</label>
+                <input type="text" class="field-input" placeholder="ex: Ingénierie"
+                  [(ngModel)]="formCursus.libelle"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 2 : NIVEAU -->
+        <div class="form-step" [class.step-disabled]="!formCursus.code || !formCursus.libelle">
+          <div class="step-indicator">
+            <span class="step-number" [class.step-done]="formNiveau.code && formNiveau.libelle">
+              @if (formNiveau.code && formNiveau.libelle) {
+                <i class="fas fa-check"></i>
+              } @else {
+                2
+              }
+            </span>
+            <div class="step-connector" [class.connector-done]="formNiveau.code && formNiveau.libelle"></div>
+          </div>
+          <div class="step-content">
+            <div class="step-header">
+              <i class="fas fa-signal step-icon"></i>
+              <label class="step-label">Niveau <span class="requis">*</span></label>
+            </div>
+            <div class="step-fields">
+              <div class="field-group">
+                <label class="field-label">Code</label>
+                <input type="text" class="field-input code-input" placeholder="ex: M1"
+                  [(ngModel)]="formNiveau.code" maxlength="10" (input)="formNiveau.code = formNiveau.code.toUpperCase()"
+                  [disabled]="!formCursus.code || !formCursus.libelle"/>
+              </div>
+              <div class="field-group field-grow">
+                <label class="field-label">Libellé</label>
+                <input type="text" class="field-input" placeholder="ex: Master 1"
+                  [(ngModel)]="formNiveau.libelle"
+                  [disabled]="!formCursus.code || !formCursus.libelle"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 3 : FILIÈRE -->
+        <div class="form-step" [class.step-disabled]="!formNiveau.code || !formNiveau.libelle">
+          <div class="step-indicator">
+            <span class="step-number" [class.step-done]="formFiliere.code && formFiliere.libelleFr">
+              @if (formFiliere.code && formFiliere.libelleFr) {
+                <i class="fas fa-check"></i>
+              } @else {
+                3
+              }
+            </span>
+          </div>
+          <div class="step-content">
+            <div class="step-header">
+              <i class="fas fa-code-branch step-icon"></i>
+              <label class="step-label">Filière <span class="optionnel">(optionnel)</span></label>
+            </div>
+            <div class="step-fields">
+              <div class="field-group">
+                <label class="field-label">Code</label>
+                <input type="text" class="field-input code-input" placeholder="ex: IA"
+                  [(ngModel)]="formFiliere.code" maxlength="10" (input)="formFiliere.code = formFiliere.code.toUpperCase()"
+                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+              </div>
+              <div class="field-group field-grow">
+                <label class="field-label">Libellé FR</label>
+                <input type="text" class="field-input" placeholder="ex: Intelligence Artificielle"
+                  [(ngModel)]="formFiliere.libelleFr"
+                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+              </div>
+            </div>
+            <div class="step-fields step-fields-full">
+              <div class="field-group field-grow">
+                <label class="field-label">Libellé EN</label>
+                <input type="text" class="field-input" placeholder="ex: Artificial Intelligence"
+                  [(ngModel)]="formFiliere.libelleEn"
+                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        @if (editIndex !== null) {
+          <button type="button" class="btn-annuler" (click)="annulerEdition()">
+            <i class="fas fa-rotate-left"></i> Annuler
+          </button>
+        }
+        <button type="button" class="btn-reset" (click)="resetForm()" [disabled]="!formCursus.code && !formCursus.libelle">
+          <i class="fas fa-eraser"></i> Effacer
+        </button>
+        <button type="button" class="btn-ajouter" (click)="ajouter()" [disabled]="enSoumission || !formCursus.code || !formCursus.libelle || !formNiveau.code || !formNiveau.libelle">
+          @if (enSoumission) {
+            <i class="fas fa-spinner fa-spin"></i> Enregistrement...
+          } @else {
+            <i class="fas" [class.fa-plus]="editIndex === null" [class.fa-pen-to-square]="editIndex !== null"></i>
+            {{ editIndex !== null ? 'Modifier' : 'Ajouter' }}
+          }
+        </button>
+      </div>
+  </div>
+
+  <!-- Tableau récapitulatif -->
+  @if (lignes.length > 0) {
+    <div class="recap-section">
+      <div class="recap-header">
+        <div class="recap-title-row">
+          <i class="fas fa-table-list recap-icon"></i>
+          <h3 class="recap-titre">Récapitulatif des combinaisons</h3>
+        </div>
+        <span class="recap-badge">{{ lignes.length }} élément(s)</span>
+      </div>
+
+      <div class="recap-table-wrapper">
+        <table class="recap-table">
+          <thead>
+            <tr>
+              <th class="th-num">#</th>
+              <th><i class="fas fa-graduation-cap th-icon"></i> Cursus</th>
+              <th><i class="fas fa-signal th-icon"></i> Niveau</th>
+              <th><i class="fas fa-code-branch th-icon"></i> Filière</th>
+              <th class="th-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lignes; track l.id; let i = $index) {
+              <tr [class.tr-editing]="editIndex === i">
+                <td class="td-num">{{ i + 1 }}</td>
+                <td>
+                  <div class="cell-double">
+                    <span class="cell-code cursus-code">{{ l.cursusCode }}</span>
+                    <span class="cell-libelle">{{ l.cursusLibelle }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cell-double">
+                    <span class="cell-code niveau-code">{{ l.niveauCode }}</span>
+                    <span class="cell-libelle">{{ l.niveauLibelle }}</span>
+                  </div>
+                </td>
+                <td>
+                  @if (l.filiereCode) {
+                    <div class="cell-double">
+                      <span class="cell-code filiere-code">{{ l.filiereCode }}</span>
+                      <span class="cell-libelle">{{ l.filiereFr }}</span>
+                    </div>
+                  } @else {
+                    <span class="no-data">—</span>
+                  }
+                </td>
+                <td class="td-actions">
+                  <button type="button" class="btn-edit" (click)="editer(i)" title="Modifier">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                  <button type="button" class="btn-delete" (click)="supprimer(i)" title="Supprimer">
+                    <i class="fas fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <div class="empty-illustration">
+        <i class="fas fa-folder-open"></i>
+      </div>
+      <p class="empty-text">Aucune combinaison ajoutée</p>
+      <p class="empty-hint">Remplissez le formulaire ci-dessus pour créer vos associations Cursus → Niveau → Filière</p>
+    </div>
+  }
+
+</div>

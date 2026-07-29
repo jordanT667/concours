@@ -35,30 +35,16 @@
         <div class="suivi-form-grid">
 
           <div class="champ-groupe">
-            <label class="champ-label">Numéro de dossier</label>
+            <label class="champ-label">Matricule</label>
             <input
               type="text"
               class="champ-input"
-              [class.invalid]="isInvalid('numeroDossier')"
-              formControlName="numeroDossier"
-              placeholder="Ex : ENSTMO-2026-00123"
+              [class.invalid]="isInvalid('matricule')"
+              formControlName="matricule"
+              placeholder="Ex : 26E00001"
             />
-            @if (isInvalid('numeroDossier')) {
-              <span class="champ-erreur">Numéro de dossier requis</span>
-            }
-          </div>
-
-          <div class="champ-groupe">
-            <label class="champ-label">Adresse e-mail</label>
-            <input
-              type="email"
-              class="champ-input"
-              [class.invalid]="isInvalid('email')"
-              formControlName="email"
-              placeholder="votre@email.com"
-            />
-            @if (isInvalid('email')) {
-              <span class="champ-erreur">Email valide requis</span>
+            @if (isInvalid('matricule')) {
+              <span class="champ-erreur">Matricule requis</span>
             }
           </div>
 
@@ -102,71 +88,60 @@
         <div class="suivi-card dossier-info-card">
           <div class="dossier-info-header">
             <div class="dossier-avatar">
-              {{ dossier.nomComplet.split(' ')[0][0] }}{{ dossier.nomComplet.split(' ')[1]?.[0] ?? '' }}
+              {{ dossier.nom[0] }}{{ dossier.prenom[0] }}
             </div>
             <div>
-              <p class="dossier-nom">{{ dossier.nomComplet }}</p>
-              <p class="dossier-num">N° {{ dossier.numeroDossier }}</p>
+              <p class="dossier-nom">{{ nomComplet }}</p>
+              <p class="dossier-num">Matricule : {{ dossier.matricule }}</p>
             </div>
-            <span class="dossier-badge" [class]="'badge-' + dossier.statut">
-              @switch (dossier.statut) {
-                @case ('SOUMISE')               { Soumise }
-                @case ('EN_COURS_VERIFICATION') { En vérification }
-                @case ('VALIDEE')               { Validée ✓ }
-                @case ('REJETEE')               { Rejetée }
+            <span class="dossier-badge" [class]="'badge-' + dossier.etatPreins">
+              @switch (dossier.etatPreins) {
+                @case ('E') { Soumise }
+                @case ('V') { En vérification }
+                @case ('S') { Sélectionné }
+                @case ('R') { Rejeté }
               }
             </span>
           </div>
           <div class="dossier-meta">
             <div class="meta-item">
-              <span class="meta-label">Filière</span>
-              <span class="meta-val">{{ dossier.filiere }}</span>
+              <span class="meta-label">Formation</span>
+              <span class="meta-val">{{ dossier.choixFormation1 ?? '—' }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">Centre</span>
-              <span class="meta-val">{{ dossier.centre }}</span>
+              <span class="meta-label">Centre d'examen</span>
+              <span class="meta-val">{{ dossier.centredexamen ?? '—' }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">Date d'inscription</span>
-              <span class="meta-val">{{ dossier.dateInscription | date:'dd/MM/yyyy' }}</span>
+              <span class="meta-label">Date de préinscription</span>
+              <span class="meta-val">{{ dossier.datePreins | date:'dd/MM/yyyy' }}</span>
             </div>
-            @if (dossier.dateValidation) {
-              <div class="meta-item">
-                <span class="meta-label">Date de validation</span>
-                <span class="meta-val">{{ dossier.dateValidation | date:'dd/MM/yyyy' }}</span>
-              </div>
-            }
           </div>
-          @if (dossier.motifRejet) {
-            <div class="motif-rejet">
-              <strong>Motif du rejet :</strong> {{ dossier.motifRejet }}
-            </div>
-          }
         </div>
 
         <!-- Timeline -->
         <div class="suivi-card timeline-card">
           <h3 class="timeline-titre">Progression du dossier</h3>
           <div class="timeline">
-            @for (etape of etapes; track etape.statut; let last = $last) {
+            @for (etape of etapes; track etape.etat; let last = $last) {
               <div class="timeline-item"
-                [class.done]="etapeActive(etape.statut)"
-                [class.current]="etapeCourante(etape.statut)"
-                [class.rejet]="etape.statut === 'REJETEE' && dossier.statut === 'REJETEE'">
+                [class.done]="etapeActive(etape.etat)"
+                [class.current]="etapeCourante(etape.etat)"
+                [class.rejet]="etape.etat === 'R' && dossier.etatPreins === 'R'">
 
                 <div class="timeline-dot">
-                  @if (etapeActive(etape.statut) && !etapeCourante(etape.statut)) {
+                  @if (etapeActive(etape.etat) && !etapeCourante(etape.etat)) {
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                       stroke-width="3" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
                     </svg>
-                  } @else if (etapeCourante(etape.statut)) {
+                  } @else if (etapeCourante(etape.etat)) {
                     <span class="dot-pulse"></span>
                   }
                 </div>
 
                 @if (!last) {
-                  <div class="timeline-line" [class.done]="etapeActive(etape.statut)"></div>
+                  <div class="timeline-line" [class.done]="etapeActive(etape.etat)"></div>
                 }
 
                 <div class="timeline-content">
