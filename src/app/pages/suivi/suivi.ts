@@ -1,21 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { PreinscriptionService } from '../../core/services/preinscription.service';
+import { PreinscriptionDto } from '../../core/models/preinscription.models';
 
-type StatutDossier = 'SOUMISE' | 'EN_COURS_VERIFICATION' | 'VALIDEE' | 'REJETEE';
-
-interface SuiviDossier {
-  numeroDossier: string;
-  nomComplet: string;
-  filiere: string;
-  centre: string;
-  statut: StatutDossier;
-  dateInscription: string;
-  dateValidation?: string;
-  motifRejet?: string;
-}
+type EtatPreins = 'E' | 'S' | 'R';
 
 @Component({
   selector: 'app-suivi',
@@ -26,25 +15,24 @@ interface SuiviDossier {
 })
 export class Suivi {
   form: FormGroup;
-  dossier: SuiviDossier | null = null;
+  dossier: PreinscriptionDto | null = null;
   chargement = false;
   erreur = '';
 
-  readonly etapes: { statut: StatutDossier; label: string; desc: string }[] = [
-    { statut: 'SOUMISE',               label: 'Dossier soumis',        desc: 'Votre dossier a été reçu avec succès.' },
-    { statut: 'EN_COURS_VERIFICATION', label: 'Vérification en cours', desc: 'Un agent examine votre dossier.' },
-    { statut: 'VALIDEE',               label: 'Dossier validé',        desc: 'Votre inscription est confirmée.' },
-    { statut: 'REJETEE',               label: 'Dossier rejeté',        desc: 'Votre dossier n\'a pas été retenu.' },
+  readonly etapes: { etat: string; label: string; desc: string }[] = [
+    { etat: 'E', label: 'Dossier soumis',        desc: 'Votre dossier a été reçu avec succès.' },
+    { etat: 'V', label: 'Vérification en cours',  desc: 'Un agent examine votre dossier.' },
+    { etat: 'S', label: 'Sélectionné',            desc: 'Votre inscription est confirmée.' },
+    { etat: 'R', label: 'Rejeté',                 desc: 'Votre dossier n\'a pas été retenu.' },
   ];
 
-  private readonly ORDRE: Record<StatutDossier, number> = {
-    SOUMISE: 0, EN_COURS_VERIFICATION: 1, VALIDEE: 2, REJETEE: 2
+  private readonly ORDRE: Record<string, number> = {
+    E: 0, V: 1, S: 2, R: 2
   };
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private preinscriptionService: PreinscriptionService) {
     this.form = this.fb.group({
-      numeroDossier: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      matricule: ['', Validators.required],
     });
   }
 
@@ -53,27 +41,35 @@ export class Suivi {
     this.chargement = true;
     this.erreur = '';
     this.dossier = null;
-    const { numeroDossier, email } = this.form.value;
-    this.http.get<SuiviDossier>(
-      `${environment.apiUrl}/inscriptions/suivi?numeroDossier=${encodeURIComponent(numeroDossier)}&email=${encodeURIComponent(email)}`
-    ).subscribe({
+    const { matricule } = this.form.value;
+    this.preinscriptionService.getByMatricule(matricule).subscribe({
       next: data => { this.dossier = data; this.chargement = false; },
-      error: err  => {
+      error: err => {
         this.chargement = false;
         this.erreur = err.status === 404
-          ? 'Aucun dossier trouvé avec ces informations.'
+          ? 'Aucun dossier trouvé avec ce matricule.'
           : 'Erreur lors de la recherche. Veuillez réessayer.';
       }
     });
   }
 
-  etapeActive(statut: StatutDossier): boolean {
-    if (!this.dossier) return false;
-    return this.ORDRE[statut] <= this.ORDRE[this.dossier.statut];
+  get nomComplet(): string {
+    if (!this.dossier) return '';
+    return `${this.dossier.nom} ${this.dossier.prenom}`.trim();
   }
 
-  etapeCourante(statut: StatutDossier): boolean {
-    return this.dossier?.statut === statut;
+  get etatLabel(): string {
+    const e = this.etapes.find(x => x.etat === this.dossier?.etatPreins);
+    return e?.label ?? 'En attente';
+  }
+
+  etapeActive(etat: string): boolean {
+    if (!this.dossier?.etatPreins) return false;
+    return (this.ORDRE[etat] ?? 99) <= (this.ORDRE[this.dossier.etatPreins] ?? 0);
+  }
+
+  etapeCourante(etat: string): boolean {
+    return this.dossier?.etatPreins === etat;
   }
 
   isInvalid(field: string): boolean {

@@ -17,4 +17,8 @@ export class DiplomeAdminService {
   desactiver(id: string): Observable<void> { return this.http.patch<void>(`${this.API}/${id}/desactiver`, {}); }
   activer(id: string): Observable<void> { return this.http.patch<void>(`${this.API}/${id}/activer`, {}); }
   delete(id: string): Observable<void> { return this.http.delete<void>(`${this.API}/${id}`); }
+  updateAdmissions(idCursus: string, codeNiveau: string, diplomeIds: string[]): Observable<void> {
+    const params = new HttpParams().set('idCursus', idCursus).set('codeNiveau', codeNiveau);
+    return this.http.put<void>(`${this.API}/admissions`, diplomeIds, { params });
+  }
 }

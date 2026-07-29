@@ -125,6 +125,11 @@ export const routes: Routes = [
             .then(m => m.Centres)
       },
       {
+        path: 'g-cursus',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () => import('./admin/g-cursus/g-cursus').then(m => m.GCursus)
+      },
+      {
         path: 'cursus',
         canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/cursus/cursus').then(m => m.CursusAdmin)

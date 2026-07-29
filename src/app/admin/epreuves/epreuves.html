@@ -42,9 +42,7 @@
   </div>
 
   <div class="table-wrapper">
-    @if (isLoading) {
-      <div class="loading">Chargement...</div>
-    } @else if (hasSearched) {
+    @if (hasSearched) {
       <table class="table">
         <thead><tr>
           <th style="width:40px;"></th><th>Code matière</th><th>Libellé</th>
@@ -66,7 +64,7 @@
     }
   </div>
 
-  @if (hasSearched && !isLoading) {
+  @if (hasSearched) {
     <div class="modal-footer" style="justify-content:flex-start; padding:0; border:none;">
       <button class="btn-sauvegarder" (click)="enregistrer()" [disabled]="enSoumission">
         {{ enSoumission ? 'Enregistrement...' : 'Enregistrer' }}

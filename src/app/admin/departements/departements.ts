@@ -86,7 +86,7 @@ export class DepartementsAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
     });
   }
 

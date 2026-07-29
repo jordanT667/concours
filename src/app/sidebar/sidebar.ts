@@ -19,14 +19,12 @@ const ALL_MENU_ITEMS: MenuItem[] = [
 
   { label: 'Référentiels', route: '', icone: '', separateur: true, adminOnly: true },
 
+  { label: 'G_Cursus',       route: '/admin/g-cursus',     icone: 'layer-group',     adminOnly: true },
   { label: 'Pays',           route: '/admin/pays',         icone: 'globe',           adminOnly: true },
   { label: 'Régions',        route: '/admin/regions',      icone: 'map-pin',         adminOnly: true },
   { label: 'Départements',   route: '/admin/departements', icone: 'location',        adminOnly: true },
-  { label: 'Cursus',         route: '/admin/cursus',       icone: 'academic-cap',    adminOnly: true },
-  { label: 'Niveaux',        route: '/admin/niveaux',      icone: 'bars',            adminOnly: true },
   { label: 'Diplômes',       route: '/admin/diplomes',     icone: 'document',        adminOnly: true },
   { label: 'Écoles',         route: '/admin/ecoles',       icone: 'building-library',adminOnly: true },
-  { label: 'Filières',       route: '/admin/filieres',     icone: 'book',            adminOnly: true },
   { label: 'Centres',        route: '/admin/centres',      icone: 'building',        adminOnly: true },
   { label: 'Séries',         route: '/admin/series',       icone: 'document',        adminOnly: true },
   { label: 'Banques',        route: '/admin/banques',      icone: 'building-library',adminOnly: true },

@@ -97,7 +97,7 @@ export class EpreuvesAdmin implements OnInit {
       idMatieres: this.selectedMatieres
     }).subscribe({
       next: () => { this.enSoumission = false; this.rechercher(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
     });
   }
 
@@ -108,7 +108,7 @@ export class EpreuvesAdmin implements OnInit {
   confirmerSuppression(): void {
     this.svc.delete(this.codefilere, this.idcursus, this.codeNiveau, this.iddiplome).subscribe({
       next: () => { this.confirmOuverte = false; this.matieres = []; this.selectedMatieres = []; this.hasSearched = false; },
-      error: (err) => { this.erreur = err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 

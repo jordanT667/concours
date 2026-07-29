@@ -33,10 +33,7 @@
     </div>
   }
 
-  @if (isLoading) {
-    <div class="loading">Chargement des filières...</div>
-  } @else {
-    <div class="filieres-grille">
+  <div class="filieres-grille">
       @for (f of filieresFiltrees; track f.codeFiliere) {
         <div class="filiere-card">
           <div class="filiere-top">
@@ -69,7 +66,6 @@
         </div>
       }
     </div>
-  }
 
   @if (formulaireOuvert) {
     <div class="modal-overlay" (click)="fermerFormulaire()">

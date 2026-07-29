@@ -73,7 +73,7 @@ export class RegionsAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
     });
   }
 
@@ -87,7 +87,7 @@ export class RegionsAdmin implements OnInit {
     if (!this.regionASupprimer) return;
     this.svc.delete(this.regionASupprimer.codeRegion).subscribe({
       next: () => { this.confirmOuverte = false; this.regionASupprimer = null; this.charger(); },
-      error: (err) => { this.erreur = err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 
