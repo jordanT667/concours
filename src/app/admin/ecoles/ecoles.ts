@@ -77,7 +77,7 @@ export class EcolesAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err: any) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err: any) => { this.enSoumission = false; this.erreur = err?.message ?? 'Une erreur est survenue.'; }
     });
   }
 

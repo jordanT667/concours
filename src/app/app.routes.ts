@@ -8,7 +8,7 @@ import { StepCursus } from './pages/wizard/step-cursus/step-cursus';
 import { StepContacts } from './pages/wizard/step-contacts/step-contacts';
 import { StepFinish } from './pages/wizard/step-finish/step-finish';
 import { Login } from './auth/login/login';
-import { authGuard, adminOnlyGuard } from './core/guards/guard-guard';
+import { authGuard, adminOnlyGuard, etudiantGuard } from './core/guards/guard-guard';
 import { Layout } from './layout/layout';
 import {
   wizardIdentificationGuard,
@@ -45,6 +45,13 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/suivi/suivi').then(m => m.Suivi)
   },
 
+  // Espace étudiant (protégé)
+  {
+    path: 'espace',
+    canActivate: [etudiantGuard],
+    loadComponent: () => import('./pages/etudiant/etudiant-dashboard').then(m => m.EtudiantDashboard)
+  },
+
 
   // Routes admin protégées par le guard
   {
@@ -57,13 +64,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/dashboard/dashboard')
             .then(m => m.Dashboard)
-      },
-      {
-        path: 'filieres',
-        canActivate: [adminOnlyGuard],
-        loadComponent: () =>
-          import('./admin/filieres/filieres')
-            .then(m => m.Filieres)
       },
       {
         path: 'ecoles',
@@ -125,7 +125,7 @@ export const routes: Routes = [
             .then(m => m.Centres)
       },
       {
-        path: 'g-cursus',
+        path: 'filiere',
         canActivate: [adminOnlyGuard],
         loadComponent: () => import('./admin/g-cursus/g-cursus').then(m => m.GCursus)
       },

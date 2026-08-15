@@ -7,8 +7,8 @@
         <i class="fas fa-layer-group"></i>
       </div>
       <div>
-        <h2 class="page-titre">G_Cursus</h2>
-        <p class="page-sous-titre">Création d'une offre de formation complète</p>
+        <h2 class="page-titre">Filières</h2>
+        <p class="page-sous-titre">Gestion des offres de formation (Cursus → Niveau → Filière)</p>
       </div>
     </div>
     <div class="header-stats">
@@ -23,9 +23,9 @@
         <span class="stat-label">Niveaux</span>
       </div>
       <div class="stat-chip accent">
-        <i class="fas fa-list-check stat-icon"></i>
-        <span class="stat-number">{{ lignes.length }}</span>
-        <span class="stat-label">Ajoutés</span>
+        <i class="fas fa-code-branch stat-icon"></i>
+        <span class="stat-number">{{ allFilieres.length }}</span>
+        <span class="stat-label">Filières</span>
       </div>
     </div>
   </div>
@@ -61,17 +61,17 @@
 
     <div class="form-body">
 
-        <!-- ÉTAPE 1 : CURSUS -->
+        <!-- ÉTAPE 1 : CURSUS (select) -->
         <div class="form-step">
           <div class="step-indicator">
-            <span class="step-number" [class.step-done]="formCursus.code && formCursus.libelle">
-              @if (formCursus.code && formCursus.libelle) {
+            <span class="step-number" [class.step-done]="formCursus.code">
+              @if (formCursus.code) {
                 <i class="fas fa-check"></i>
               } @else {
                 1
               }
             </span>
-            <div class="step-connector" [class.connector-done]="formCursus.code && formCursus.libelle"></div>
+            <div class="step-connector" [class.connector-done]="formCursus.code"></div>
           </div>
           <div class="step-content">
             <div class="step-header">
@@ -79,31 +79,30 @@
               <label class="step-label">Cursus <span class="requis">*</span></label>
             </div>
             <div class="step-fields">
-              <div class="field-group">
-                <label class="field-label">Code</label>
-                <input type="text" class="field-input code-input" placeholder="ex: ING"
-                  [(ngModel)]="formCursus.code" maxlength="10" (input)="formCursus.code = formCursus.code.toUpperCase()"/>
-              </div>
               <div class="field-group field-grow">
-                <label class="field-label">Libellé</label>
-                <input type="text" class="field-input" placeholder="ex: Ingénierie"
-                  [(ngModel)]="formCursus.libelle"/>
+                <label class="field-label">Sélectionner un cursus</label>
+                <select class="field-input" [(ngModel)]="formCursus.code" (change)="onCursusSelect()" title="Cursus">
+                  <option value="">-- Choisir un cursus --</option>
+                  @for (c of allCursus; track c.idCursus) {
+                    <option [value]="c.idCursus">{{ c.idCursus }} — {{ c.libelle }}</option>
+                  }
+                </select>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ÉTAPE 2 : NIVEAU -->
-        <div class="form-step" [class.step-disabled]="!formCursus.code || !formCursus.libelle">
+        <!-- ÉTAPE 2 : NIVEAU (select) -->
+        <div class="form-step" [class.step-disabled]="!formCursus.code">
           <div class="step-indicator">
-            <span class="step-number" [class.step-done]="formNiveau.code && formNiveau.libelle">
-              @if (formNiveau.code && formNiveau.libelle) {
+            <span class="step-number" [class.step-done]="formNiveau.code">
+              @if (formNiveau.code) {
                 <i class="fas fa-check"></i>
               } @else {
                 2
               }
             </span>
-            <div class="step-connector" [class.connector-done]="formNiveau.code && formNiveau.libelle"></div>
+            <div class="step-connector" [class.connector-done]="formNiveau.code"></div>
           </div>
           <div class="step-content">
             <div class="step-header">
@@ -111,24 +110,22 @@
               <label class="step-label">Niveau <span class="requis">*</span></label>
             </div>
             <div class="step-fields">
-              <div class="field-group">
-                <label class="field-label">Code</label>
-                <input type="text" class="field-input code-input" placeholder="ex: M1"
-                  [(ngModel)]="formNiveau.code" maxlength="10" (input)="formNiveau.code = formNiveau.code.toUpperCase()"
-                  [disabled]="!formCursus.code || !formCursus.libelle"/>
-              </div>
               <div class="field-group field-grow">
-                <label class="field-label">Libellé</label>
-                <input type="text" class="field-input" placeholder="ex: Master 1"
-                  [(ngModel)]="formNiveau.libelle"
-                  [disabled]="!formCursus.code || !formCursus.libelle"/>
+                <label class="field-label">Sélectionner un niveau</label>
+                <select class="field-input" [(ngModel)]="formNiveau.code" (change)="onNiveauSelect()"
+                  [disabled]="!formCursus.code" title="Niveau">
+                  <option value="">-- Choisir un niveau --</option>
+                  @for (n of allNiveaux; track n.codeNiveau) {
+                    <option [value]="n.codeNiveau">{{ n.codeNiveau }} — {{ n.libelleNiveau }}</option>
+                  }
+                </select>
               </div>
             </div>
           </div>
         </div>
 
         <!-- ÉTAPE 3 : FILIÈRE -->
-        <div class="form-step" [class.step-disabled]="!formNiveau.code || !formNiveau.libelle">
+        <div class="form-step" [class.step-disabled]="!formNiveau.code">
           <div class="step-indicator">
             <span class="step-number" [class.step-done]="formFiliere.code && formFiliere.libelleFr">
               @if (formFiliere.code && formFiliere.libelleFr) {
@@ -148,13 +145,13 @@
                 <label class="field-label">Code</label>
                 <input type="text" class="field-input code-input" placeholder="ex: IA"
                   [(ngModel)]="formFiliere.code" maxlength="10" (input)="formFiliere.code = formFiliere.code.toUpperCase()"
-                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+                  [disabled]="!formNiveau.code"/>
               </div>
               <div class="field-group field-grow">
                 <label class="field-label">Libellé FR</label>
                 <input type="text" class="field-input" placeholder="ex: Intelligence Artificielle"
                   [(ngModel)]="formFiliere.libelleFr"
-                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+                  [disabled]="!formNiveau.code"/>
               </div>
             </div>
             <div class="step-fields step-fields-full">
@@ -162,7 +159,7 @@
                 <label class="field-label">Libellé EN</label>
                 <input type="text" class="field-input" placeholder="ex: Artificial Intelligence"
                   [(ngModel)]="formFiliere.libelleEn"
-                  [disabled]="!formNiveau.code || !formNiveau.libelle"/>
+                  [disabled]="!formNiveau.code"/>
               </div>
             </div>
           </div>
@@ -177,10 +174,10 @@
             <i class="fas fa-rotate-left"></i> Annuler
           </button>
         }
-        <button type="button" class="btn-reset" (click)="resetForm()" [disabled]="!formCursus.code && !formCursus.libelle">
+        <button type="button" class="btn-reset" (click)="resetForm()" [disabled]="!formCursus.code">
           <i class="fas fa-eraser"></i> Effacer
         </button>
-        <button type="button" class="btn-ajouter" (click)="ajouter()" [disabled]="enSoumission || !formCursus.code || !formCursus.libelle || !formNiveau.code || !formNiveau.libelle">
+        <button type="button" class="btn-ajouter" (click)="ajouter()" [disabled]="enSoumission || !formCursus.code || !formNiveau.code">
           @if (enSoumission) {
             <i class="fas fa-spinner fa-spin"></i> Enregistrement...
           } @else {
@@ -191,15 +188,30 @@
       </div>
   </div>
 
-  <!-- Tableau récapitulatif -->
-  @if (lignes.length > 0) {
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="loading-section">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Chargement des données...</span>
+    </div>
+  }
+
+  <!-- Tableau des filières existantes -->
+  @if (!isLoading && lignes.length > 0) {
     <div class="recap-section">
       <div class="recap-header">
         <div class="recap-title-row">
           <i class="fas fa-table-list recap-icon"></i>
-          <h3 class="recap-titre">Récapitulatif des combinaisons</h3>
+          <h3 class="recap-titre">Combinaisons existantes</h3>
         </div>
-        <span class="recap-badge">{{ lignes.length }} élément(s)</span>
+        <div class="recap-actions">
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Rechercher..."
+              [(ngModel)]="recherche" (input)="appliquerFiltre()"/>
+          </div>
+          <span class="recap-badge">{{ lignesFiltrees.length }} / {{ lignes.length }}</span>
+        </div>
       </div>
 
       <div class="recap-table-wrapper">
@@ -214,20 +226,28 @@
             </tr>
           </thead>
           <tbody>
-            @for (l of lignes; track l.id; let i = $index) {
+            @for (l of lignesFiltrees; track l.id; let i = $index) {
               <tr [class.tr-editing]="editIndex === i">
                 <td class="td-num">{{ i + 1 }}</td>
                 <td>
-                  <div class="cell-double">
-                    <span class="cell-code cursus-code">{{ l.cursusCode }}</span>
-                    <span class="cell-libelle">{{ l.cursusLibelle }}</span>
-                  </div>
+                  @if (l.cursusCode) {
+                    <div class="cell-double">
+                      <span class="cell-code cursus-code">{{ l.cursusCode }}</span>
+                      <span class="cell-libelle">{{ l.cursusLibelle }}</span>
+                    </div>
+                  } @else {
+                    <span class="no-data">—</span>
+                  }
                 </td>
                 <td>
-                  <div class="cell-double">
-                    <span class="cell-code niveau-code">{{ l.niveauCode }}</span>
-                    <span class="cell-libelle">{{ l.niveauLibelle }}</span>
-                  </div>
+                  @if (l.niveauCode) {
+                    <div class="cell-double">
+                      <span class="cell-code niveau-code">{{ l.niveauCode }}</span>
+                      <span class="cell-libelle">{{ l.niveauLibelle }}</span>
+                    </div>
+                  } @else {
+                    <span class="no-data">—</span>
+                  }
                 </td>
                 <td>
                   @if (l.filiereCode) {
@@ -253,13 +273,13 @@
         </table>
       </div>
     </div>
-  } @else {
+  } @else if (!isLoading && lignes.length === 0 && allCursus.length === 0 && allNiveaux.length === 0) {
     <div class="empty-state">
       <div class="empty-illustration">
         <i class="fas fa-folder-open"></i>
       </div>
-      <p class="empty-text">Aucune combinaison ajoutée</p>
-      <p class="empty-hint">Remplissez le formulaire ci-dessus pour créer vos associations Cursus → Niveau → Filière</p>
+      <p class="empty-text">Aucune filière enregistrée</p>
+      <p class="empty-hint">Utilisez le formulaire ci-dessus pour créer des associations Cursus → Niveau → Filière</p>
     </div>
   }
 

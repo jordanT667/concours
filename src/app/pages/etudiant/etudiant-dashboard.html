@@ -1,0 +1,19 @@
+<div class="ed-page">
+
+  @if (erreur) {
+    <div class="ed-center">
+      <p class="ed-erreur">{{ erreur }}</p>
+      <button type="button" class="ed-btn" (click)="chargerDossier()">Réessayer</button>
+    </div>
+  } @else if (dossier) {
+    <div class="ed-center">
+      <div class="ed-card">
+        <div class="ed-avatar">{{ dossier.nom[0] }}{{ dossier.prenom[0] }}</div>
+        <h1 class="ed-nom">{{ dossier.nom }} {{ dossier.prenom }}</h1>
+        <span class="ed-matricule">{{ dossier.matricule }}</span>
+        <button type="button" class="ed-logout" (click)="deconnexion()">Déconnexion</button>
+      </div>
+    </div>
+  }
+
+</div>

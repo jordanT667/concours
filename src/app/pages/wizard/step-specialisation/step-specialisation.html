@@ -4,276 +4,306 @@
     <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
   </div>
 
+  @if (chargement) {
+    <div class="chargement-overlay">
+      <div class="spinner-lg"></div>
+      <p>Chargement des données...</p>
+    </div>
+  }
+
   @if (erreurChargement) {
     <div class="alerte-erreur">
       <i class="fa-solid fa-triangle-exclamation"></i> {{ erreurChargement }}
     </div>
   }
 
-  <div class="grille">
+  <!-- SECTION 1 : CHOIX DE FORMATION -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-graduation-cap"></i> Filière</legend>
+    <div class="grille">
 
-    <!-- ═══ LIGNE 1 : Cursus / Niveau / Domaine / Diplôme ═══ -->
-    <div class="champ col3">
-      <label class="titre">Cursus <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('cursus')">
-        <i class="fa-solid fa-circle-check ico"></i>
-        <select formControlName="cursus" class="entr" (change)="onCursusChange($event)">
-          <option value="">--- Choisir un seul --</option>
-          @for (c of cursusOptions; track c.idCursus) {
-            <option [value]="c.idCursus">{{ c.libelle }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('cursus')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Niveau <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('niveau')">
-        <i class="fa-solid fa-briefcase ico"></i>
-        <select formControlName="niveau" class="entr" (change)="onNiveauChange($event)">
-          <option value="">-- Choisir --</option>
-          @for (n of niveauxFiltres; track n.codeNiveau) {
-            <option [value]="n.codeNiveau">{{ n.libelleNiveau }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('niveau')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Domaine de formation <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('domaineFormation')">
-        <i class="fa-solid fa-briefcase ico"></i>
-        <select formControlName="domaineFormation" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (d of domainesFiltres; track d.codeFiliere) {
-            <option [value]="d.codeFiliere">{{ d.libelleFiliereFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('domaineFormation')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Diplôme d'admission <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('diplomeAdmission')">
-        <i class="fa-solid fa-book-open ico"></i>
-        <select formControlName="diplomeAdmission" class="entr" (change)="onDiplomeChange($event)">
-          <option value="">-- Choisir --</option>
-          @for (d of diplomesAdmission; track d.idDiplome) {
-            <option [value]="d.idDiplome">{{ d.libelleFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('diplomeAdmission')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <!-- ═══ LIGNE 2 : Série / Mention / Année dip / Établissement ═══ -->
-    <div class="champ col3">
-      <label class="titre">Série diplôme d'admission <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('serieDiplome')">
-        <i class="fa-solid fa-book-open ico"></i>
-        <select formControlName="serieDiplome" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (s of seriesFiltrees; track s.idSerie) {
-            <option [value]="s.idSerie">{{ s.libelleFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('serieDiplome')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Mention diplôme d'admission <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('mentionDiplome')">
-        <i class="fa-solid fa-book-open ico"></i>
-        <select formControlName="mentionDiplome" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (m of mentionsOptions; track m.idMention) {
-            <option [value]="m.idMention">{{ m.libelleFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('mentionDiplome')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Année d'obtention Dip admission <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('anneeObtentionDip')">
-        <i class="fa-solid fa-calendar-days ico"></i>
-        <select formControlName="anneeObtentionDip" class="entr">
-          @for (a of anneesCourantes; track a) {
-            <option [value]="a">{{ a }}</option>
-          }
-        </select>
-      </div>
-    </div>
-
-    <div class="champ col3">
-      <label class="titre">Établissement d'obtention <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('etablissementObtention')">
-        <i class="fa-solid fa-building-columns ico"></i>
-        <input type="text" formControlName="etablissementObtention"
-               placeholder="saisir établissement du diplôme" class="entr"/>
-      </div>
-      @if (isInvalid('etablissementObtention')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <!-- ═══ LIGNE 3 : Pays / Année BEPC / Épreuve ═══ -->
-    <div class="champ col4">
-      <label class="titre">Pays d'obtention <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('paysObtention')">
-        <i class="fa-solid fa-flag ico"></i>
-        <select formControlName="paysObtention" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (p of paysOptions; track p.codePays) {
-            <option [value]="p.codePays">{{ p.libelleFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('paysObtention')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col4">
-      <label class="titre">Année obtention BEPC/GCEOL/CAP/equiv <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('anneeBEPC')">
-        <i class="fa-solid fa-pencil ico"></i>
-        <select formControlName="anneeBEPC" class="entr">
-          @for (a of anneesBEPC; track a) {
-            <option [value]="a">{{ a }}</option>
-          }
-        </select>
-      </div>
-    </div>
-
-    <div class="champ col4">
-      <label class="titre">Choix épreuve écrite</label>
-      <div class="saisie">
-        <i class="fa-solid fa-briefcase ico"></i>
-        <select formControlName="choixEpreuve" class="entr">
-          <option value="RAS">RAS</option>
-          @for (e of epreuvesOptions; track e.idMatiere) {
-            <option [value]="e.idMatiere">{{ e.libelle }}</option>
-          }
-        </select>
-      </div>
-    </div>
-
-    <!-- ═══ LIGNE 4 : Centre concours / Centre dépôt / N° Reçu ═══ -->
-    <div class="champ col4">
-      <label class="titre">Choix Centre d'examen concours <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('centreConcours')">
-        <i class="fa-solid fa-pencil ico"></i>
-        <select formControlName="centreConcours" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (c of centresConcours; track c.idCexam) {
-            <option [value]="c.idCexam">{{ c.libeleFiliereFr }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('centreConcours')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col4">
-      <label class="titre">Centre dépôt dossier <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('centreDepotDossier')">
-        <i class="fa-solid fa-pencil ico"></i>
-        <select formControlName="centreDepotDossier" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (c of centresDepot; track c.idSiteDepot) {
-            <option [value]="c.idSiteDepot">{{ c.libelle }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('centreDepotDossier')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col4">
-      <label class="titre">N° Reçu CCA BANK <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('numeroRecuCCA')">
-        <i class="fa-solid fa-credit-card ico"></i>
-        <input type="text" formControlName="numeroRecuCCA"
-               placeholder="saisir n° reçu bancaire" class="entr"/>
-      </div>
-      @if (isInvalid('numeroRecuCCA')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <!-- ═══ LIGNE 5 : Banque / Image reçu ═══ -->
-    <div class="champ col6">
-      <label class="titre">Banque <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('banque')">
-        <i class="fa-solid fa-landmark ico"></i>
-        <select formControlName="banque" class="entr">
-          <option value="">Votre choix</option>
-          @for (b of banquesOptions; track b.idBanque) {
-            <option [value]="b.idBanque">{{ b.libelleBanque }}</option>
-          }
-        </select>
-      </div>
-      @if (isInvalid('banque')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col6">
-      <label class="titre">Image reçu bancaire <span class="req">*</span></label>
-
-      @if (!imagePreview) {
-        <div class="zone-charg" [class.upload-erreur]="isInvalid('imageRecu')">
-          <i class="fa-solid fa-image ico-charg"></i>
-          <span class="txt-charg">PNG ou JPG · Max 2 Mo · Sans accents dans le nom</span>
-          <label class="btn-charg">
-            <i class="fa-solid fa-folder-open"></i> Choisir un fichier
-            <input type="file" accept=".png,.jpg,.jpeg" (change)="onImageChange($event)" hidden/>
-          </label>
+      <div class="champ col4">
+        <label class="titre">Cursus <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('cursus')">
+          <i class="fa-solid fa-circle-check ico"></i>
+          <select formControlName="cursus" class="entr" (change)="onCursusChange($event)">
+            <option value="">-- Choisir un cursus --</option>
+            @for (c of cursusOptions; track c.idCursus) {
+              <option [value]="c.idCursus">{{ c.libelle }}</option>
+            }
+          </select>
         </div>
-      }
+        @if (isInvalid('cursus')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
 
-      @if (imagePreview) {
-        <div class="wrap-img">
-          <img [src]="imagePreview" alt="Aperçu reçu" class="img-prev"/>
-          <div class="info-img">
-            <i class="fa-solid fa-file-image"></i>
-            <span>{{ imageNom }}</span>
-            <button type="button" class="btn-sup" (click)="supprimerImage()">
-              <i class="fa-solid fa-xmark"></i> Supprimer
-            </button>
+      <div class="champ col4">
+        <label class="titre">Niveau <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('niveau')">
+          <i class="fa-solid fa-layer-group ico"></i>
+          <select formControlName="niveau" class="entr" (change)="onNiveauChange($event)">
+            <option value="">-- Choisir --</option>
+            @for (n of niveauxFiltres; track n.codeNiveau) {
+              <option [value]="n.codeNiveau">{{ n.libelleNiveau }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('niveau')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Filière <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('filiere')">
+          <i class="fa-solid fa-diagram-project ico"></i>
+          <select formControlName="filiere" class="entr">
+            <option value="">-- Choisir une filière --</option>
+            @for (f of filieresFiltrees; track f.codeFiliere) {
+              <option [value]="f.codeFiliere">{{ f.libelleFiliereFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('filiere')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- SECTION 2 : DIPLÔME D'ADMISSION -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-scroll"></i> Diplôme d'admission</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Diplôme d'admission <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('diplomeAdmission')">
+          <i class="fa-solid fa-book-open ico"></i>
+          <select formControlName="diplomeAdmission" class="entr" (change)="onDiplomeChange($event)">
+            <option value="">-- Choisir --</option>
+            @for (d of diplomesAdmission; track d.idDiplome) {
+              <option [value]="d.idDiplome">{{ d.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('diplomeAdmission')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Série <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('serieDiplome')">
+          <i class="fa-solid fa-list-ol ico"></i>
+          <select formControlName="serieDiplome" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (s of seriesFiltrees; track s.idSerie) {
+              <option [value]="s.idSerie">{{ s.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('serieDiplome')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Mention <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('mentionDiplome')">
+          <i class="fa-solid fa-award ico"></i>
+          <select formControlName="mentionDiplome" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (m of mentionsOptions; track m.idMention) {
+              <option [value]="m.idMention">{{ m.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('mentionDiplome')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col3">
+        <label class="titre">Année d'obtention <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('anneeObtentionDip')">
+          <i class="fa-solid fa-calendar-days ico"></i>
+          <select formControlName="anneeObtentionDip" class="entr">
+            @for (a of anneesCourantes; track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="champ col3">
+        <label class="titre">Pays d'obtention <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('paysObtention')">
+          <i class="fa-solid fa-flag ico"></i>
+          <select formControlName="paysObtention" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (p of paysOptions; track p.codePays) {
+              <option [value]="p.codePays">{{ p.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('paysObtention')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col3">
+        <label class="titre">Établissement <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('etablissementObtention')">
+          <i class="fa-solid fa-building-columns ico"></i>
+          <input type="text" formControlName="etablissementObtention"
+                 placeholder="établissement du diplôme" class="entr"/>
+        </div>
+        @if (isInvalid('etablissementObtention')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col3">
+        <label class="titre">Année BEPC/GCEOL <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('anneeBEPC')">
+          <i class="fa-solid fa-pencil ico"></i>
+          <select formControlName="anneeBEPC" class="entr">
+            @for (a of anneesBEPC; track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- SECTION 3 : CONCOURS -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-file-pen"></i> Concours</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Centre d'examen <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('centreConcours')">
+          <i class="fa-solid fa-building ico"></i>
+          <select formControlName="centreConcours" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (c of centresConcours; track c.idCexam) {
+              <option [value]="c.idCexam">{{ c.libeleFiliereFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('centreConcours')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Choix épreuve écrite</label>
+        <div class="saisie">
+          <i class="fa-solid fa-pen-to-square ico"></i>
+          <select formControlName="choixEpreuve" class="entr">
+            <option value="RAS">RAS</option>
+            @for (e of epreuvesOptions; track e.idMatiere) {
+              <option [value]="e.idMatiere">{{ e.libelle }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Site dépôt dossier <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('centreDepotDossier')">
+          <i class="fa-solid fa-box-archive ico"></i>
+          <select formControlName="centreDepotDossier" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (c of centresDepot; track c.idSiteDepot) {
+              <option [value]="c.idSiteDepot">{{ c.libelle }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('centreDepotDossier')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- SECTION 4 : PAIEMENT -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-credit-card"></i> Paiement</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Banque <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('banque')">
+          <i class="fa-solid fa-landmark ico"></i>
+          <select formControlName="banque" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (b of banquesOptions; track b.idBanque) {
+              <option [value]="b.idBanque">{{ b.libelleBanque }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('banque')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">N° Reçu CCA BANK <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('numeroRecuCCA')">
+          <i class="fa-solid fa-receipt ico"></i>
+          <input type="text" formControlName="numeroRecuCCA"
+                 placeholder="numéro reçu bancaire" class="entr"/>
+        </div>
+        @if (isInvalid('numeroRecuCCA')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Image reçu bancaire <span class="req">*</span></label>
+
+        @if (!imagePreview) {
+          <div class="zone-charg" [class.upload-erreur]="isInvalid('imageRecu')">
+            <i class="fa-solid fa-image ico-charg"></i>
+            <span class="txt-charg">PNG ou JPG · Max 2 Mo</span>
+            <label class="btn-charg">
+              <i class="fa-solid fa-folder-open"></i> Choisir
+              <input type="file" accept=".png,.jpg,.jpeg" (change)="onImageChange($event)" hidden/>
+            </label>
           </div>
-        </div>
-      }
+        }
 
-      @if (imageErreur) {
-        <span class="err">{{ imageErreur }}</span>
-      }
-      @if (isInvalid('imageRecu') && !imageErreur) {
-        <span class="err">Le reçu bancaire est obligatoire.</span>
-      }
+        @if (imagePreview) {
+          <div class="wrap-img">
+            <img [src]="imagePreview" alt="Aperçu reçu" class="img-prev"/>
+            <div class="info-img">
+              <i class="fa-solid fa-file-image"></i>
+              <span>{{ imageNom }}</span>
+              <button type="button" class="btn-sup" (click)="supprimerImage()">
+                <i class="fa-solid fa-xmark"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (imageErreur) {
+          <span class="err">{{ imageErreur }}</span>
+        }
+        @if (isInvalid('imageRecu') && !imageErreur) {
+          <span class="err">Le reçu bancaire est obligatoire.</span>
+        }
+      </div>
+
     </div>
-
-  </div>
+  </fieldset>
 
   <div class="wizard-footer">
     <button class="back" type="button" (click)="onBack()">&lsaquo; PRÉCÉDENT</button>

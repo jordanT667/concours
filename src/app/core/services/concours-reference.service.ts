@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { PaysDto } from '../models/pays.models';
 import {
@@ -42,7 +43,11 @@ export class ConcoursReferenceService {
     return this.http.get<NiveauDto[]>(`${this.BASE}/niveaux`);
   }
 
-  getDiplomes(idCursus = '*', codeNiveau = '*'): Observable<DiplomeDto[]> {
+  getAllDiplomes(): Observable<DiplomeDto[]> {
+    return this.http.get<DiplomeDto[]>(`${this.BASE}/alldiplomes`);
+  }
+
+  getDiplomes(idCursus: string, codeNiveau: string): Observable<DiplomeDto[]> {
     const params = new HttpParams()
       .set('idCursus', idCursus)
       .set('codeNiveau', codeNiveau);
@@ -50,10 +55,12 @@ export class ConcoursReferenceService {
   }
 
   getFilieres(idCursus = '*', codeNiveau = '*'): Observable<FiliereDto[]> {
-    const params = new HttpParams()
-      .set('idCursus', idCursus)
-      .set('codeNiveau', codeNiveau);
-    return this.http.get<FiliereDto[]>(`${this.BASE}/searchfiliere`, { params });
+    return this.http.get<FiliereDto[]>(`${this.BASE}/filieres`).pipe(
+      map(filieres => filieres.filter(f =>
+        (idCursus === '*' || f.idCursus === idCursus) &&
+        (codeNiveau === '*' || f.codeNiveau === codeNiveau)
+      ))
+    );
   }
 
   getEcoles(): Observable<EcoleDto[]> {

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InscriptionService } from '../../../core/services/inscription';
-import { Inscription, StatutInscription } from '../../../core/models/inscription.models';
+import { PreinscriptionService } from '../../../core/services/preinscription.service';
+import { AdminDataService } from '../../services/admin-data.service';
+import { PreinscriptionDto } from '../../../core/models/preinscription.models';
 
 @Component({
   selector: 'app-inscription-detail',
@@ -13,16 +14,24 @@ import { Inscription, StatutInscription } from '../../../core/models/inscription
 })
 export class InscriptionDetail implements OnInit {
 
-  inscription: Inscription | null = null;
-  isLoading = true;
+  ins: PreinscriptionDto | null = null;
+  chargement = true;
   erreur = '';
   private currentId = 0;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private inscriptionService: InscriptionService
+    private preinscriptionService: PreinscriptionService,
+    private adminData: AdminDataService
   ) {}
+
+  get anneeAcademique(): string {
+    const y = new Date().getFullYear();
+    const m = new Date().getMonth();
+    const start = m >= 7 ? y : y - 1;
+    return `${start}/${start + 1}`;
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -31,41 +40,33 @@ export class InscriptionDetail implements OnInit {
       return;
     }
     this.currentId = id;
-    this.charger(id);
+    this.charger();
   }
 
-  reessayer(): void {
-    this.charger(this.currentId);
-  }
-
-  charger(id: number): void {
-    this.isLoading = true;
+  charger(): void {
+    this.chargement = true;
     this.erreur = '';
-    this.inscriptionService.getById(id).subscribe({
-      next: (data) => {
-        this.inscription = data;
-        this.isLoading = false;
+    this.adminData.getById(this.currentId, this.anneeAcademique).subscribe({
+      next: (found) => {
+        this.ins = found ?? null;
+        if (!this.ins) this.erreur = 'Inscription introuvable.';
+        this.chargement = false;
       },
       error: () => {
         this.erreur = 'Impossible de charger cette inscription.';
-        this.isLoading = false;
+        this.chargement = false;
       }
     });
   }
 
-  valider(): void {
-    if (!this.inscription) return;
-    this.inscriptionService.updateStatut(this.inscription.id, { statut: 'VALIDEE' }).subscribe({
-      next: (updated) => { this.inscription = updated; },
-      error: () => { this.erreur = 'Erreur lors de la validation.'; }
-    });
-  }
-
-  rejeter(): void {
-    if (!this.inscription) return;
-    this.inscriptionService.updateStatut(this.inscription.id, { statut: 'REJETEE' }).subscribe({
-      next: (updated) => { this.inscription = updated; },
-      error: () => { this.erreur = 'Erreur lors du rejet.'; }
+  changerEtat(etat: string): void {
+    if (!this.ins?.idPreins) return;
+    this.preinscriptionService.updateEtat(this.ins.idPreins, etat).subscribe({
+      next: () => {
+        this.ins!.etatPreins = etat;
+        this.adminData.invalidate();
+      },
+      error: () => { this.erreur = `Erreur lors du changement d'état.`; }
     });
   }
 
@@ -73,23 +74,22 @@ export class InscriptionDetail implements OnInit {
     this.router.navigate(['/admin/inscriptions']);
   }
 
-  libelleStatut(statut: StatutInscription): string {
-    const map: Record<StatutInscription, string> = {
-      'SOUMISE': 'Soumise',
-      'EN_COURS_VERIFICATION': 'En vérification',
-      'VALIDEE': 'Validée',
-      'REJETEE': 'Rejetée'
-    };
-    return map[statut];
+  etatLibelle(etat?: string): string {
+    switch (etat) {
+      case 'E': return 'Soumis';
+      case 'V': return 'Vérification';
+      case 'S': return 'Sélectionné';
+      case 'R': return 'Rejeté';
+      default: return '—';
+    }
   }
 
-  couleurStatut(statut: StatutInscription): string {
-    const map: Record<StatutInscription, string> = {
-      'SOUMISE': 'badge-orange',
-      'EN_COURS_VERIFICATION': 'badge-bleu',
-      'VALIDEE': 'badge-vert',
-      'REJETEE': 'badge-rouge'
-    };
-    return map[statut];
+  etatCouleur(etat?: string): string {
+    switch (etat) {
+      case 'S': return 'badge-vert';
+      case 'R': return 'badge-rouge';
+      case 'V': return 'badge-bleu';
+      default: return 'badge-orange';
+    }
   }
 }

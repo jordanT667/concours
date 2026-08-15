@@ -1,4 +1,4 @@
-/* 
+/*
    PAGE CURSUS
  */
 .cursus {
@@ -6,7 +6,26 @@
     flex-direction: column;
     gap: 16px;
     padding: 8px 0 8px;
+}
 
+/*
+   SECTIONS
+ */
+.section {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px 20px 20px;
+    margin-bottom: 20px;
+}
+
+.section-titre {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2980b9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 6px;
 }
 
 /* 

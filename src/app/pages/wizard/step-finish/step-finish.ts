@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { timeout } from 'rxjs/operators';
-import jsPDF from 'jspdf';
+import { timeout, retry, timer, forkJoin } from 'rxjs';
 import { PreinscriptionService } from '../../../core/services/preinscription.service';
+import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { STORAGE_KEYS } from '../../../core/services/storage';
 import { PreinscriptionDto } from '../../../core/models/preinscription.models';
 import { ErrorResponse, ErrorCode } from '../../../core/models/error-response.models';
 import { LoggerService } from '../../../core/services/logger.service';
 
-// ── Formes des données telles qu'enregistrées par chaque step précédent ──
+type JsPDFType = InstanceType<typeof import('jspdf').default>;
+
 interface Identification {
   nom: string;
   prenom: string;
@@ -30,7 +32,7 @@ interface Identification {
 interface Specialisation {
   cursus: string;
   niveau: string;
-  domaineFormation: string;
+  filiere: string;
   diplomeAdmission: string;
   serieDiplome: string;
   mentionDiplome: string;
@@ -43,7 +45,6 @@ interface Specialisation {
   centreDepotDossier: string;
   numeroRecuCCA: string;
   banque: string;
-  imageRecu: string;
   imageNom: string;
 }
 
@@ -61,11 +62,31 @@ interface Contacts {
   activite2: string;
   handicap: string;
   profession: string;
+  descriptionActiviteProf: string;
   nomPere: string;
-  nomMere: string;
   telPere: string;
-  emailPere: string;
+  nomMere: string;
   telMere: string;
+  nomPersonneContact: string;
+  telPersonneContact: string;
+  emailPersonneContact: string;
+}
+
+interface Labels {
+  cursus: string;
+  niveau: string;
+  filiere: string;
+  diplome: string;
+  mention: string;
+  pays: string;
+  paysObtention: string;
+  region: string;
+  departement: string;
+  centreConcours: string;
+  centreDepot: string;
+  banque: string;
+  langue1: string;
+  langue2: string;
 }
 
 @Component({
@@ -77,52 +98,120 @@ interface Contacts {
 })
 export class StepFinish implements OnInit {
 
-  // ── Données regroupées depuis le localStorage ────────────────────────
   identification: Partial<Identification> = {};
   specialisation: Partial<Specialisation> = {};
   cursus: Diplome[] = [];
   contacts: Partial<Contacts> = {};
+  labels: Partial<Labels> = {};
 
-  // ── Numéro de dossier (assigné par le backend après soumission) ──────
   numeroDossier = '';
   motDePasse = '';
 
-  // ── États d'affichage ─────────────────────────────────────────────────
   enregistrementReussi = false;
   enCours = false;
   erreur = '';
   attestation = false;
+  copieFeedback = '';
+  donneesIncompletes = false;
+  pdfEnCours = false;
+  ecoleChargee = false;
 
   private logoBase64: string | null = null;
   private logoCharge: Promise<void> = Promise.resolve();
+  private soumissionEffectuee = false;
+  private codeEcole = '';
 
   constructor(
     private router: Router,
     private preinscriptionService: PreinscriptionService,
+    private refCache: ReferenceCacheService,
     private logger: LoggerService
   ) { }
 
   ngOnInit(): void {
     this.chargerDonnees();
     this.logoCharge = this.chargerLogo();
-    // Si le candidat revient sur cette page après soumission, on restaure le numéro
-    const existant = localStorage.getItem('enstmo_numero_dossier');
+    this.verifierCompletude();
+    this.chargerLabels();
+
+    this.refCache.getEcoles().subscribe({
+      next: (ecoles) => {
+        const active = ecoles.find(e => !e.annuler);
+        if (active) this.codeEcole = active.codeEcole;
+        this.ecoleChargee = true;
+      },
+      error: () => { this.ecoleChargee = true; }
+    });
+
+    const existant = localStorage.getItem(STORAGE_KEYS.NUMERO_DOSSIER);
     if (existant) {
       this.numeroDossier = existant;
-      this.motDePasse = localStorage.getItem('enstmo_mot_de_passe') ?? '';
       this.enregistrementReussi = true;
+      this.soumissionEffectuee = true;
     }
   }
 
-  // ── Lecture de toutes les étapes précédentes ──────────────────────────
   private chargerDonnees(): void {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return;
-    }
-    this.identification = this.lireJSON<Identification>('enstmo_identification') || {};
-    this.specialisation = this.lireJSON<Specialisation>('enstmo_specialisation') || {};
-    this.cursus = this.lireJSON<Diplome[]>('enstmo_cursus') || [];
-    this.contacts = this.lireJSON<Contacts>('enstmo_contacts') || {};
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    this.identification = this.lireJSON<Identification>(STORAGE_KEYS.IDENTIFICATION) || {};
+    this.specialisation = this.lireJSON<Specialisation>(STORAGE_KEYS.SPECIALISATION) || {};
+    this.cursus = this.lireJSON<Diplome[]>(STORAGE_KEYS.CURSUS) || [];
+    this.contacts = this.lireJSON<Contacts>(STORAGE_KEYS.CONTACTS) || {};
+  }
+
+  private chargerLabels(): void {
+    forkJoin({
+      cursus: this.refCache.getCursus(),
+      niveaux: this.refCache.getNiveaux(),
+      diplomes: this.refCache.getAllDiplomes(),
+      mentions: this.refCache.getMentions(),
+      pays: this.refCache.getPays(),
+      centres: this.refCache.getCentresExamen(),
+      sites: this.refCache.getSitesDepot(),
+      banques: this.refCache.getBanques(),
+      langues: this.refCache.getLangues()
+    }).subscribe({
+      next: (data) => {
+        const sp = this.specialisation;
+        const id = this.identification;
+
+        const cursusObj = data.cursus.find(c => c.idCursus === sp.cursus);
+        this.labels.cursus = cursusObj?.libelle ?? sp.cursus ?? '—';
+
+        const niveauObj = data.niveaux.find(n => n.codeNiveau === sp.niveau);
+        this.labels.niveau = niveauObj?.libelleNiveau ?? sp.niveau ?? '—';
+
+        this.labels.filiere = sp.filiere ?? '—';
+
+        const diplomeObj = data.diplomes.find(d => d.idDiplome === sp.diplomeAdmission);
+        this.labels.diplome = diplomeObj?.libelleFr ?? sp.diplomeAdmission ?? '—';
+
+        const mentionObj = data.mentions.find(m => m.idMention === sp.mentionDiplome);
+        this.labels.mention = mentionObj?.libelleFr ?? sp.mentionDiplome ?? '—';
+
+        const paysObj = data.pays.find(p => p.codePays === id.paysNationalite);
+        this.labels.pays = paysObj?.libelleFr ?? id.paysNationalite ?? '—';
+
+        const paysObtObj = data.pays.find(p => p.codePays === sp.paysObtention);
+        this.labels.paysObtention = paysObtObj?.libelleFr ?? sp.paysObtention ?? '—';
+
+        const centreObj = data.centres.find(c => c.idCexam === sp.centreConcours);
+        this.labels.centreConcours = centreObj?.libeleFiliereFr ?? sp.centreConcours ?? '—';
+
+        const siteObj = data.sites.find(s => s.idSiteDepot === sp.centreDepotDossier);
+        this.labels.centreDepot = siteObj?.libelle ?? sp.centreDepotDossier ?? '—';
+
+        const banqueObj = data.banques.find(b => b.idBanque === sp.banque);
+        this.labels.banque = banqueObj?.libelleBanque ?? sp.banque ?? '—';
+
+        const l1 = data.langues.find(l => l.code === id.premiereLangue);
+        this.labels.langue1 = l1?.libelleFr ?? id.premiereLangue ?? '—';
+
+        const l2 = data.langues.find(l => l.code === id.deuxiemeLangue);
+        this.labels.langue2 = l2?.libelleFr ?? id.deuxiemeLangue ?? '—';
+      },
+      error: () => {}
+    });
   }
 
   private lireJSON<T>(cle: string): T | null {
@@ -135,7 +224,13 @@ export class StepFinish implements OnInit {
     }
   }
 
-  // ── Chargement du logo ENSTMO en base64 pour intégration PDF ──────
+  private verifierCompletude(): void {
+    const id = this.identification;
+    const sp = this.specialisation;
+    this.donneesIncompletes = !id?.nom || !id?.prenom || !id?.dateNaissance
+      || !sp?.cursus || !sp?.niveau || !sp?.diplomeAdmission;
+  }
+
   private chargerLogo(): Promise<void> {
     if (typeof window === 'undefined') return Promise.resolve();
 
@@ -165,7 +260,6 @@ export class StepFinish implements OnInit {
     });
   }
 
-  // ── Diplôme le plus récent (le tableau est trié décroissant par step-cursus) ─
   get diplomeRecent(): Diplome | null {
     return this.cursus && this.cursus.length > 0 ? this.cursus[0] : null;
   }
@@ -177,7 +271,7 @@ export class StepFinish implements OnInit {
   }
 
   get langues(): string {
-    return [this.identification?.premiereLangue, this.identification?.deuxiemeLangue]
+    return [this.labels.langue1 || this.identification?.premiereLangue, this.labels.langue2 || this.identification?.deuxiemeLangue]
       .filter(Boolean)
       .join(' - ');
   }
@@ -194,13 +288,77 @@ export class StepFinish implements OnInit {
       .join(' - ');
   }
 
-  // ── Action principale : soumettre au backend, récupérer le matricule, générer le PDF ─
   onEnregistrer(): void {
+    if (this.soumissionEffectuee || this.enCours) return;
+
+    if (!this.codeEcole) {
+      this.erreur = 'Chargement en cours, veuillez patienter quelques secondes puis réessayer.';
+      return;
+    }
+
+    const validation = this.validerPayload();
+    if (validation) {
+      this.erreur = validation;
+      return;
+    }
+
     this.erreur = '';
     this.enCours = true;
+    this.soumissionEffectuee = true;
 
+    const payload = this.construirePayload();
+
+    this.preinscriptionService.create(payload).pipe(
+      retry({
+        count: 1,
+        delay: (err) => {
+          const status = err?.status ?? 0;
+          if (status >= 400 && status < 500) throw err;
+          return timer(1500);
+        }
+      }),
+      timeout(12000)
+    ).subscribe({
+      next: (res) => {
+        this.numeroDossier = res.matricule ?? '';
+        this.motDePasse = res.pwd ?? '';
+        localStorage.setItem(STORAGE_KEYS.NUMERO_DOSSIER, this.numeroDossier);
+        this.enregistrementReussi = true;
+        this.enCours = false;
+        setTimeout(async () => {
+          try {
+            await this.logoCharge;
+            await this.genererPdf();
+          } catch (e) {
+            this.logger.error('PDF auto-gen failed', e);
+          }
+        }, 0);
+      },
+      error: (err: ErrorResponse | any) => {
+        this.enCours = false;
+        this.soumissionEffectuee = false;
+        this.extraireErreur(err);
+      },
+    });
+  }
+
+  private validerPayload(): string | null {
+    const id = this.identification;
+    const sp = this.specialisation;
+    if (!id?.nom || !id?.prenom) return 'Nom et prénom sont obligatoires.';
+    if (!id?.dateNaissance) return 'Date de naissance obligatoire.';
+    if (!id?.email) return 'Email obligatoire.';
+    if (!id?.numeroCNI) return 'Numéro CNI obligatoire.';
+    if (!sp?.cursus || !sp?.niveau) return 'Cursus et niveau obligatoires.';
+    if (!sp?.diplomeAdmission) return "Diplôme d'admission obligatoire.";
+    if (!sp?.numeroRecuCCA) return 'Numéro de reçu CCA obligatoire.';
+    return null;
+  }
+
+  private construirePayload(): PreinscriptionDto {
     const annee = new Date().getFullYear();
-    const payload: PreinscriptionDto = {
+    const cursusConcat = this.cursus.map(d => `${d.annee}|${d.etablissement}|${d.diplome}|${d.mention}`).join(';;');
+    return {
       nom: this.identification.nom ?? '',
       prenom: this.identification.prenom ?? '',
       sexe: (this.identification.sexe ?? '').charAt(0).toUpperCase(),
@@ -218,7 +376,7 @@ export class StepFinish implements OnInit {
       lang2: this.identification.deuxiemeLangue ?? '',
       cycles: this.specialisation.cursus ?? '',
       niveau: this.specialisation.niveau ?? '',
-      choixFormation1: this.specialisation.domaineFormation ?? '',
+      choixFormation1: this.specialisation.filiere ?? '',
       diplomeAdmission: this.specialisation.diplomeAdmission ?? '',
       typeBacc: this.specialisation.serieDiplome ?? '',
       mention: this.specialisation.mentionDiplome ?? '',
@@ -229,87 +387,104 @@ export class StepFinish implements OnInit {
       lieudepot: this.specialisation.centreDepotDossier ?? '',
       numRecu: this.specialisation.numeroRecuCCA ?? '',
       anneeDipAnt: this.specialisation.anneeBEPC ? String(this.specialisation.anneeBEPC) : '',
-      loisir1: this.contacts.loisir1 ?? '',
-      loisir2: this.contacts.loisir2 ?? '',
+      loisir1: this.contacts.loisir1 || null,
+      loisir2: this.contacts.loisir2 || null,
       sport1: this.contacts.activite1 ?? '',
       sport2: this.contacts.activite2 ?? '',
       activiteSportive: !!(this.contacts.activite1 || this.contacts.activite2),
       handicap: !!this.contacts.handicap && this.contacts.handicap !== 'Aucun',
       typeHandicap: this.contacts.handicap !== 'Aucun' ? (this.contacts.handicap ?? '') : '',
       activiteProfessionnelle: this.contacts.profession ?? '',
+      descriptionActiviteProf: this.contacts.descriptionActiviteProf ?? '',
       nomParent1: this.contacts.nomPere ?? '',
       telParent1: this.contacts.telPere ?? '',
-      emailPersonneAContacter: this.contacts.emailPere ?? '',
       nomParent2: this.contacts.nomMere ?? '',
       telParent2: this.contacts.telMere ?? '',
+      nomPersonneAContacter: this.contacts.nomPersonneContact ?? '',
+      telPersonneAContacter: this.contacts.telPersonneContact ?? '',
+      emailPersonneAContacter: this.contacts.emailPersonneContact ?? '',
       anneeAcademique: `${annee}/${annee + 1}`,
-      ecole: 'E',
+      ecole: this.codeEcole,
+      taf: cursusConcat ? true : undefined,
     };
+  }
 
-    this.preinscriptionService.create(payload).pipe(
-      timeout(30000)
-    ).subscribe({
-      next: async (res) => {
-        this.numeroDossier = res.matricule ?? '';
-        this.motDePasse = res.pwd ?? '';
-        localStorage.setItem('enstmo_numero_dossier', this.numeroDossier);
-        localStorage.setItem('enstmo_mot_de_passe', this.motDePasse);
-        try {
-          await this.logoCharge;
-          this.genererPdf();
-          this.enregistrementReussi = true;
-        } catch (e) {
-          this.logger.error('Erreur génération PDF', e);
-          this.erreur = 'Inscription enregistrée mais erreur lors de la génération du PDF. Veuillez re-télécharger.';
-          this.enregistrementReussi = true;
-        }
-        this.enCours = false;
-      },
-      error: (err: ErrorResponse | any) => {
-        this.enCours = false;
-        if (err?.name === 'TimeoutError') {
-          this.erreur = 'Le serveur met trop de temps à répondre. Veuillez réessayer.';
-          return;
-        }
-        const code = (err as ErrorResponse)?.code;
-        if (code === ErrorCode.DUPLICATE_RESOURCE) {
-          this.erreur = 'Un dossier existe déjà avec cet email ou ce numéro CNI. Vérifiez vos informations ou contactez l\'administration.';
-        } else if (code === ErrorCode.VALIDATION_FAILED) {
-          const details = (err as ErrorResponse).details;
-          this.erreur = details ? `Données invalides : ${details}` : 'Certains champs sont invalides. Vérifiez votre dossier.';
-        } else if (err?.status === 0) {
-          this.erreur = 'Serveur inaccessible. Vérifiez votre connexion internet et réessayez.';
-        } else {
-          this.erreur = (err as ErrorResponse)?.message ?? 'Une erreur est survenue. Veuillez réessayer.';
-        }
-      },
-    });
+  private extraireErreur(err: any): void {
+    if (err?.name === 'TimeoutError') {
+      this.erreur = 'Le serveur met trop de temps à répondre. Veuillez réessayer.';
+      return;
+    }
+
+    const body = err?.error || err;
+    const code = body?.code;
+
+    if (code === ErrorCode.DUPLICATE_RESOURCE) {
+      this.erreur = 'Un dossier existe déjà avec cet email ou ce numéro CNI. Vérifiez vos informations ou contactez l\'administration.';
+    } else if (code === ErrorCode.VALIDATION_FAILED) {
+      const details = body?.details;
+      this.erreur = details ? `Données invalides : ${details}` : 'Certains champs sont invalides. Vérifiez votre dossier.';
+    } else if (err?.status === 0) {
+      this.erreur = 'Serveur inaccessible. Vérifiez votre connexion internet et réessayez.';
+    } else if (err?.status >= 500) {
+      this.erreur = 'Erreur interne du serveur. Veuillez réessayer dans quelques instants.';
+    } else {
+      this.erreur = body?.message ?? 'Une erreur est survenue. Veuillez réessayer.';
+    }
   }
 
   async onRetelecharger(): Promise<void> {
-    await this.logoCharge;
-    this.genererPdf();
+    if (this.pdfEnCours) return;
+    this.pdfEnCours = true;
+    try {
+      await this.logoCharge;
+      await this.genererPdf();
+    } finally {
+      this.pdfEnCours = false;
+    }
   }
 
   copier(texte: string): void {
-    navigator.clipboard.writeText(texte);
+    if (!navigator.clipboard) {
+      this.copierFallback(texte);
+      return;
+    }
+    navigator.clipboard.writeText(texte).then(
+      () => this.afficherCopieFeedback(),
+      () => this.copierFallback(texte)
+    );
+  }
+
+  private copierFallback(texte: string): void {
+    const el = document.createElement('textarea');
+    el.value = texte;
+    el.style.position = 'fixed';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    this.afficherCopieFeedback();
+  }
+
+  private afficherCopieFeedback(): void {
+    this.copieFeedback = 'Copié !';
+    setTimeout(() => { this.copieFeedback = ''; }, 2000);
   }
 
   onBack(): void {
     this.router.navigate(['/inscription/contacts']);
   }
 
-  // ── Génération du PDF avec jsPDF, mise en page fidèle au modèle papier ─
-  private genererPdf(): void {
+  private async genererPdf(): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margeG = 15;
     const margeD = 195;
     const logoW = 32;
     const logoH = 32;
-    const logoX = (210 - logoW) / 2; // centré sur A4 (210mm)
+    const logoX = (210 - logoW) / 2;
     let y = 10;
 
-    // ── Logo ENSTMO centré en haut ───────────────────────────────────────
     if (this.logoBase64) {
       try {
         doc.addImage(this.logoBase64, 'JPEG', logoX, y, logoW, logoH);
@@ -318,7 +493,6 @@ export class StepFinish implements OnInit {
       }
     }
 
-    // Texte FR (gauche) et EN (droite) alignés verticalement au centre du logo
     const yTexte = y + 6;
 
     doc.setFont('helvetica', 'bold');
@@ -347,14 +521,12 @@ export class StepFinish implements OnInit {
     doc.text('TECHNIQUES MARITIMES ET OCEANIQUES (ENSTMO)', margeG, yTexte + 20);
     doc.text('AND OCEAN SCIENCE AND TECHNOLOGY', margeD, yTexte + 20, { align: 'right' });
 
-    // Ligne de séparation sous l'en-tête
     y = y + logoH + 4;
     doc.setDrawColor(20, 60, 130);
     doc.setLineWidth(0.5);
     doc.line(margeG, y, margeD, y);
     y += 2;
 
-    // ── Titre / numéro de dossier ────────────────────────────────────────
     y += 11;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
@@ -375,53 +547,50 @@ export class StepFinish implements OnInit {
     doc.text("REGISTRATION'S FILE", 105, y, { align: 'center' });
 
     y += 5;
+    const annee = new Date().getFullYear();
     doc.setFont('helvetica', 'normal');
-    doc.text(`Année académique ${new Date().getFullYear()}/${new Date().getFullYear() + 1}`, 105, y, { align: 'center' });
+    doc.text(`Année académique ${annee}/${annee + 1}`, 105, y, { align: 'center' });
 
-    // ── Type / Formation ─────────────────────────────────────────────────
     y += 9;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.text('Cursus :', margeG, y);
     doc.setFont('helvetica', 'normal');
-    doc.text(String(this.specialisation?.cursus || '—'), margeG + 22, y);
+    doc.text(String(this.labels.cursus || this.specialisation?.cursus || '—'), margeG + 22, y);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Domaine de formation :', margeG + 75, y);
+    doc.text('Filière :', margeG + 75, y);
     doc.setFont('helvetica', 'normal');
-    doc.text(String(this.specialisation?.domaineFormation || '—'), margeG + 120, y, { maxWidth: 60 });
+    doc.text(String(this.labels.filiere || this.specialisation?.filiere || '—'), margeG + 120, y, { maxWidth: 60 });
 
     y += 6;
     doc.setFont('helvetica', 'bold');
     doc.text('Niveau :', margeG, y);
     doc.setFont('helvetica', 'normal');
-    doc.text(String(this.specialisation?.niveau || '—'), margeG + 22, y);
+    doc.text(String(this.labels.niveau || this.specialisation?.niveau || '—'), margeG + 22, y);
 
-    // ── Identification du candidat ───────────────────────────────────────
     y += 8;
     y = this.tracerSectionTitre(doc, "IDENTIFICATION DU CANDIDAT / CANDIDAT'S IDENTIFICATION", margeG, y);
 
     y = this.ligneInfo(doc, margeG, y, 'Nom & Prénoms', this.nomComplet, 'Sexe', this.identification?.sexe);
     y = this.ligneInfo(doc, margeG, y, 'Né(e) le', this.identification?.dateNaissance, 'à', this.identification?.lieuNaissance);
-    y = this.ligneInfo(doc, margeG, y, 'Pays de nationalité', this.identification?.paysNationalite, 'Région', this.identification?.regionOrigine);
+    y = this.ligneInfo(doc, margeG, y, 'Pays de nationalité', this.labels.pays || this.identification?.paysNationalite, 'Région', this.identification?.regionOrigine);
     y = this.ligneInfo(doc, margeG, y, 'Département', this.identification?.departementOrigine, 'Situation', this.identification?.situationMatrimoniale);
     y = this.ligneInfo(doc, margeG, y, 'Adresse', this.identification?.adresse);
     y = this.ligneInfo(doc, margeG, y, 'N° de Téléphone', this.identification?.telephone, 'e-mail', this.identification?.email);
     y = this.ligneInfo(doc, margeG, y, 'N° CNI', this.identification?.numeroCNI);
     y = this.ligneInfo(doc, margeG, y, 'Langues officielles', this.langues || '—');
 
-    // ── Profil scolaire et académique ────────────────────────────────────
     y += 3;
     y = this.tracerSectionTitre(doc, 'PROFIL SCOLAIRE ET ACADEMIQUE / ACADEMIC PROFILE', margeG, y);
 
-    y = this.ligneInfo(doc, margeG, y, "Diplôme d'admission", this.specialisation?.diplomeAdmission, 'Série', this.specialisation?.serieDiplome);
-    y = this.ligneInfo(doc, margeG, y, 'Mention', this.specialisation?.mentionDiplome, "Année d'obtention", this.specialisation?.anneeObtentionDip);
+    y = this.ligneInfo(doc, margeG, y, "Diplôme d'admission", this.labels.diplome || this.specialisation?.diplomeAdmission, 'Série', this.specialisation?.serieDiplome);
+    y = this.ligneInfo(doc, margeG, y, 'Mention', this.labels.mention || this.specialisation?.mentionDiplome, "Année d'obtention", this.specialisation?.anneeObtentionDip);
     y = this.ligneInfo(doc, margeG, y, "Établissement d'obtention", this.specialisation?.etablissementObtention);
-    y = this.ligneInfo(doc, margeG, y, "Pays d'obtention", this.specialisation?.paysObtention);
-    y = this.ligneInfo(doc, margeG, y, 'Centre de concours', this.specialisation?.centreConcours, 'Centre de dépôt', this.specialisation?.centreDepotDossier);
-    y = this.ligneInfo(doc, margeG, y, 'N° reçu CCA', this.specialisation?.numeroRecuCCA, 'Banque', this.specialisation?.banque);
+    y = this.ligneInfo(doc, margeG, y, "Pays d'obtention", this.labels.paysObtention || this.specialisation?.paysObtention);
+    y = this.ligneInfo(doc, margeG, y, 'Centre de concours', this.labels.centreConcours || this.specialisation?.centreConcours, 'Centre de dépôt', this.labels.centreDepot || this.specialisation?.centreDepotDossier);
+    y = this.ligneInfo(doc, margeG, y, 'N° reçu CCA', this.specialisation?.numeroRecuCCA, 'Banque', this.labels.banque || this.specialisation?.banque);
 
-    // ── Parcours scolaire (tableau des diplômes) ─────────────────────────
     y += 3;
     y = this.tracerSectionTitre(doc, 'PARCOURS SCOLAIRE', margeG, y);
 
@@ -449,21 +618,22 @@ export class StepFinish implements OnInit {
       y += 5;
     }
 
-    // ── Informations complémentaires ─────────────────────────────────────
     y += 3;
     if (y > 250) { doc.addPage(); y = 18; }
     y = this.tracerSectionTitre(doc, 'INFORMATIONS COMPLEMENTAIRES / FURTHER INFORMATION', margeG, y);
 
-    y = this.ligneInfo(doc, margeG, y, 'Handicap signalé', this.contacts?.handicap, 'Profession', this.contacts?.profession);
-    y = this.ligneInfo(doc, margeG, y, 'Sport', this.sportsPratiques || '—');
-    y = this.ligneInfo(doc, margeG, y, 'Loisir', this.loisirs || '—');
+    y = this.ligneInfo(doc, margeG, y, 'Handicap signalé', this.contacts?.handicap || 'Aucun', 'Profession', this.contacts?.profession);
+    if (this.contacts?.descriptionActiviteProf) {
+      y = this.ligneInfo(doc, margeG, y, 'Description activité', this.contacts.descriptionActiviteProf);
+    }
+    y = this.ligneInfo(doc, margeG, y, 'Sport', this.sportsPratiques || '—', 'Loisir', this.loisirs || '—');
     y = this.ligneInfo(doc, margeG, y, 'Nom du père', this.contacts?.nomPere, 'Tél. père', this.contacts?.telPere);
     y = this.ligneInfo(doc, margeG, y, 'Nom de la mère', this.contacts?.nomMere, 'Tél. mère', this.contacts?.telMere);
-    if (this.contacts?.emailPere) {
-      y = this.ligneInfo(doc, margeG, y, 'E-mail du père', this.contacts?.emailPere);
+    y = this.ligneInfo(doc, margeG, y, 'Personne à contacter', this.contacts?.nomPersonneContact, 'Tél.', this.contacts?.telPersonneContact);
+    if (this.contacts?.emailPersonneContact) {
+      y = this.ligneInfo(doc, margeG, y, 'Email contact urgence', this.contacts.emailPersonneContact);
     }
 
-    // ── Pied de page ──────────────────────────────────────────────────────
     y += 6;
     if (y > 265) { doc.addPage(); y = 20; }
     doc.setFont('helvetica', 'bold');
@@ -484,8 +654,7 @@ export class StepFinish implements OnInit {
     doc.save(`Fiche_Preinscription_ENSTMO_${this.numeroDossier}.pdf`);
   }
 
-  // ── Bandeau de titre de section (fond bleu/violet, texte blanc) ──────
-  private tracerSectionTitre(doc: jsPDF, titre: string, x: number, y: number): number {
+  private tracerSectionTitre(doc: JsPDFType, titre: string, x: number, y: number): number {
     doc.setFillColor(70, 70, 160);
     doc.rect(x, y - 4.5, 180, 6, 'F');
     doc.setTextColor(255, 255, 255);
@@ -496,9 +665,8 @@ export class StepFinish implements OnInit {
     return y + 8;
   }
 
-  // ── Affiche "Label : valeur" et, optionnellement, un 2e couple sur la même ligne ─
   private ligneInfo(
-    doc: jsPDF, x: number, y: number,
+    doc: JsPDFType, x: number, y: number,
     label1: string, valeur1: unknown,
     label2?: string, valeur2?: unknown
   ): number {
@@ -518,7 +686,6 @@ export class StepFinish implements OnInit {
     return y + 6;
   }
 
-  // ── Normalise une valeur potentiellement vide/undefined/null en texte ─
   private versTexte(valeur: unknown): string {
     if (valeur === undefined || valeur === null || valeur === '') {
       return '—';

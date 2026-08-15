@@ -7,8 +7,10 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, forkJoin } from 'rxjs';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { STORAGE_KEYS } from '../../../core/services/storage';
 import { PaysDto } from '../../../core/models/pays.models';
 import {
   CursusDto, NiveauDto, DiplomeDto, FiliereDto,
@@ -36,15 +38,13 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   anneesCourantes: number[] = [];
   anneesBEPC: number[] = [];
 
-  // Données chargées depuis l'API
   cursusOptions: CursusDto[] = [];
   niveauxTous: NiveauDto[] = [];
   niveauxFiltres: NiveauDto[] = [];
-  domainesFiltres: FiliereDto[] = [];
+  filieresFiltrees: FiliereDto[] = [];
   diplomesAdmission: DiplomeDto[] = [];
   paysOptions: PaysDto[] = [];
 
-  // Données dynamiques depuis l'API
   seriesFiltrees: SerieDto[] = [];
   mentionsOptions: MentionDto[] = [];
   centresConcours: CentreExamenDto[] = [];
@@ -52,7 +52,7 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   banquesOptions: BanqueDto[] = [];
   epreuvesOptions: EpreuveMatiereDto[] = [];
 
-  chargement = false;
+  chargement = true;
   erreurChargement = '';
 
   autosaveStatus$!: Observable<AutosaveStatus>;
@@ -62,6 +62,7 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private router: Router,
     private ref: ConcoursReferenceService,
+    private refCache: ReferenceCacheService,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) {}
@@ -72,7 +73,11 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     this.buildForm();
     this.chargerDonneesReference();
     this.formSub = this.form.valueChanges.subscribe(val => {
-      if (this.form.dirty) this.autosave.schedule('enstmo_specialisation', { ...val, imageNom: this.imageNom });
+      if (this.form.dirty) {
+        const toSave = { ...val, imageNom: this.imageNom };
+        delete toSave.imageRecu;
+        this.autosave.schedule(STORAGE_KEYS.SPECIALISATION, toSave);
+      }
     });
   }
 
@@ -98,49 +103,30 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   private chargerDonneesReference(): void {
     this.chargement = true;
 
-    this.ref.getCursus().subscribe({
-      next: (data) => { this.cursusOptions = data.filter(c => !c.annuler); },
-      error: () => { this.erreurChargement = 'Impossible de charger les cursus.'; }
-    });
-
-    this.ref.getNiveaux().subscribe({
-      next: (data) => { this.niveauxTous = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les niveaux.'; }
-    });
-
-    this.ref.getPays().subscribe({
-      next: (data) => { this.paysOptions = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les pays.'; }
-    });
-
-    this.ref.getMentions().subscribe({
-      next: (data) => { this.mentionsOptions = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les mentions.'; }
-    });
-
-    this.ref.getBanques().subscribe({
-      next: (data) => { this.banquesOptions = data.filter(b => !b.annuler); },
-      error: () => { this.erreurChargement = 'Impossible de charger les banques.'; }
-    });
-
-    this.ref.getCentresExamen().subscribe({
-      next: (data) => { this.centresConcours = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les centres d\'examen.'; }
-    });
-
-    this.ref.getSitesDepot().subscribe({
-      next: (data) => { this.centresDepot = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les sites de dépôt.'; }
-    });
-
-    this.ref.getDiplomes().subscribe({
+    forkJoin({
+      cursus: this.refCache.getCursus(),
+      niveaux: this.refCache.getNiveaux(),
+      pays: this.refCache.getPays(),
+      mentions: this.refCache.getMentions(),
+      banques: this.refCache.getBanques(),
+      centres: this.refCache.getCentresExamen(),
+      sites: this.refCache.getSitesDepot(),
+      diplomes: this.refCache.getAllDiplomes()
+    }).subscribe({
       next: (data) => {
-        this.diplomesAdmission = data.filter(d => !d.annuler);
+        this.cursusOptions = data.cursus.filter(c => !c.annuler);
+        this.niveauxTous = data.niveaux;
+        this.paysOptions = data.pays;
+        this.mentionsOptions = data.mentions;
+        this.banquesOptions = data.banques.filter(b => !b.annuler);
+        this.centresConcours = data.centres;
+        this.centresDepot = data.sites;
+        this.diplomesAdmission = data.diplomes.filter(d => !d.annuler);
         this.chargement = false;
         this.restoreFromStorage();
       },
       error: () => {
-        this.erreurChargement = 'Impossible de charger les diplômes.';
+        this.erreurChargement = 'Impossible de charger les données. Vérifiez votre connexion.';
         this.chargement = false;
       }
     });
@@ -151,7 +137,7 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     this.form = this.fb.group({
       cursus: ['', Validators.required],
       niveau: ['', Validators.required],
-      domaineFormation: ['', Validators.required],
+      filiere: ['', Validators.required],
       diplomeAdmission: ['', Validators.required],
       serieDiplome: ['', Validators.required],
       mentionDiplome: ['', Validators.required],
@@ -170,33 +156,20 @@ export class StepSpecialisation implements OnInit, OnDestroy {
 
   private restoreFromStorage(): void {
     if (typeof window === 'undefined' || !window.localStorage) return;
-    const saved = localStorage.getItem('enstmo_specialisation');
+    const saved = localStorage.getItem(STORAGE_KEYS.SPECIALISATION);
     if (!saved) return;
     try {
       const data = JSON.parse(saved);
-      this.form.patchValue(data);
-      if (data.cursus) {
-        this.filtrerNiveauxEtFilieres(data.cursus, data.niveau);
-        this.ref.getSitesDepotByCursus(data.cursus).subscribe({
-          next: (sites) => { this.centresDepot = sites; },
-          error: () => {}
-        });
-      }
-      if (data.niveau) {
-        this.ref.getCentresExamenByNiveau(data.niveau).subscribe({
-          next: (centres) => { this.centresConcours = centres; },
-          error: () => {}
-        });
-      }
+      const { cursus, niveau, filiere, imageRecu, ...reste } = data;
+      this.form.patchValue(reste);
       if (data.diplomeAdmission) {
         this.ref.getSeriesByDiplome(data.diplomeAdmission).subscribe({
           next: (series) => { this.seriesFiltrees = series.filter(s => !s.annuler); },
           error: () => {}
         });
       }
-      if (data.imageRecu) {
-        this.imagePreview = data.imageRecu;
-        this.imageNom = data.imageNom || '';
+      if (data.imageNom) {
+        this.imageNom = data.imageNom;
       }
     } catch (e) { this.logger.error('Erreur localStorage', e); }
   }
@@ -204,15 +177,14 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   onCursusChange(event: Event): void {
     const idCursus = (event.target as HTMLSelectElement).value;
     this.form.get('niveau')?.setValue('');
-    this.form.get('domaineFormation')?.setValue('');
+    this.form.get('filiere')?.setValue('');
+    this.form.get('diplomeAdmission')?.setValue('');
+    this.form.get('serieDiplome')?.setValue('');
     this.niveauxFiltres = [];
-    this.domainesFiltres = [];
+    this.filieresFiltrees = [];
+    this.seriesFiltrees = [];
     if (idCursus) {
       this.filtrerNiveauxEtFilieres(idCursus, '');
-      this.ref.getDiplomes(idCursus).subscribe({
-        next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
-        error: () => {}
-      });
       this.ref.getSitesDepotByCursus(idCursus).subscribe({
         next: (data) => { this.centresDepot = data; },
         error: () => {}
@@ -221,27 +193,21 @@ export class StepSpecialisation implements OnInit, OnDestroy {
   }
 
   private filtrerNiveauxEtFilieres(idCursus: string, codeNiveau: string): void {
-    this.niveauxFiltres = this.niveauxTous.filter(n =>
-      n.codeCursus && n.codeCursus.includes(idCursus)
-    );
+    this.niveauxFiltres = [...this.niveauxTous];
     this.ref.getFilieres(idCursus, codeNiveau || '*').subscribe({
-      next: (data) => { this.domainesFiltres = data.filter(f => !f.annuler); },
-      error: () => { this.domainesFiltres = []; }
+      next: (data) => { this.filieresFiltrees = data.filter(f => !f.annuler); },
+      error: () => { this.filieresFiltrees = []; }
     });
   }
 
   onNiveauChange(event: Event): void {
     const codeNiveau = (event.target as HTMLSelectElement).value;
     const idCursus = this.form.get('cursus')?.value;
-    this.form.get('domaineFormation')?.setValue('');
+    this.form.get('filiere')?.setValue('');
     if (idCursus && codeNiveau) {
       this.ref.getFilieres(idCursus, codeNiveau).subscribe({
-        next: (data) => { this.domainesFiltres = data.filter(f => !f.annuler); },
-        error: () => { this.domainesFiltres = []; }
-      });
-      this.ref.getDiplomes(idCursus, codeNiveau).subscribe({
-        next: (data) => { this.diplomesAdmission = data.filter(d => !d.annuler); },
-        error: () => {}
+        next: (data) => { this.filieresFiltrees = data.filter(f => !f.annuler); },
+        error: () => { this.filieresFiltrees = []; }
       });
       this.ref.getCentresExamenByNiveau(codeNiveau).subscribe({
         next: (data) => { this.centresConcours = data; },
@@ -275,7 +241,7 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     reader.onload = () => {
       this.imagePreview = reader.result as string;
       this.imageNom = fichier.name;
-      this.form.get('imageRecu')?.setValue(reader.result as string);
+      this.form.get('imageRecu')?.setValue('selected');
       this.form.get('imageRecu')?.markAsTouched();
     };
     reader.onerror = () => { this.imageErreur = 'Erreur de lecture du fichier.'; };
@@ -297,8 +263,10 @@ export class StepSpecialisation implements OnInit, OnDestroy {
 
   onNext(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.autosave.saveNow('enstmo_specialisation', { ...this.form.value, imageNom: this.imageNom });
-    localStorage.setItem('enstmo_current_step', '3');
+    const toSave = { ...this.form.value, imageNom: this.imageNom };
+    delete toSave.imageRecu;
+    this.autosave.saveNow(STORAGE_KEYS.SPECIALISATION, toSave);
+    localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, '3');
     this.router.navigate(['/inscription/cursus']);
   }
 

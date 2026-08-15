@@ -46,7 +46,7 @@ export interface SoumettreInscriptionPayload {
   deuxiemeLangue: string;
   cursus: string;
   niveau: string;
-  domaineFormation: string;
+  filiere: string;
   diplomeAdmission: string;
   serieDiplome: string;
   mentionDiplome: string;

@@ -1,85 +1,211 @@
 <div class="page-candidats">
 
+  <!-- En-tête -->
   <div class="page-header">
     <div>
-      <h2 class="page-titre">Candidats inscrits</h2>
-      <p class="page-sous-titre">{{ candidatsFiltres.length }} candidat(s) trouvé(s)</p>
+      <h2 class="page-titre">Candidats</h2>
+      <p class="page-sous-titre">{{ filtres.length }} candidat(s)</p>
     </div>
-    <button type="button" class="btn-refresh" (click)="chargerCandidats()" title="Actualiser">
-      <i class="fa-solid fa-rotate-right"></i>
-    </button>
+    <div class="header-actions">
+      <div class="vue-toggle">
+        <button type="button" [class.active]="vue === 'grille'" (click)="vue = 'grille'" title="Vue grille">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button type="button" [class.active]="vue === 'liste'" (click)="vue = 'liste'" title="Vue liste">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </button>
+      </div>
+      <button type="button" class="btn-refresh" (click)="charger(true)" title="Actualiser">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+    </div>
   </div>
 
-  @if (candidatsState$ | async; as state) {
+  @if (chargement) {
+    <app-candidats-skeleton></app-candidats-skeleton>
+  } @else if (erreur) {
+    <div class="alerte-erreur">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      {{ erreur }}
+      <button type="button" (click)="charger(true)">Réessayer</button>
+    </div>
+  } @else {
 
-    @switch (state.dataState) {
+    <!-- Filtres -->
+    <div class="filtres-bar">
+      <div class="recherche-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input
+          type="text"
+          class="input-recherche"
+          placeholder="Rechercher par nom, matricule, CNI..."
+          [(ngModel)]="recherche"
+          (input)="appliquerFiltres()"
+        />
+      </div>
 
-      @case ('LOADING') {
-        <app-candidats-skeleton></app-candidats-skeleton>
-      }
+      <select class="select-filtre" [(ngModel)]="filtreEtat" (change)="appliquerFiltres()" title="Filtrer par état">
+        <option value="TOUS">Tous les états</option>
+        <option value="E">Soumis</option>
+        <option value="V">Vérification</option>
+        <option value="S">Sélectionné</option>
+        <option value="R">Rejeté</option>
+      </select>
 
-      @case ('ERROR') {
-        <div class="alerte-erreur">
-          <i class="fa-solid fa-triangle-exclamation"></i> {{ state.error }}
-          <button type="button" (click)="chargerCandidats()">Réessayer</button>
-        </div>
-      }
+      <select class="select-filtre" [(ngModel)]="filtrePaiement" (change)="appliquerFiltres()" title="Filtrer par paiement">
+        <option value="TOUS">Paiement</option>
+        <option value="PAYE">Payé</option>
+        <option value="NON_PAYE">Non payé</option>
+      </select>
+    </div>
 
-      @case ('LOADED') {
-
-        <!-- Filtres -->
-        <div class="filtres-bar">
-          <input type="text"
-            class="input-recherche"
-            placeholder="Rechercher par nom, email, N° CNI..."
-            [(ngModel)]="recherche"
-            (input)="appliquerFiltres()" />
-
-          <select class="select-filtre"
-            [(ngModel)]="filtreStatut"
-            (change)="appliquerFiltres()"
-            title="Filtrer par statut">
-            <option value="TOUS">Tous les statuts</option>
-            @for (s of statuts; track s) {
-              <option [value]="s">{{ s }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Grille candidats -->
-        <div class="candidats-grille">
-          @for (c of candidatsFiltres; track c.id) {
-            <div class="candidat-card" (click)="voirDetail(c.id)">
-
-              <div class="candidat-avatar">
-                {{ c.prenom[0] }}{{ c.nom[0] }}
-              </div>
-
-              <div class="candidat-infos">
-                <p class="candidat-nom">{{ c.prenom }} {{ c.nom }}</p>
-                <p class="candidat-email">{{ c.email }}</p>
-                <p class="candidat-tel">{{ c.telephone }}</p>
-              </div>
-
-              <div class="candidat-footer">
-                <span [class]="'badge ' + couleurStatut(c.statut)">
-                  {{ c.statut }}
-                </span>
-              </div>
-
+    <!-- VUE GRILLE -->
+    @if (vue === 'grille') {
+      <div class="candidats-grille">
+        @for (c of filtres; track c.idPreins) {
+          <div class="candidat-card" (click)="ouvrirDetail(c)">
+            <div class="card-top">
+              <div class="candidat-avatar">{{ c.prenom[0] || '?' }}{{ c.nom[0] || '?' }}</div>
+              <span [class]="'badge ' + etatCouleur(c.etatPreins)">{{ etatLibelle(c.etatPreins) }}</span>
             </div>
-          } @empty {
-            <div class="vide">
-              <i class="fa-solid fa-users-slash"></i>
-              Aucun candidat trouvé
+            <div class="card-body">
+              <p class="candidat-nom">{{ c.prenom }} {{ c.nom }}</p>
+              <p class="candidat-detail">{{ c.choixFormation1 || 'Formation non renseignée' }}</p>
+              <p class="candidat-matricule">{{ c.matricule || '—' }}</p>
             </div>
-          }
-        </div>
-
-      }
-
+            <div class="card-footer">
+              <span [class]="c.paye ? 'paiement-ok' : 'paiement-non'">{{ c.paye ? 'Payé' : 'Non payé' }}</span>
+              <span class="card-date">{{ c.datePreins || '' }}</span>
+            </div>
+          </div>
+        } @empty {
+          <div class="vide">Aucun candidat trouvé</div>
+        }
+      </div>
     }
 
+    <!-- VUE LISTE -->
+    @if (vue === 'liste') {
+      <div class="candidats-liste">
+        @for (c of filtres; track c.idPreins) {
+          <div class="liste-item" (click)="ouvrirDetail(c)">
+            <div class="liste-avatar">{{ c.prenom[0] || '?' }}{{ c.nom[0] || '?' }}</div>
+            <div class="liste-info">
+              <span class="liste-nom">{{ c.prenom }} {{ c.nom }}</span>
+              <span class="liste-sub">{{ c.choixFormation1 || '—' }} · {{ c.matricule || '—' }}</span>
+            </div>
+            <span [class]="'badge ' + etatCouleur(c.etatPreins)">{{ etatLibelle(c.etatPreins) }}</span>
+            <span [class]="c.paye ? 'paiement-ok' : 'paiement-non'">{{ c.paye ? 'Payé' : 'Non payé' }}</span>
+          </div>
+        } @empty {
+          <div class="vide">Aucun candidat trouvé</div>
+        }
+      </div>
+    }
+
+  }
+
+  <!-- PANEL DÉTAIL -->
+  @if (detailOuvert) {
+    <div class="overlay" (click)="fermerDetail()"></div>
+    <div class="detail-panel">
+      <div class="detail-header">
+        <h3>Fiche candidat</h3>
+        <button type="button" class="btn-fermer" (click)="fermerDetail()" title="Fermer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <div class="detail-avatar-big">{{ detailOuvert.prenom[0] || '?' }}{{ detailOuvert.nom[0] || '?' }}</div>
+          <h4>{{ detailOuvert.prenom }} {{ detailOuvert.nom }}</h4>
+          <span [class]="'badge ' + etatCouleur(detailOuvert.etatPreins)">{{ etatLibelle(detailOuvert.etatPreins) }}</span>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span class="detail-label">Matricule</span>
+            <span class="detail-value">{{ detailOuvert.matricule || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">CNI</span>
+            <span class="detail-value">{{ detailOuvert.numCni || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ detailOuvert.email || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Téléphone</span>
+            <span class="detail-value">{{ detailOuvert.numTel || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Sexe</span>
+            <span class="detail-value">{{ detailOuvert.sexe || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Date naissance</span>
+            <span class="detail-value">{{ detailOuvert.dateNaiss || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Lieu naissance</span>
+            <span class="detail-value">{{ detailOuvert.lieuNaiss || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Nationalité</span>
+            <span class="detail-value">{{ detailOuvert.paysNationalite || '—' }}</span>
+          </div>
+        </div>
+
+        <h5 class="detail-subtitle">Formation</h5>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span class="detail-label">Choix 1</span>
+            <span class="detail-value">{{ detailOuvert.choixFormation1 || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Choix 2</span>
+            <span class="detail-value">{{ detailOuvert.choixFormation2 || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Diplôme</span>
+            <span class="detail-value">{{ detailOuvert.diplomeAdmission || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Niveau</span>
+            <span class="detail-value">{{ detailOuvert.niveau || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Centre examen</span>
+            <span class="detail-value">{{ detailOuvert.centredexamen || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Année académique</span>
+            <span class="detail-value">{{ detailOuvert.anneeAcademique || '—' }}</span>
+          </div>
+        </div>
+
+        <h5 class="detail-subtitle">Paiement</h5>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <span class="detail-label">Statut</span>
+            <span [class]="detailOuvert.paye ? 'detail-value paiement-ok' : 'detail-value paiement-non'">{{ detailOuvert.paye ? 'Payé' : 'Non payé' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Date paiement</span>
+            <span class="detail-value">{{ detailOuvert.datePaiement || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">{{ detailOuvert.typePaiement || '—' }}</span>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">N° Reçu</span>
+            <span class="detail-value">{{ detailOuvert.numRecu || '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 
 </div>

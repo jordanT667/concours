@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { DiplomeAdminService } from '../../core/services/diplome-admin.service';
 import { CursusAdminService } from '../../core/services/cursus-admin.service';
 import { NiveauAdminService } from '../../core/services/niveau-admin.service';
@@ -38,9 +39,25 @@ export class DiplomesAdmin implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.charger();
-    this.cursusSvc.getAll().subscribe({ next: data => this.allCursus = data });
-    this.niveauSvc.getAll().subscribe({ next: data => this.allNiveaux = data });
+    this.chargerDonnees();
+  }
+
+  chargerDonnees(): void {
+    this.isLoading = true;
+    forkJoin({
+      diplomes: this.svc.getAll(),
+      cursus: this.cursusSvc.getAll(),
+      niveaux: this.niveauSvc.getAll()
+    }).subscribe({
+      next: ({ diplomes, cursus, niveaux }) => {
+        this.liste = diplomes;
+        this.allCursus = cursus;
+        this.allNiveaux = niveaux;
+        this.appliquerFiltres();
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
   }
 
   charger(): void {
@@ -93,7 +110,7 @@ export class DiplomesAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? 'Une erreur est survenue.'; }
     });
   }
 
@@ -113,7 +130,7 @@ export class DiplomesAdmin implements OnInit {
     if (!this.diplomeASupprimer) return;
     this.svc.delete(this.diplomeASupprimer.idDiplome).subscribe({
       next: () => { this.confirmOuverte = false; this.diplomeASupprimer = null; this.charger(); },
-      error: (err) => { this.erreur = err?.message ?? err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 

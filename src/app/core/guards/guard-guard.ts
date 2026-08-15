@@ -23,6 +23,19 @@ export const authGuard: CanActivateFn = () => {
 };
 
 /**
+ * Protège /espace — l'utilisateur doit être connecté (tout rôle accepté).
+ */
+export const etudiantGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) {
+    return router.createUrlTree(['/login']);
+  }
+  return true;
+};
+
+/**
  * Protège les routes réservées aux ADMIN uniquement (référentiels, sessions, paramètres).
  * Un SAISIE connecté est redirigé vers le dashboard avec un message d'accès refusé.
  */

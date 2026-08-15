@@ -13,7 +13,7 @@ export class FiliereService {
 
   // Lecture publique → GET /api/v1/concours/filiere
   getAll(): Observable<FiliereDto[]> {
-    return this.http.get<FiliereDto[]>(`${this.API_PUBLIC}/filiere`);
+    return this.http.get<FiliereDto[]>(`${this.API_PUBLIC}/filieres`);
   }
 
   // Recherche par cursus/niveau/école → GET /api/v1/concours/searchfiliere

@@ -10,214 +10,258 @@
     </div>
   }
 
-  <div class="grille">
+  <!-- SECTION 1 : ÉTAT CIVIL -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-id-card"></i> État civil</legend>
+    <div class="grille">
 
-    <!--LIGNE 1 : Nom / Prénom-->
-    <div class="champ col6">
-      <label class="titre">Nom <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('nom')">
-        <i class="fa-solid fa-user ico"></i>
-        <input type="text" formControlName="nom" placeholder="saisir votre nom" class="entr"/>
+      <div class="champ col6">
+        <label class="titre">Nom <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('nom')">
+          <i class="fa-solid fa-user ico"></i>
+          <input type="text" formControlName="nom" placeholder="saisir votre nom" class="entr"/>
+        </div>
+        @if (isInvalid('nom')) {
+          <span class="err">
+            @if (f['nom'].errors?.['required']) { Le nom est obligatoire. }
+            @if (f['nom'].errors?.['minlength']) { Minimum 2 caractères. }
+          </span>
+        }
       </div>
-      @if (isInvalid('nom')) {
-        <span class="err">
-          @if (f['nom'].errors?.['required']) { Le nom est obligatoire. }
-          @if (f['nom'].errors?.['minlength']) { Minimum 2 caractères. }
-        </span>
-      }
-    </div>
 
-    <div class="champ col6">
-      <label class="titre">Prénom(s)</label>
-      <div class="saisie">
-        <i class="fa-solid fa-user-pen ico"></i>
-        <input type="text" formControlName="prenom" placeholder="saisir votre prénom" class="entr"/>
+      <div class="champ col6">
+        <label class="titre">Prénom(s) <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('prenom')">
+          <i class="fa-solid fa-user-pen ico"></i>
+          <input type="text" formControlName="prenom" placeholder="saisir votre prénom" class="entr"/>
+        </div>
+        @if (isInvalid('prenom')) {
+          <span class="err">Le prénom est obligatoire.</span>
+        }
       </div>
-    </div>
 
-    <!--LIGNE 2 : Sexe / Date / Lieu / Situation -->
-    <div class="champ col3">
-      <label class="titre">Sexe <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('sexe')">
-        <i class="fa-solid fa-venus-mars ico"></i>
-        <select formControlName="sexe" class="entr">
-          <option value="M">Masculin</option>
-          <option value="F">Féminin</option>
-        </select>
+      <div class="champ col3">
+        <label class="titre">Sexe <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('sexe')">
+          <i class="fa-solid fa-venus-mars ico"></i>
+          <select formControlName="sexe" class="entr">
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">Date naissance <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('dateNaissance')">
-        <i class="fa-solid fa-calendar-days ico"></i>
-        <input type="date" formControlName="dateNaissance" class="entr"/>
+      <div class="champ col3">
+        <label class="titre">Date naissance <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('dateNaissance')">
+          <i class="fa-solid fa-calendar-days ico"></i>
+          <input type="date" formControlName="dateNaissance" class="entr"/>
+        </div>
+        @if (isInvalid('dateNaissance')) {
+          <span class="err">
+            @if (f['dateNaissance'].errors?.['required']) { La date est obligatoire. }
+            @else if (f['dateNaissance'].errors?.['tooYoung']) { Vous devez avoir au moins 15 ans. }
+            @else if (f['dateNaissance'].errors?.['tooOld']) { L'âge maximum est de 50 ans. }
+          </span>
+        }
       </div>
-      @if (isInvalid('dateNaissance')) {
-        <span class="err">La date est obligatoire.</span>
-      }
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">Lieu Naissance <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('lieuNaissance')">
-        <i class="fa-solid fa-location-dot ico"></i>
-        <input type="text" formControlName="lieuNaissance" placeholder="saisir votre lieu de naissance" class="entr"/>
+      <div class="champ col3">
+        <label class="titre">Lieu Naissance <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('lieuNaissance')">
+          <i class="fa-solid fa-location-dot ico"></i>
+          <input type="text" formControlName="lieuNaissance" placeholder="lieu de naissance" class="entr"/>
+        </div>
+        @if (isInvalid('lieuNaissance')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('lieuNaissance')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">Situation matrimoniale <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('situationMatrimoniale')">
-        <i class="fa-solid fa-rings-wedding ico"></i>
-        <select formControlName="situationMatrimoniale" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (s of situationsMatrimoniales; track s) {
-            <option [value]="s">{{ s }}</option>
+      <div class="champ col3">
+        <label class="titre">N° CNI <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('numeroCNI')">
+          <i class="fa-solid fa-id-card ico"></i>
+          <input type="text" formControlName="numeroCNI" placeholder="numéro de CNI" class="entr"/>
+        </div>
+        @if (isInvalid('numeroCNI')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col6">
+        <label class="titre">Situation matrimoniale <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('situationMatrimoniale')">
+          <i class="fa-solid fa-rings-wedding ico"></i>
+          <select formControlName="situationMatrimoniale" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (s of situationsMatrimoniales; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- SECTION 2 : ORIGINE GÉOGRAPHIQUE -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-globe"></i> Origine géographique</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Pays de nationalité <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('paysNationalite')">
+          <i class="fa-solid fa-globe ico"></i>
+          <select formControlName="paysNationalite" class="entr" (change)="onPaysChange()">
+            <option value="">-- Choisir --</option>
+            @for (p of pays; track p.codePays) {
+              <option [value]="p.codePays">{{ p.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('paysNationalite')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Région d'origine</label>
+        <div class="saisie">
+          <i class="fa-solid fa-map-pin ico"></i>
+          @if (isCameroun) {
+            <select formControlName="regionOrigine" class="entr" (change)="onRegionChange($event)">
+              <option value="">-- Choisir une région --</option>
+              @for (r of regions; track r.codeRegion) {
+                <option [value]="r.codeRegion">{{ r.libelleRegionLangue1 }}</option>
+              }
+            </select>
+          } @else {
+            <input type="text" formControlName="regionOrigine" placeholder="saisir votre région" class="entr"/>
           }
-        </select>
+        </div>
       </div>
-    </div>
 
-    <!--LIGNE 3 : Adresse / Téléphone / CNI + Email-->
-    <div class="champ col4">
-      <label class="titre">Adresse <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('adresse')">
-        <i class="fa-solid fa-map-marker-alt ico"></i>
-        <input type="text" formControlName="adresse" placeholder="saisir Ville / Quartier / BP" class="entr"/>
-      </div>
-      @if (isInvalid('adresse')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
-
-    <div class="champ col4">
-      <label class="titre titre-rouge">N° téléphone du Candidat (Orange de Préférence) <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('telephone')">
-        <i class="fa-solid fa-phone ico"></i>
-        <input type="tel" formControlName="telephone" placeholder="saisir votre numéro de téléphone" class="entr"/>
-      </div>
-      @if (isInvalid('telephone')) {
-        <span class="err">
-          @if (f['telephone'].errors?.['required']) { Champ obligatoire. }
-          @if (f['telephone'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
-        </span>
-      }
-    </div>
-
-    <div class="champ col4">
-      <label class="titre">N° CNI <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('numeroCNI')">
-        <i class="fa-solid fa-id-card ico"></i>
-        <input type="text" formControlName="numeroCNI" placeholder="saisir votre numéro de CNI" class="entr"/>
-      </div>
-      @if (isInvalid('numeroCNI')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-
-      <label class="titre" style="margin-top: 14px;">Email</label>
-      <div class="saisie" [class.erreur]="isInvalid('email')">
-        <i class="fa-solid fa-at ico"></i>
-        <input type="email" formControlName="email" placeholder="saisir votre adresse email" class="entr"/>
-      </div>
-      @if (isInvalid('email')) {
-        <span class="err">Adresse email invalide.</span>
-      }
-    </div>
-
-    <!--LIGNE 4 : Langues / Pays-->
-    <div class="champ col4">
-      <label class="titre">1ère langue <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('premiereLangue')">
-        <i class="fa-solid fa-language ico"></i>
-        <select formControlName="premiereLangue" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (l of langues; track l.code) {
-            <option [value]="l.code">{{ l.libelleFr }}</option>
+      <div class="champ col4">
+        <label class="titre">Département d'origine</label>
+        <div class="saisie">
+          <i class="fa-solid fa-location-crosshairs ico"></i>
+          @if (isCameroun) {
+            <select formControlName="departementOrigine" class="entr">
+              <option value="">-- Choisir un département --</option>
+              @for (d of departementsFiltres; track d.codeDepartementGeographique) {
+                <option [value]="d.codeDepartementGeographique">{{ d.libelleDepartementGeographiqueLangue1 }}</option>
+              }
+            </select>
+          } @else {
+            <input type="text" formControlName="departementOrigine" placeholder="saisir votre département" class="entr"/>
           }
-        </select>
+        </div>
       </div>
-      @if (isInvalid('premiereLangue')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
 
-    <div class="champ col4">
-      <label class="titre">2ième langue <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('deuxiemeLangue')">
-        <i class="fa-solid fa-language ico"></i>
-        <select formControlName="deuxiemeLangue" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (l of langues; track l.code) {
-            <option [value]="l.code">{{ l.libelleFr }}</option>
-          }
-        </select>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 3 : COORDONNÉES -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-address-book"></i> Coordonnées</legend>
+    <div class="grille">
+
+      <div class="champ col6">
+        <label class="titre">Adresse <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('adresse')">
+          <i class="fa-solid fa-map-marker-alt ico"></i>
+          <input type="text" formControlName="adresse" placeholder="Ville / Quartier / BP" class="entr"/>
+        </div>
+        @if (isInvalid('adresse')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('deuxiemeLangue')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
 
-    <div class="champ col4">
-      <label class="titre">Pays de nationalité <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('paysNationalite')">
-        <i class="fa-solid fa-globe ico"></i>
-        <select formControlName="paysNationalite" class="entr">
-          <option value="">-- Choisir --</option>
-          @for (p of pays; track p.codePays) {
-            <option [value]="p.codePays">{{ p.libelleFr }}</option>
-          }
-        </select>
+      <div class="champ col6">
+        <label class="titre titre-rouge">N° téléphone du Candidat (Orange de Préférence) <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('telephone')">
+          <i class="fa-solid fa-phone ico"></i>
+          <input type="tel" formControlName="telephone" placeholder="numéro de téléphone" class="entr"/>
+        </div>
+        @if (isInvalid('telephone')) {
+          <span class="err">
+            @if (f['telephone'].errors?.['required']) { Champ obligatoire. }
+            @if (f['telephone'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
+          </span>
+        }
       </div>
-      @if (isInvalid('paysNationalite')) {
-        <span class="err">Champ obligatoire.</span>
-      }
-    </div>
 
-    <!--LIGNE 5 : Région / Département -->
-    <div class="champ col6">
-      <label class="titre">Région d'origine</label>
-      <div class="saisie">
-        <i class="fa-solid fa-map-pin ico"></i>
-        <input
-          type="text"
-          formControlName="regionOrigine"
-          list="liste-regions"
-          class="entr"
-          placeholder="Choisir ou saisir une région"
-          (change)="onRegionChange($event)"
-        />
-        <datalist id="liste-regions">
-          @for (r of regions; track r.codeRegion) {
-            <option [value]="r.libelleRegionLangue1">{{ r.libelleRegionLangue1 }}</option>
-          }
-        </datalist>
+      <div class="champ col6">
+        <label class="titre">Email <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('email')">
+          <i class="fa-solid fa-at ico"></i>
+          <input type="email" formControlName="email" placeholder="adresse email" class="entr"/>
+        </div>
+        @if (isInvalid('email')) {
+          <span class="err">Adresse email invalide.</span>
+        }
       </div>
-    </div>
 
-    <div class="champ col6">
-      <label class="titre">Département d'origine</label>
-      <div class="saisie">
-        <i class="fa-solid fa-location-crosshairs ico"></i>
-        <input
-          type="text"
-          formControlName="departementOrigine"
-          list="liste-departements"
-          class="entr"
-          placeholder="Choisir ou saisir un département"
-        />
-        <datalist id="liste-departements">
-          @for (d of departementsFiltres; track d.codeDepartementGeographique) {
-            <option [value]="d.libelleDepartementGeographiqueLangue1">{{ d.libelleDepartementGeographiqueLangue1 }}</option>
-          }
-        </datalist>
+      <div class="champ col6">
+        <label class="titre">Confirmer l'email <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('confirmEmail') || emailErreur">
+          <i class="fa-solid fa-at ico"></i>
+          <input type="email" formControlName="confirmEmail" placeholder="confirmer l'email" class="entr"/>
+        </div>
+        @if (isInvalid('confirmEmail')) {
+          <span class="err">Confirmation obligatoire.</span>
+        }
+        @if (emailErreur) {
+          <span class="err">Les emails ne correspondent pas.</span>
+        }
       </div>
-    </div>
 
-  </div>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 4 : LANGUES -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-language"></i> Langues</legend>
+    <div class="grille">
+
+      <div class="champ col6">
+        <label class="titre">1ère langue <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('premiereLangue')">
+          <i class="fa-solid fa-language ico"></i>
+          <select formControlName="premiereLangue" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (l of langues; track l.code) {
+              <option [value]="l.code">{{ l.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('premiereLangue')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col6">
+        <label class="titre">2ème langue <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('deuxiemeLangue')">
+          <i class="fa-solid fa-language ico"></i>
+          <select formControlName="deuxiemeLangue" class="entr">
+            <option value="">-- Choisir --</option>
+            @for (l of langues; track l.code) {
+              <option [value]="l.code">{{ l.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('deuxiemeLangue')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+        @if (languesErreur) {
+          <span class="err">Les deux langues doivent être différentes.</span>
+        }
+      </div>
+
+    </div>
+  </fieldset>
 
   <div class="wizard-footer">
     <button class="back" type="button" (click)="onBack()">&lsaquo; PRÉCÉDENT</button>

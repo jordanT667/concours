@@ -38,7 +38,12 @@ export class Login {
     this.authService.login({ username: this.matricule, password: this.password }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/admin/dashboard']);
+        const roles = this.authService.getRoles();
+        if (roles.includes('ADMIN') || roles.includes('SAISIE')) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/espace']);
+        }
       },
       error: (err: ErrorResponse | any) => {
         this.isLoading = false;

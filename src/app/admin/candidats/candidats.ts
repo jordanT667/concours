@@ -1,13 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, startWith, catchError } from 'rxjs/operators';
 
-import { StatutCandidat } from '../../core/models/candidat.models';
-import { CandidatsService, CandidatDto } from '../../core/services/candidats';
-import { AppState, DataState } from '../../core/models/app-state.models';
+import { AdminDataService } from '../services/admin-data.service';
+import { PreinscriptionDto } from '../../core/models/preinscription.models';
 import { CandidatsSkeleton } from './candidats-skeleton/candidats-skeleton';
 
 @Component({
@@ -19,67 +15,96 @@ import { CandidatsSkeleton } from './candidats-skeleton/candidats-skeleton';
 })
 export class Candidats implements OnInit {
 
-  readonly DataState = DataState;
+  chargement = true;
+  erreur = '';
 
-  candidatsState$!: Observable<AppState<CandidatDto[]>>;
+  private tous: PreinscriptionDto[] = [];
+  filtres: PreinscriptionDto[] = [];
 
-  // Données locales pour le filtrage (alimentées depuis l'observable)
-  private tousLesCandidats: CandidatDto[] = [];
-  candidatsFiltres: CandidatDto[] = [];
-  recherche    = '';
-  filtreStatut = 'TOUS';
+  recherche = '';
+  filtreEtat = 'TOUS';
+  filtrePaiement = 'TOUS';
+  vue: 'grille' | 'liste' = 'grille';
 
-  statuts: StatutCandidat[] = [
-    'EN_ATTENTE', 'VALIDE', 'REJETE', 'ADMIS', 'NON_ADMIS'
-  ];
+  detailOuvert: PreinscriptionDto | null = null;
 
-  constructor(
-    private router: Router,
-    private candidatsService: CandidatsService
-  ) {}
+  constructor(private adminData: AdminDataService) {}
 
   ngOnInit(): void {
-    this.chargerCandidats();
+    this.charger();
   }
 
-  chargerCandidats(): void {
-    this.candidatsState$ = this.candidatsService.getAll().pipe(
-      map(data => {
-        this.tousLesCandidats = data;
-        this.candidatsFiltres = data;
-        return { dataState: DataState.LOADED, data };
-      }),
-      startWith({ dataState: DataState.LOADING }),
-      catchError(() => of({
-        dataState: DataState.ERROR,
-        error: 'Impossible de charger la liste des candidats.'
-      }))
-    );
+  get anneeAcademique(): string {
+    const y = new Date().getFullYear();
+    const m = new Date().getMonth();
+    const start = m >= 7 ? y : y - 1;
+    return `${start}/${start + 1}`;
   }
 
-  appliquerFiltres(): void {
-    this.candidatsFiltres = this.tousLesCandidats.filter(c => {
-      const matchStatut    = this.filtreStatut === 'TOUS' || c.statut === this.filtreStatut;
-      const matchRecherche = this.recherche === ''
-        || `${c.nom} ${c.prenom}`.toLowerCase().includes(this.recherche.toLowerCase())
-        || c.email.toLowerCase().includes(this.recherche.toLowerCase())
-        || c.numeroCNI.includes(this.recherche);
-      return matchStatut && matchRecherche;
+  charger(force = false): void {
+    this.chargement = true;
+    this.erreur = '';
+    this.adminData.getAll(this.anneeAcademique, force).subscribe({
+      next: (list) => {
+        this.tous = list;
+        this.appliquerFiltres();
+        this.chargement = false;
+      },
+      error: () => {
+        this.erreur = 'Impossible de charger les candidats.';
+        this.chargement = false;
+      }
     });
   }
 
-  voirDetail(id: number): void {
-    this.router.navigate(['/admin/candidats', id]);
+  appliquerFiltres(): void {
+    let result = [...this.tous];
+
+    if (this.filtreEtat !== 'TOUS') {
+      result = result.filter(p => p.etatPreins === this.filtreEtat);
+    }
+    if (this.filtrePaiement !== 'TOUS') {
+      const paye = this.filtrePaiement === 'PAYE';
+      result = result.filter(p => p.paye === paye);
+    }
+    if (this.recherche.trim()) {
+      const q = this.recherche.toLowerCase().trim();
+      result = result.filter(p =>
+        p.nom?.toLowerCase().includes(q) ||
+        p.prenom?.toLowerCase().includes(q) ||
+        p.matricule?.toLowerCase().includes(q) ||
+        p.email?.toLowerCase().includes(q) ||
+        p.numCni?.toLowerCase().includes(q)
+      );
+    }
+
+    this.filtres = result;
   }
 
-  couleurStatut(statut: StatutCandidat): string {
-    const map: Record<StatutCandidat, string> = {
-      'EN_ATTENTE': 'badge-orange',
-      'VALIDE':     'badge-bleu',
-      'REJETE':     'badge-rouge',
-      'ADMIS':      'badge-vert',
-      'NON_ADMIS':  'badge-gris'
-    };
-    return map[statut];
+  ouvrirDetail(c: PreinscriptionDto): void {
+    this.detailOuvert = c;
+  }
+
+  fermerDetail(): void {
+    this.detailOuvert = null;
+  }
+
+  etatLibelle(etat?: string): string {
+    switch (etat) {
+      case 'E': return 'Soumis';
+      case 'V': return 'Vérification';
+      case 'S': return 'Sélectionné';
+      case 'R': return 'Rejeté';
+      default: return '—';
+    }
+  }
+
+  etatCouleur(etat?: string): string {
+    switch (etat) {
+      case 'S': return 'badge-vert';
+      case 'R': return 'badge-rouge';
+      case 'V': return 'badge-bleu';
+      default: return 'badge-orange';
+    }
   }
 }

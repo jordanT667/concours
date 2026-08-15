@@ -1,39 +1,44 @@
 import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { of, tap } from 'rxjs';
 
-const cache = new Map<string, HttpResponse<unknown>>();
+interface CacheEntry {
+  response: HttpResponse<unknown>;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const TTL_MS = 5 * 60 * 1000;
 
 const URLS_EXCLUES = [
   '/auth/login',
   '/auth/refresh',
   '/auth/logout',
   '/inscriptions',
+  '/preinscriptions',
 ];
 
 export const cacheInterceptor: HttpInterceptorFn = (req, next) => {
-  // Ne cacher que les requêtes GET
   if (req.method !== 'GET') {
     cache.clear();
     return next(req);
   }
 
-  // Ne pas cacher les URLs sensibles ou paginées
   const exclure = URLS_EXCLUES.some(url => req.url.includes(url));
   if (exclure) {
     return next(req);
   }
 
-  // Réponse déjà en cache → retourner directement
   const cached = cache.get(req.url);
-  if (cached) {
-    return of(cached.clone());
+  if (cached && (Date.now() - cached.timestamp) < TTL_MS) {
+    return of(cached.response.clone());
   }
 
-  // Laisser partir la requête et sauvegarder la réponse
+  if (cached) cache.delete(req.url);
+
   return next(req).pipe(
     tap(event => {
       if (event instanceof HttpResponse) {
-        cache.set(req.url, event.clone());
+        cache.set(req.url, { response: event.clone(), timestamp: Date.now() });
       }
     })
   );
