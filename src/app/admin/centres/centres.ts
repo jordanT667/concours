@@ -20,6 +20,7 @@ export class Centres implements OnInit {
   isLoading = false;
   formulaireOuvert = false;
   centreSelectionne: CentreExamenDto | null = null;
+  erreur = '';
 
   constructor(private centreService: CentreService) {}
 
@@ -68,14 +69,16 @@ export class Centres implements OnInit {
       next: () => {
         this.fermerFormulaire();
         this.charger();
-      }
+      },
+      error: (err) => { this.erreur = err?.message ?? 'Erreur lors de l\'enregistrement.'; }
     });
   }
 
   supprimer(idCexam: string): void {
     if (!confirm('Confirmer la suppression de ce centre ?')) return;
     this.centreService.delete(idCexam).subscribe({
-      next: () => this.charger()
+      next: () => this.charger(),
+      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; }
     });
   }
 }

@@ -8,7 +8,8 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { STORAGE_KEYS } from '../../../core/services/storage';
 import { DiplomeDto, MentionDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
 import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
@@ -46,7 +47,7 @@ export class StepCursus implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private ref: ConcoursReferenceService,
+    private refCache: ReferenceCacheService,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) {}
@@ -61,27 +62,22 @@ export class StepCursus implements OnInit {
   }
 
   private chargerDiplomes(): void {
-    this.ref.getDiplomes().subscribe({
+    this.refCache.getAllDiplomes().subscribe({
       next: (data) => { this.diplomesOptions = data.filter(d => !d.annuler); },
       error: () => {}
     });
   }
 
   private chargerMentions(): void {
-    this.ref.getMentions().subscribe({
+    this.refCache.getMentions().subscribe({
       next: (data) => { this.mentionsOptions = data; },
       error: () => {}
     });
   }
 
   private genererAnnees(): void {
-    this.ref.getAnnees(30).subscribe({
-      next: (data) => { this.annees = data; },
-      error: () => {
-        const an = new Date().getFullYear();
-        for (let a = an; a >= an - 30; a--) this.annees.push(a);
-      }
-    });
+    const an = new Date().getFullYear();
+    for (let a = an; a >= an - 30; a--) this.annees.push(a);
   }
 
   private buildModalForm(): void {
@@ -96,7 +92,7 @@ export class StepCursus implements OnInit {
 
   private restoreFromStorage(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('enstmo_cursus');
+      const saved = localStorage.getItem(STORAGE_KEYS.CURSUS);
       if (saved) {
         try {
           this.diplomes = JSON.parse(saved);
@@ -166,7 +162,7 @@ export class StepCursus implements OnInit {
   }
 
   private sauvegarderEnLocal(): void {
-    this.autosave.saveNow('enstmo_cursus', this.diplomes);
+    this.autosave.saveNow(STORAGE_KEYS.CURSUS, this.diplomes);
   }
 
   get mf() { return this.modalForm.controls; }
@@ -192,7 +188,7 @@ export class StepCursus implements OnInit {
       return;
     }
     this.sauvegarderEnLocal();
-    localStorage.setItem('enstmo_current_step', '4');
+    localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, '4');
     this.router.navigate(['/inscription/contacts']);
   }
 

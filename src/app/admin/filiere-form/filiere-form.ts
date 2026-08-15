@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { FiliereDto } from '../../core/models/filiere.models';
 import { CursusDto, NiveauDto, EcoleDto } from '../../core/models/referentiel.models';
 import { CursusAdminService } from '../../core/services/cursus-admin.service';
@@ -42,14 +43,31 @@ export class FiliereFormComponent implements OnInit {
     private ecoleSvc: EcoleAdminService
   ) {}
 
+  isLoading = false;
+
   ngOnInit(): void {
     if (this.filiere) {
       this.form = { ...this.filiere };
       this.estModification = true;
     }
-    this.cursusSvc.getAll().subscribe({ next: data => this.allCursus = data.filter(c => !c.annuler) });
-    this.niveauSvc.getAll().subscribe({ next: data => this.allNiveaux = data });
-    this.ecoleSvc.getAll().subscribe({ next: data => this.allEcoles = data.filter(e => !e.annuler) });
+    this.chargerDonnees();
+  }
+
+  chargerDonnees(): void {
+    this.isLoading = true;
+    forkJoin({
+      cursus: this.cursusSvc.getAll(),
+      niveaux: this.niveauSvc.getAll(),
+      ecoles: this.ecoleSvc.getAll()
+    }).subscribe({
+      next: ({ cursus, niveaux, ecoles }) => {
+        this.allCursus = cursus.filter(c => !c.annuler);
+        this.allNiveaux = niveaux;
+        this.allEcoles = ecoles.filter(e => !e.annuler);
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
   }
 
   onCodeInput(): void {

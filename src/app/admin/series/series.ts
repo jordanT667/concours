@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { SerieAdminService } from '../../core/services/serie-admin.service';
+import { DiplomeAdminService } from '../../core/services/diplome-admin.service';
 import { AuthService } from '../../auth/auth';
-import { SerieDto } from '../../core/models/referentiel.models';
+import { SerieDto, DiplomeDto } from '../../core/models/referentiel.models';
 
 @Component({
   selector: 'app-series',
@@ -15,20 +17,41 @@ import { SerieDto } from '../../core/models/referentiel.models';
 export class SeriesAdmin implements OnInit {
   liste: SerieDto[] = [];
   listeFiltree: SerieDto[] = [];
+  allDiplomes: DiplomeDto[] = [];
   isLoading = false;
   recherche = '';
   modalOuverte = false;
   modeEdition = false;
   enSoumission = false;
   idOriginal = '';
-  form: SerieDto = { idSerie: '', libelleFr: '', libelleEn: '', annuler: false };
+  form: SerieDto = { idSerie: '', libelleFr: '', libelleEn: '', annuler: false, codeDiplomes: [] };
   confirmOuverte = false;
   itemASupprimer: SerieDto | null = null;
   erreur = '';
 
-  constructor(private svc: SerieAdminService, public authService: AuthService) {}
+  constructor(
+    private svc: SerieAdminService,
+    private diplomeSvc: DiplomeAdminService,
+    public authService: AuthService
+  ) {}
 
-  ngOnInit(): void { this.charger(); }
+  ngOnInit(): void { this.chargerDonnees(); }
+
+  chargerDonnees(): void {
+    this.isLoading = true;
+    forkJoin({
+      series: this.svc.getAll(),
+      diplomes: this.diplomeSvc.getAll()
+    }).subscribe({
+      next: ({ series, diplomes }) => {
+        this.liste = series;
+        this.allDiplomes = diplomes.filter(d => !d.annuler);
+        this.appliquerFiltres();
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
 
   charger(): void {
     this.isLoading = true;
@@ -47,7 +70,7 @@ export class SeriesAdmin implements OnInit {
 
   ouvrirCreation(): void {
     this.modeEdition = false;
-    this.form = { idSerie: '', libelleFr: '', libelleEn: '', annuler: false };
+    this.form = { idSerie: '', libelleFr: '', libelleEn: '', annuler: false, codeDiplomes: [] };
     this.erreur = '';
     this.modalOuverte = true;
   }
@@ -55,10 +78,17 @@ export class SeriesAdmin implements OnInit {
   ouvrirEdition(c: SerieDto): void {
     this.modeEdition = true;
     this.idOriginal = c.idSerie;
-    this.form = { ...c };
+    this.form = { ...c, codeDiplomes: [...(c.codeDiplomes ?? [])] };
     this.erreur = '';
     this.modalOuverte = true;
   }
+
+  toggleItem(arr: string[], val: string): void {
+    const idx = arr.indexOf(val);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
+  }
+
+  isSelected(arr: string[], val: string): boolean { return arr.includes(val); }
 
   fermerModal(): void { this.modalOuverte = false; this.erreur = ''; }
 
@@ -70,9 +100,33 @@ export class SeriesAdmin implements OnInit {
       ? this.svc.update(this.idOriginal, this.form)
       : this.svc.create(this.form);
     op$.subscribe({
-      next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
+      next: () => {
+        const diplomesCoches = new Set(this.form.codeDiplomes ?? []);
+        const idSerie = this.form.idSerie;
+
+        for (const diplome of this.allDiplomes) {
+          const seriesDuDiplome = this.getSeriesForDiplome(diplome.idDiplome);
+          const contientSerie = seriesDuDiplome.includes(idSerie);
+
+          if (diplomesCoches.has(diplome.idDiplome) && !contientSerie) {
+            this.svc.updateDiplomes(diplome.idDiplome, [...seriesDuDiplome, idSerie]).subscribe();
+          } else if (!diplomesCoches.has(diplome.idDiplome) && contientSerie) {
+            this.svc.updateDiplomes(diplome.idDiplome, seriesDuDiplome.filter(s => s !== idSerie)).subscribe();
+          }
+        }
+
+        this.enSoumission = false;
+        this.fermerModal();
+        setTimeout(() => this.charger(), 300);
+      },
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? 'Une erreur est survenue.'; }
     });
+  }
+
+  private getSeriesForDiplome(idDiplome: string): string[] {
+    return this.liste
+      .filter(s => (s.codeDiplomes ?? []).includes(idDiplome))
+      .map(s => s.idSerie);
   }
 
   toggleActif(c: SerieDto, event: Event): void {
@@ -91,7 +145,7 @@ export class SeriesAdmin implements OnInit {
     if (!this.itemASupprimer) return;
     this.svc.delete(this.itemASupprimer.idSerie).subscribe({
       next: () => { this.confirmOuverte = false; this.itemASupprimer = null; this.charger(); },
-      error: (err) => { this.erreur = err?.message ?? err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 

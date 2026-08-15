@@ -42,8 +42,8 @@ export interface PreinscriptionDto {
   // Handicap & Loisirs
   handicap?: boolean;
   typeHandicap?: string;
-  loisir1?: string;
-  loisir2?: string;
+  loisir1?: string | null;
+  loisir2?: string | null;
   activiteSportive?: boolean;
   sport1?: string;
   sport2?: string;

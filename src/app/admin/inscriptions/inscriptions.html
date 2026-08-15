@@ -3,127 +3,182 @@
   <!-- En-tête -->
   <div class="page-header">
     <div>
-      <h2 class="page-titre">Inscriptions au concours</h2>
-      <p class="page-sous-titre">ESTM — Année académique 2026/2027</p>
+      <h2 class="page-titre">Inscriptions</h2>
+      <p class="page-sous-titre">{{ filtrees.length }} inscription(s) trouvée(s)</p>
     </div>
-    <button type="button" class="btn-export" (click)="exporterCSV()">
-      <i class="fas fa-download"></i> Exporter CSV
-    </button>
+    <div class="header-actions">
+      <button type="button" class="btn-refresh" (click)="charger(true)" title="Actualiser" aria-label="Actualiser la liste">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+      <button type="button" class="btn-export" (click)="exporterCSV()" aria-label="Exporter en CSV">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Exporter CSV
+      </button>
+    </div>
   </div>
 
   @if (erreurAction) {
-    <div class="alerte-erreur">
-      <i class="fa-solid fa-triangle-exclamation"></i> {{ erreurAction }}
+    <div class="alerte-erreur" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      {{ erreurAction }}
     </div>
   }
 
-  @if (inscriptionsState$ | async; as state) {
+  @if (chargement) {
+    <app-inscriptions-skeleton></app-inscriptions-skeleton>
+  } @else if (erreur) {
+    <div class="alerte-erreur" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      {{ erreur }}
+      <button type="button" (click)="charger(true)">Réessayer</button>
+    </div>
+  } @else {
 
-    @switch (state.dataState) {
+    <!-- Filtres -->
+    <div class="filtres-bar">
+      <div class="recherche-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input
+          type="text"
+          class="input-recherche"
+          placeholder="Rechercher par nom, matricule, email..."
+          aria-label="Rechercher une inscription"
+          [(ngModel)]="recherche"
+          (input)="appliquerFiltres()"
+        />
+      </div>
 
-      @case ('LOADING') {
-        <app-inscriptions-skeleton></app-inscriptions-skeleton>
+      <select class="select-filtre" [(ngModel)]="filtreEtat" (change)="appliquerFiltres()" aria-label="Filtrer par état">
+        <option value="TOUS">Tous les états</option>
+        <option value="E">Soumis</option>
+        <option value="V">En vérification</option>
+        <option value="S">Sélectionné</option>
+        <option value="R">Rejeté</option>
+      </select>
+
+      <select class="select-filtre" [(ngModel)]="filtrePaiement" (change)="appliquerFiltres()" aria-label="Filtrer par paiement">
+        <option value="TOUS">Paiement</option>
+        <option value="PAYE">Payé</option>
+        <option value="NON_PAYE">Non payé</option>
+      </select>
+
+      @if (centres.length > 0) {
+        <select class="select-filtre" [(ngModel)]="filtreCentre" (change)="appliquerFiltres()" aria-label="Filtrer par centre">
+          <option value="TOUS">Tous les centres</option>
+          @for (c of centres; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
       }
 
-      @case ('ERROR') {
-        <div class="alerte-erreur">
-          <i class="fa-solid fa-triangle-exclamation"></i> {{ state.error }}
-          <button type="button" (click)="chargerInscriptions()">Réessayer</button>
-        </div>
-      }
+      <select class="select-filtre select-pagesize" [(ngModel)]="pageSize" (change)="appliquerFiltres()" aria-label="Éléments par page">
+        <option [ngValue]="25">25 / page</option>
+        <option [ngValue]="50">50 / page</option>
+        <option [ngValue]="100">100 / page</option>
+      </select>
+    </div>
 
-      @case ('LOADED') {
+    <!-- Tableau -->
+    <div class="table-wrapper">
+      <table class="table" aria-label="Liste des inscriptions">
+        <thead>
+          <tr>
+            <th scope="col" class="th-sort" (click)="trier('matricule')" role="columnheader" [attr.aria-sort]="triColonne === 'matricule' ? (triAsc ? 'ascending' : 'descending') : null">
+              Matricule
+              @if (triColonne === 'matricule') { <span class="tri-icon" aria-hidden="true">{{ triAsc ? '↑' : '↓' }}</span> }
+            </th>
+            <th scope="col" class="th-sort" (click)="trier('nom')" role="columnheader" [attr.aria-sort]="triColonne === 'nom' ? (triAsc ? 'ascending' : 'descending') : null">
+              Candidat
+              @if (triColonne === 'nom') { <span class="tri-icon" aria-hidden="true">{{ triAsc ? '↑' : '↓' }}</span> }
+            </th>
+            <th scope="col">Formation</th>
+            <th scope="col">Centre</th>
+            <th scope="col" class="th-sort" (click)="trier('etatPreins')" role="columnheader" [attr.aria-sort]="triColonne === 'etatPreins' ? (triAsc ? 'ascending' : 'descending') : null">
+              État
+              @if (triColonne === 'etatPreins') { <span class="tri-icon" aria-hidden="true">{{ triAsc ? '↑' : '↓' }}</span> }
+            </th>
+            <th scope="col">Paiement</th>
+            <th scope="col" class="th-sort" (click)="trier('datePreins')" role="columnheader" [attr.aria-sort]="triColonne === 'datePreins' ? (triAsc ? 'ascending' : 'descending') : null">
+              Date
+              @if (triColonne === 'datePreins') { <span class="tri-icon" aria-hidden="true">{{ triAsc ? '↑' : '↓' }}</span> }
+            </th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ins of pageItems; track ins.idPreins) {
+            <tr class="row-clickable" (click)="voirDetail(ins)">
+              <td class="td-mono">{{ ins.matricule || '—' }}</td>
+              <td>
+                <div class="candidat-cell">
+                  <span class="candidat-nom">{{ ins.nom }} {{ ins.prenom }}</span>
+                  <span class="candidat-email">{{ ins.email || '—' }}</span>
+                </div>
+              </td>
+              <td>{{ ins.choixFormation1 || '—' }}</td>
+              <td>{{ ins.centredexamen || '—' }}</td>
+              <td>
+                <span [class]="'badge ' + (ins.etatPreins | etatCouleur)">{{ ins.etatPreins | etatLibelle }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <button type="button"
+                  [class]="ins.paye ? 'btn-paiement btn-paiement-ok' : 'btn-paiement btn-paiement-non'"
+                  (click)="togglePaiement(ins, $event)"
+                  [disabled]="paiementEnCours.has(ins.idPreins!)"
+                  [attr.aria-label]="ins.paye ? 'Annuler le paiement de ' + ins.nom : 'Marquer ' + ins.nom + ' comme payé'">
+                  @if (ins.paye) {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                  } @else {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+                  }
+                  {{ ins.paye ? 'Payé' : 'Non payé' }}
+                </button>
+              </td>
+              <td>{{ ins.datePreins || '—' }}</td>
+              <td class="td-actions" (click)="$event.stopPropagation()">
+                @if (ins.etatPreins === 'E' || ins.etatPreins === 'V') {
+                  <button type="button" class="btn-action btn-valider" title="Sélectionner" aria-label="Sélectionner ce candidat" (click)="changerEtat(ins, 'S', $event)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+                  </button>
+                  <button type="button" class="btn-action btn-rejeter" title="Rejeter" aria-label="Rejeter ce candidat" (click)="changerEtat(ins, 'R', $event)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="td-vide">Aucune inscription trouvée</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-        <!-- Filtres -->
-        <div class="filtres-bar">
-
-          <input
-            type="text"
-            class="input-recherche"
-            placeholder="Rechercher par nom, prénom, N° reçu..."
-            [(ngModel)]="recherche"
-            (input)="appliquerFiltres()"
-          />
-
-          <select class="select-filtre"
-            [(ngModel)]="filtreStatut"
-            (change)="appliquerFiltres()">
-            <option value="TOUS">Tous les statuts</option>
-            @for (s of statuts; track s) {
-              <option [value]="s">{{ libelleStatut(s) }}</option>
-            }
-          </select>
-
-          <select class="select-filtre"
-            [(ngModel)]="filtreCentre"
-            (change)="appliquerFiltres()">
-            <option value="TOUS">Tous les centres</option>
-            @for (c of centres; track c) {
-              <option [value]="c">{{ c }}</option>
-            }
-          </select>
-
-        </div>
-
-        <!-- Tableau -->
-        <div class="table-wrapper">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>N° Reçu</th>
-                <th>Candidat</th>
-                <th>Filière</th>
-                <th>Centre examen</th>
-                <th>Centre dépôt</th>
-                <th>Date inscription</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (ins of inscriptionsFiltrees; track ins.id) {
-                <tr (click)="voirDetail(ins.id)" class="row-clickable">
-                  <td class="td-recu">{{ ins.numeroRecu }}</td>
-                  <td>
-                    <div class="candidat-info">
-                      <span class="candidat-nom">{{ ins.candidat.nom }} {{ ins.candidat.prenom }}</span>
-                      <span class="candidat-email">{{ ins.candidat.email }}</span>
-                    </div>
-                  </td>
-                  <td>{{ ins.filiere.libelleFiliereFr }}</td>
-                  <td>{{ ins.centreExamen.libeleFiliereFr }}</td>
-                  <td>{{ ins.centreDepot.libeleFiliereFr }}</td>
-                  <td>{{ ins.dateInscription | date:'dd/MM/yyyy' }}</td>
-                  <td>
-                    <span [class]="'badge ' + couleurStatut(ins.statut)">
-                      {{ libelleStatut(ins.statut) }}
-                    </span>
-                  </td>
-                  <td class="td-actions">
-                    @if (authService.isAdmin() && (ins.statut === 'SOUMISE' ||
-                         ins.statut === 'EN_COURS_VERIFICATION')) {
-                      <button type="button" class="btn-valider"
-                        (click)="valider(ins.id, $event)"
-                        title="Valider"><i class="fas fa-check"></i></button>
-                      <button type="button" class="btn-rejeter"
-                        (click)="rejeter(ins.id, $event)"
-                        title="Rejeter"><i class="fas fa-times"></i></button>
-                    }
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="8" class="td-vide">Aucune inscription trouvée</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-      }
-
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <nav class="pagination" aria-label="Navigation entre les pages">
+        <button type="button" class="page-btn" [disabled]="page === 1" (click)="allerPage(page - 1)" aria-label="Page précédente">&laquo;</button>
+        @for (p of pagesVisibles; track p) {
+          <button type="button" class="page-btn" [class.active]="p === page" (click)="allerPage(p)" [attr.aria-current]="p === page ? 'page' : null">{{ p }}</button>
+        }
+        <button type="button" class="page-btn" [disabled]="page === totalPages" (click)="allerPage(page + 1)" aria-label="Page suivante">&raquo;</button>
+        <span class="page-info">{{ page }}/{{ totalPages }} ({{ filtrees.length }} résultats)</span>
+      </nav>
     }
 
   }
+
+  <!-- Dialog de confirmation -->
+  <app-confirm-dialog
+    [ouvert]="confirmOuverte"
+    [titre]="confirmTitre"
+    [message]="confirmMessage"
+    [detail]="confirmDetail"
+    [texteBouton]="confirmTexteBouton"
+    [classBouton]="confirmClassBouton"
+    (confirmer)="onConfirmer()"
+    (annuler)="onAnnuler()"
+  ></app-confirm-dialog>
 
 </div>

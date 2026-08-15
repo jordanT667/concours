@@ -13,36 +13,35 @@ export class StatsOverview {
 
   @Input() stats!: DashboardStats;
 
-  // Configuration des 4 cartes
   get cartes() {
     return [
       {
         valeur: this.stats.totalInscrits.toString(),
         label: 'Total inscrits',
         couleur: 'bleu',
-        icone: '',
-        evolution: '+12 cette semaine'
+        evolution: `${this.stats.tauxValidation}% traités`
       },
       {
         valeur: this.stats.totalValides.toString(),
-        label: 'Dossiers validés',
+        label: 'Sélectionnés',
         couleur: 'vert',
-        icone: '',
-        evolution: `${this.stats.tauxValidation}% de validation`
+        evolution: this.stats.totalInscrits > 0
+          ? `${Math.round((this.stats.totalValides / this.stats.totalInscrits) * 100)}% du total`
+          : '—'
       },
       {
         valeur: this.stats.totalEnAttente.toString(),
         label: 'En attente',
         couleur: 'orange',
-
         evolution: 'À traiter'
       },
       {
         valeur: this.stats.totalRejetes.toString(),
-        label: 'Dossiers rejetés',
+        label: 'Rejetés',
         couleur: 'rouge',
-
-        evolution: 'Notifiés par SMS'
+        evolution: this.stats.totalInscrits > 0
+          ? `${Math.round((this.stats.totalRejetes / this.stats.totalInscrits) * 100)}% du total`
+          : '—'
       },
     ];
   }

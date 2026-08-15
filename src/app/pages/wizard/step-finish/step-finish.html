@@ -5,7 +5,7 @@
        ═══════════════════════════════════════════════════════════════════ -->
   @if (!enregistrementReussi) {
 
-    <!-- Bandeau info doux -->
+    <!-- Bandeau info -->
     <div class="info-banner">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="info-icon">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
@@ -16,16 +16,26 @@
       </div>
     </div>
 
-    <!-- Récapitulatif pleine largeur -->
+    <!-- Alerte données incomplètes -->
+    @if (donneesIncompletes) {
+      <div class="alerte-incomplete">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+        </svg>
+        <span>Certains champs obligatoires semblent manquants. Revenez aux étapes précédentes pour compléter votre dossier.</span>
+      </div>
+    }
+
+    <!-- Récapitulatif -->
     <div class="recap-container">
 
-      <!-- Identification -->
+      <!-- ══ STEP IDENTIFICATION ══ -->
+
+      <!-- Section : État civil -->
       <section class="recap-section">
         <div class="section-header">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-          </svg>
-          <h4>Identification</h4>
+          <i class="fa-solid fa-id-card"></i>
+          <h4>État civil</h4>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -35,27 +45,60 @@
             </div>
             <div class="info-item">
               <span class="item-label">Sexe</span>
-              <span class="item-value">{{ identification?.sexe || '—' }}</span>
+              <span class="item-value">{{ identification?.sexe === 'M' ? 'Masculin' : 'Féminin' }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Date de naissance</span>
-              <span class="item-value">
-                {{ identification?.dateNaissance || '—' }}
-                @if (identification?.lieuNaissance) { à {{ identification.lieuNaissance }} }
-              </span>
+              <span class="item-value">{{ identification?.dateNaissance || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Lieu de naissance</span>
+              <span class="item-value">{{ identification?.lieuNaissance || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">N° CNI</span>
+              <span class="item-value">{{ identification?.numeroCNI || '—' }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Situation matrimoniale</span>
               <span class="item-value">{{ identification?.situationMatrimoniale || '—' }}</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Origine géographique -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-globe"></i>
+          <h4>Origine géographique</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
             <div class="info-item">
-              <span class="item-label">Nationalité / Région</span>
-              <span class="item-value">
-                {{ identification?.paysNationalite || '—' }}
-                @if (identification?.regionOrigine) { — {{ identification.regionOrigine }} }
-                @if (identification?.departementOrigine) { ({{ identification.departementOrigine }}) }
-              </span>
+              <span class="item-label">Pays de nationalité</span>
+              <span class="item-value">{{ labels.pays || identification?.paysNationalite || '—' }}</span>
             </div>
+            <div class="info-item">
+              <span class="item-label">Région d'origine</span>
+              <span class="item-value">{{ identification?.regionOrigine || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Département d'origine</span>
+              <span class="item-value">{{ identification?.departementOrigine || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Coordonnées -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-address-book"></i>
+          <h4>Coordonnées</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
             <div class="info-item">
               <span class="item-label">Adresse</span>
               <span class="item-value">{{ identification?.adresse || '—' }}</span>
@@ -65,82 +108,150 @@
               <span class="item-value">{{ identification?.telephone || '—' }}</span>
             </div>
             <div class="info-item">
-              <span class="item-label">E-mail</span>
+              <span class="item-label">Email</span>
               <span class="item-value">{{ identification?.email || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">N° CNI</span>
-              <span class="item-value">{{ identification?.numeroCNI || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Langues parlées</span>
-              <span class="item-value">{{ langues || '—' }}</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Formation -->
+      <!-- Section : Langues -->
       <section class="recap-section">
         <div class="section-header">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/>
-          </svg>
-          <h4>Formation & Concours</h4>
+          <i class="fa-solid fa-language"></i>
+          <h4>Langues</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">1ère langue</span>
+              <span class="item-value">{{ labels.langue1 || identification?.premiereLangue || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">2ème langue</span>
+              <span class="item-value">{{ labels.langue2 || identification?.deuxiemeLangue || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ STEP SPÉCIALISATION ══ -->
+
+      <!-- Section : Choix de formation -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <h4>Choix de formation</h4>
         </div>
         <div class="section-body">
           <div class="info-grid">
             <div class="info-item">
               <span class="item-label">Cursus</span>
-              <span class="item-value">{{ specialisation?.cursus || '—' }}</span>
+              <span class="item-value">{{ labels.cursus || specialisation?.cursus || '—' }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Niveau</span>
-              <span class="item-value">{{ specialisation?.niveau || '—' }}</span>
+              <span class="item-value">{{ labels.niveau || specialisation?.niveau || '—' }}</span>
             </div>
             <div class="info-item">
-              <span class="item-label">Domaine de formation</span>
-              <span class="item-value">{{ specialisation?.domaineFormation || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Diplôme d'admission</span>
-              <span class="item-value">
-                {{ specialisation?.diplomeAdmission || '—' }}
-                @if (specialisation?.serieDiplome) { — série {{ specialisation.serieDiplome }} }
-                @if (specialisation?.mentionDiplome) { ({{ specialisation.mentionDiplome }}) }
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Obtenu en</span>
-              <span class="item-value">
-                {{ specialisation?.anneeObtentionDip || '—' }}
-                @if (specialisation?.etablissementObtention) { — {{ specialisation.etablissementObtention }} }
-                @if (specialisation?.paysObtention) { ({{ specialisation.paysObtention }}) }
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Centre de concours</span>
-              <span class="item-value">{{ specialisation?.centreConcours || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Centre de dépôt</span>
-              <span class="item-value">{{ specialisation?.centreDepotDossier || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">N° reçu CCA / Banque</span>
-              <span class="item-value">{{ specialisation?.numeroRecuCCA || '—' }} — {{ specialisation?.banque || '—' }}</span>
+              <span class="item-label">Filière</span>
+              <span class="item-value">{{ labels.filiere || specialisation?.filiere || '—' }}</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Parcours scolaire -->
+      <!-- Section : Diplôme d'admission -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-scroll"></i>
+          <h4>Diplôme d'admission</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">Diplôme</span>
+              <span class="item-value">{{ labels.diplome || specialisation?.diplomeAdmission || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Série</span>
+              <span class="item-value">{{ specialisation?.serieDiplome || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Mention</span>
+              <span class="item-value">{{ labels.mention || specialisation?.mentionDiplome || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Année d'obtention</span>
+              <span class="item-value">{{ specialisation?.anneeObtentionDip || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Pays d'obtention</span>
+              <span class="item-value">{{ labels.paysObtention || specialisation?.paysObtention || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Établissement</span>
+              <span class="item-value">{{ specialisation?.etablissementObtention || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Année BEPC/GCEOL</span>
+              <span class="item-value">{{ specialisation?.anneeBEPC || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Concours -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-file-pen"></i>
+          <h4>Concours</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">Centre d'examen</span>
+              <span class="item-value">{{ labels.centreConcours || specialisation?.centreConcours || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Épreuve écrite</span>
+              <span class="item-value">{{ specialisation?.choixEpreuve || 'RAS' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Site dépôt dossier</span>
+              <span class="item-value">{{ labels.centreDepot || specialisation?.centreDepotDossier || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Paiement -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-credit-card"></i>
+          <h4>Paiement</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">Banque</span>
+              <span class="item-value">{{ labels.banque || specialisation?.banque || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">N° Reçu CCA</span>
+              <span class="item-value">{{ specialisation?.numeroRecuCCA || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ STEP CURSUS ══ -->
+
+      <!-- Section : Parcours scolaire -->
       @if (cursus && cursus.length > 0) {
         <section class="recap-section">
           <div class="section-header">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
-            </svg>
+            <i class="fa-solid fa-book-open"></i>
             <h4>Parcours scolaire</h4>
           </div>
           <div class="section-body">
@@ -168,47 +279,103 @@
         </section>
       }
 
-      <!-- Informations complémentaires -->
+      <!-- ══ STEP CONTACTS ══ -->
+
+      <!-- Section : Activités & Loisirs -->
       <section class="recap-section">
         <div class="section-header">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
-          </svg>
-          <h4>Informations complémentaires</h4>
+          <i class="fa-solid fa-masks-theater"></i>
+          <h4>Activités & Loisirs</h4>
         </div>
         <div class="section-body">
           <div class="info-grid">
             <div class="info-item">
-              <span class="item-label">Handicap signalé</span>
+              <span class="item-label">Loisirs</span>
+              <span class="item-value">{{ loisirs || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Sports</span>
+              <span class="item-value">{{ sportsPratiques || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Situation personnelle -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-user-gear"></i>
+          <h4>Situation personnelle</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">Handicap</span>
               <span class="item-value">{{ contacts.handicap || 'Aucun' }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Profession</span>
               <span class="item-value">{{ contacts.profession || '—' }}</span>
             </div>
+            @if (contacts.descriptionActiviteProf) {
+              <div class="info-item">
+                <span class="item-label">Description</span>
+                <span class="item-value">{{ contacts.descriptionActiviteProf }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Contacts parentaux -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-people-roof"></i>
+          <h4>Contacts parentaux</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
             <div class="info-item">
-              <span class="item-label">Sports pratiqués</span>
-              <span class="item-value">{{ sportsPratiques || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Loisirs</span>
-              <span class="item-value">{{ loisirs || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="item-label">Père</span>
+              <span class="item-label">Père / Tuteur</span>
               <span class="item-value">{{ contacts.nomPere || '—' }} @if (contacts.telPere) { — {{ contacts.telPere }} }</span>
             </div>
             <div class="info-item">
-              <span class="item-label">Mère</span>
+              <span class="item-label">Mère / Tutrice</span>
               <span class="item-value">{{ contacts.nomMere || '—' }} @if (contacts.telMere) { — {{ contacts.telMere }} }</span>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- Section : Personne à contacter en cas d'urgence -->
+      <section class="recap-section">
+        <div class="section-header">
+          <i class="fa-solid fa-phone-volume"></i>
+          <h4>Personne d'urgence</h4>
+        </div>
+        <div class="section-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="item-label">Nom</span>
+              <span class="item-value">{{ contacts.nomPersonneContact || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="item-label">Téléphone</span>
+              <span class="item-value">{{ contacts.telPersonneContact || '—' }}</span>
+            </div>
+            @if (contacts.emailPersonneContact) {
+              <div class="info-item">
+                <span class="item-label">Email</span>
+                <span class="item-value">{{ contacts.emailPersonneContact }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
     </div>
 
-    <!-- Zone d'action sticky -->
+    <!-- Zone d'action -->
     <div class="action-zone">
       <label class="attestation">
         <input type="checkbox" [(ngModel)]="attestation"/>
@@ -234,7 +401,7 @@
         <button
           type="button"
           class="btn-submit"
-          [disabled]="enCours || !attestation"
+          [disabled]="enCours || !attestation || donneesIncompletes || !ecoleChargee"
           (click)="onEnregistrer()"
         >
           @if (enCours) {
@@ -299,6 +466,10 @@
           </div>
         }
 
+        @if (copieFeedback) {
+          <div class="copie-feedback">{{ copieFeedback }}</div>
+        }
+
         <div class="credential-warning">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
@@ -337,11 +508,16 @@
 
       <!-- Actions post-soumission -->
       <div class="post-actions">
-        <button type="button" class="btn-pdf" (click)="onRetelecharger()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
-          </svg>
-          Télécharger ma fiche PDF
+        <button type="button" class="btn-pdf" [disabled]="pdfEnCours" (click)="onRetelecharger()">
+          @if (pdfEnCours) {
+            <span class="spinner spinner-sm"></span>
+            Génération...
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+            </svg>
+            Télécharger ma fiche PDF
+          }
         </button>
         <button type="button" class="btn-suivi" routerLink="/suivi">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

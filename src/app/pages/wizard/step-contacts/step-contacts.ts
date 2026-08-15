@@ -8,11 +8,13 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
-import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
+import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { STORAGE_KEYS } from '../../../core/services/storage';
 import { LoisirDto, SportDto, HandicapDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
 import { AutosaveService, AutosaveStatus } from '../../../core/services/autosave.service';
 import { AutosaveIndicator } from '../../../shared/autosave-indicator/autosave-indicator';
+
 @Component({
   selector: 'app-step-contacts',
   standalone: true,
@@ -28,13 +30,15 @@ export class StepContacts implements OnInit, OnDestroy {
   handicapOptions: HandicapDto[] = [];
   professionOptions = ['NON', 'Enseignant', 'Médecin', 'Ingénieur', 'Avocat', 'Commerçant', 'Autre'];
 
+  erreurChargement = '';
+
   autosaveStatus$!: Observable<AutosaveStatus>;
   private formSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private ref: ConcoursReferenceService,
+    private refCache: ReferenceCacheService,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) { }
@@ -45,22 +49,22 @@ export class StepContacts implements OnInit, OnDestroy {
     this.chargerDonneesReference();
     this.restoreFromStorage();
     this.formSub = this.form.valueChanges.subscribe(val => {
-      if (this.form.dirty) this.autosave.schedule('enstmo_contacts', val);
+      if (this.form.dirty) this.autosave.schedule(STORAGE_KEYS.CONTACTS, val);
     });
   }
 
   private chargerDonneesReference(): void {
-    this.ref.getLoisirs().subscribe({
+    this.refCache.getLoisirs().subscribe({
       next: (data) => { this.loisirOptions = data.filter(l => !l.annuler); },
-      error: () => {}
+      error: () => { this.erreurChargement = 'Impossible de charger les loisirs.'; }
     });
-    this.ref.getSports().subscribe({
+    this.refCache.getSports().subscribe({
       next: (data) => { this.sportOptions = data.filter(s => !s.annuler); },
-      error: () => {}
+      error: () => { this.erreurChargement = 'Impossible de charger les sports.'; }
     });
-    this.ref.getHandicaps().subscribe({
+    this.refCache.getHandicaps().subscribe({
       next: (data) => { this.handicapOptions = data.filter(h => !h.annuler); },
-      error: () => {}
+      error: () => { this.erreurChargement = 'Impossible de charger les handicaps.'; }
     });
   }
 
@@ -74,17 +78,20 @@ export class StepContacts implements OnInit, OnDestroy {
       activite2: [''],
       handicap: [''],
       profession: ['NON', Validators.required],
+      descriptionActiviteProf: [''],
       nomPere: ['', Validators.required],
-      nomMere: ['', Validators.required],
       telPere: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
-      emailPere: ['', Validators.email],
+      nomMere: ['', Validators.required],
       telMere: ['', Validators.pattern(/^[0-9]{9}$/)],
+      nomPersonneContact: ['', Validators.required],
+      telPersonneContact: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
+      emailPersonneContact: ['', Validators.email],
     });
   }
 
   private restoreFromStorage(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = localStorage.getItem('enstmo_contacts');
+      const saved = localStorage.getItem(STORAGE_KEYS.CONTACTS);
       if (saved) {
         try {
           const data = JSON.parse(saved);
@@ -94,11 +101,6 @@ export class StepContacts implements OnInit, OnDestroy {
         }
       }
     }
-  }
-
-  onLoisirChange(event: Event): void {
-    const val = (event.target as HTMLSelectElement).value;
-    this.logger.log('Loisir selectionné:', val);
   }
 
   isInvalid(field: string): boolean {
@@ -115,8 +117,8 @@ export class StepContacts implements OnInit, OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
-    this.autosave.saveNow('enstmo_contacts', this.form.value);
-    if (typeof window !== 'undefined') localStorage.setItem('enstmo_current_step', '5');
+    this.autosave.saveNow(STORAGE_KEYS.CONTACTS, this.form.value);
+    if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, '5');
     this.router.navigate(['/inscription/finish']);
   }
 

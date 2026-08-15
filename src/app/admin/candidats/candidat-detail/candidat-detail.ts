@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CandidatsService, CandidatDto } from '../../../core/services/candidats';
+import { AdminDataService } from '../../services/admin-data.service';
+import { PreinscriptionDto } from '../../../core/models/preinscription.models';
 
 @Component({
   selector: 'app-candidat-detail',
@@ -12,15 +13,23 @@ import { CandidatsService, CandidatDto } from '../../../core/services/candidats'
 })
 export class CandidatDetail implements OnInit {
 
-  candidat: CandidatDto | null = null;
-  isLoading = true;
+  candidat: PreinscriptionDto | null = null;
+  chargement = true;
   erreur = '';
+  private currentId = 0;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private candidatsService: CandidatsService
+    private adminData: AdminDataService
   ) {}
+
+  get anneeAcademique(): string {
+    const y = new Date().getFullYear();
+    const m = new Date().getMonth();
+    const start = m >= 7 ? y : y - 1;
+    return `${start}/${start + 1}`;
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -28,20 +37,22 @@ export class CandidatDetail implements OnInit {
       this.router.navigate(['/admin/candidats']);
       return;
     }
-    this.charger(id);
+    this.currentId = id;
+    this.charger();
   }
 
-  charger(id: number): void {
-    this.isLoading = true;
+  charger(): void {
+    this.chargement = true;
     this.erreur = '';
-    this.candidatsService.getById(id).subscribe({
-      next: (data) => {
-        this.candidat = data;
-        this.isLoading = false;
+    this.adminData.getById(this.currentId, this.anneeAcademique).subscribe({
+      next: (found) => {
+        this.candidat = found ?? null;
+        if (!this.candidat) this.erreur = 'Candidat introuvable.';
+        this.chargement = false;
       },
       error: () => {
         this.erreur = 'Impossible de charger ce candidat.';
-        this.isLoading = false;
+        this.chargement = false;
       }
     });
   }
@@ -50,14 +61,22 @@ export class CandidatDetail implements OnInit {
     this.router.navigate(['/admin/candidats']);
   }
 
-  libelleStatut(statut: CandidatDto['statut']): string {
-    const map: Record<CandidatDto['statut'], string> = {
-      'EN_ATTENTE': 'En attente',
-      'VALIDE': 'Validé',
-      'REJETE': 'Rejeté',
-      'ADMIS': 'Admis',
-      'NON_ADMIS': 'Non admis'
-    };
-    return map[statut];
+  etatLibelle(etat?: string): string {
+    switch (etat) {
+      case 'E': return 'Soumis';
+      case 'V': return 'Vérification';
+      case 'S': return 'Sélectionné';
+      case 'R': return 'Rejeté';
+      default: return '—';
+    }
+  }
+
+  etatCouleur(etat?: string): string {
+    switch (etat) {
+      case 'S': return 'badge-vert';
+      case 'R': return 'badge-rouge';
+      case 'V': return 'badge-bleu';
+      default: return 'badge-orange';
+    }
   }
 }

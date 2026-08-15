@@ -54,15 +54,15 @@
 
 @if (modalOuverte) {
   <div class="modal-overlay" (click)="fermerModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal-large" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3 class="modal-titre">{{ modeEdition ? 'Modifier la serie' : 'Ajouter une serie' }}</h3>
+        <h3 class="modal-titre">{{ modeEdition ? 'Modifier la série' : 'Ajouter une série' }}</h3>
         <button class="modal-fermer" (click)="fermerModal()"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
         @if (erreur) { <div class="alerte-erreur">{{ erreur }}</div> }
         <div class="champ">
-          <label class="label">Code serie <span class="requis">*</span></label>
+          <label class="label">Code série <span class="requis">*</span></label>
           <input type="text" class="input" placeholder="ex: S1" maxlength="15"
             [(ngModel)]="form.idSerie" [disabled]="modeEdition" style="text-transform:uppercase"/>
           <span class="aide">Max 15 caractères</span>
@@ -74,6 +74,20 @@
         <div class="champ">
           <label class="label">Libellé EN <span class="requis">*</span></label>
           <input type="text" class="input" placeholder="ex: Scientific series" [(ngModel)]="form.libelleEn"/>
+        </div>
+        <div class="champ">
+          <label class="label">Diplômes associés</label>
+          <div class="checkboxes">
+            @for (d of allDiplomes; track d.idDiplome) {
+              <label class="checkbox-item">
+                <input type="checkbox" [checked]="isSelected(form.codeDiplomes ?? [], d.idDiplome)"
+                  (change)="toggleItem(form.codeDiplomes ?? [], d.idDiplome)"/>
+                {{ d.libelleFr }}
+              </label>
+            } @empty {
+              <span class="aide">Aucun diplôme disponible</span>
+            }
+          </div>
         </div>
       </div>
       <div class="modal-footer">

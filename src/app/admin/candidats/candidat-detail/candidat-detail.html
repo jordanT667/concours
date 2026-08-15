@@ -1,26 +1,34 @@
 <div class="detail-page">
 
-  <div class="detail-header">
-    <button class="btn-retour" type="button" (click)="retour()">
-      &lsaquo; Retour
+  <div class="detail-top">
+    <button class="btn-retour" type="button" (click)="retour()" title="Retour">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+      Retour aux candidats
     </button>
-    <h2 class="detail-titre">Détail du candidat</h2>
   </div>
 
-  @if (erreur) {
+  @if (chargement) {
+    <div class="detail-loading">Chargement...</div>
+  } @else if (erreur) {
     <div class="alert-erreur">
       {{ erreur }}
+      <button type="button" (click)="charger()">Réessayer</button>
     </div>
   } @else if (candidat) {
 
     <div class="detail-card">
-      <div class="detail-statut">
-        <span class="badge badge-bleu">{{ libelleStatut(candidat.statut) }}</span>
-        <span class="detail-numero">ID : {{ candidat.id }}</span>
+
+      <div class="detail-hero">
+        <div class="hero-avatar">{{ candidat.prenom[0] || '?' }}{{ candidat.nom[0] || '?' }}</div>
+        <div class="hero-info">
+          <h2>{{ candidat.prenom }} {{ candidat.nom }}</h2>
+          <p class="hero-matricule">{{ candidat.matricule || '—' }}</p>
+        </div>
+        <span [class]="'badge ' + etatCouleur(candidat.etatPreins)">{{ etatLibelle(candidat.etatPreins) }}</span>
       </div>
 
       <div class="detail-section">
-        <h3>Informations personnelles</h3>
+        <h3>Identité</h3>
         <div class="detail-grid">
           <div class="detail-item">
             <span class="detail-label">Nom</span>
@@ -31,19 +39,98 @@
             <span class="detail-val">{{ candidat.prenom }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Email</span>
-            <span class="detail-val">{{ candidat.email }}</span>
+            <span class="detail-label">Sexe</span>
+            <span class="detail-val">{{ candidat.sexe || '—' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Téléphone</span>
-            <span class="detail-val">{{ candidat.telephone }}</span>
+            <span class="detail-label">Date naissance</span>
+            <span class="detail-val">{{ candidat.dateNaiss || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Lieu naissance</span>
+            <span class="detail-val">{{ candidat.lieuNaiss || '—' }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">N° CNI</span>
-            <span class="detail-val">{{ candidat.numeroCNI }}</span>
+            <span class="detail-val">{{ candidat.numCni || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Nationalité</span>
+            <span class="detail-val">{{ candidat.paysNationalite || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Situation</span>
+            <span class="detail-val">{{ candidat.situationMatrimoniale || '—' }}</span>
           </div>
         </div>
       </div>
+
+      <div class="detail-section">
+        <h3>Contact</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-val">{{ candidat.email || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Téléphone</span>
+            <span class="detail-val">{{ candidat.numTel || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Adresse</span>
+            <span class="detail-val">{{ candidat.adresse || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Ville</span>
+            <span class="detail-val">{{ candidat.villeResid || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Formation</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Formation 1</span>
+            <span class="detail-val">{{ candidat.choixFormation1 || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Formation 2</span>
+            <span class="detail-val">{{ candidat.choixFormation2 || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Diplôme</span>
+            <span class="detail-val">{{ candidat.diplomeAdmission || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Centre examen</span>
+            <span class="detail-val">{{ candidat.centredexamen || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Paiement</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Statut</span>
+            <span [class]="candidat.paye ? 'detail-val text-success' : 'detail-val text-warning'">{{ candidat.paye ? 'Payé' : 'Non payé' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date paiement</span>
+            <span class="detail-val">{{ candidat.datePaiement || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type</span>
+            <span class="detail-val">{{ candidat.typePaiement || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">N° Reçu</span>
+            <span class="detail-val">{{ candidat.numRecu || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   }

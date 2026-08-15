@@ -4,71 +4,76 @@
     <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
   </div>
 
-  <!-- Alerte d'information -->
-  <div class="alerte">
-    <div class="ico-alerte">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-    </div>
-    <div class="txt-alerte">
-      <strong>Parcours Scolaire / Académique</strong>
-      <p>Veuillez renseigner au moins 3 diplômes obtenus durant votre cursus.</p>
-    </div>
-  </div>
+  <!-- SECTION : PARCOURS SCOLAIRE / ACADÉMIQUE -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-graduation-cap"></i> Parcours Scolaire / Académique</legend>
 
-  <!-- Tableau des diplômes ajoutés -->
-  <div class="cadre-tab">
-    <table class="tab">
-      <thead>
-        <tr>
-          <th class="td-n">#</th>
-          <th>Année</th>
-          <th>Établissement d'obtention</th>
-          <th>Diplôme</th>
-          <th>Mention</th>
-          <th class="th-action">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (d of diplomes; track d.annee; let i = $index) {
-          <tr class="ligne">
-            <td class="td-n">{{ i + 1 }}</td>
-            <td class="td-a">{{ d.annee }}</td>
-            <td class="td-e">{{ d.etablissement }}</td>
-            <td class="td-d">{{ d.diplome }}</td>
-            <td><span class="badge">{{ d.mention }}</span></td>
-            <td class="td-action">
-              <button type="button" class="btn-sup" (click)="supprimerDiplome(i)" title="Supprimer ce diplôme">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
+    <!-- Alerte d'information -->
+    <div class="alerte">
+      <div class="ico-alerte">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="txt-alerte">
+        <p>Veuillez renseigner au moins 1 diplôme obtenu durant votre cursus (3 maximum).</p>
+      </div>
+    </div>
+
+    <!-- Tableau des diplômes ajoutés -->
+    <div class="cadre-tab">
+      <table class="tab">
+        <thead>
+          <tr>
+            <th class="td-n">#</th>
+            <th>Année</th>
+            <th>Établissement d'obtention</th>
+            <th>Diplôme</th>
+            <th>Mention</th>
+            <th class="th-action">Action</th>
           </tr>
-        }
-        @if (diplomes.length === 0) {
-          <tr class="ligne-vide">
-            <td colspan="6" class="td-vide">
-              <i class="fa-solid fa-folder-open ico-vide"></i>
-              Aucun diplôme ajouté pour le moment.
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Erreur globale si moins de 3 diplômes -->
-  @if (erreurGlobale) {
-    <div class="err-glob">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      <span>{{ erreurGlobale }}</span>
+        </thead>
+        <tbody>
+          @for (d of diplomes; track d.annee; let i = $index) {
+            <tr class="ligne">
+              <td class="td-n">{{ i + 1 }}</td>
+              <td class="td-a">{{ d.annee }}</td>
+              <td class="td-e">{{ d.etablissement }}</td>
+              <td class="td-d">{{ d.diplome }}</td>
+              <td><span class="badge">{{ d.mention }}</span></td>
+              <td class="td-action">
+                <button type="button" class="btn-sup" (click)="supprimerDiplome(i)" title="Supprimer ce diplôme">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+          @if (diplomes.length === 0) {
+            <tr class="ligne-vide">
+              <td colspan="6" class="td-vide">
+                <i class="fa-solid fa-folder-open ico-vide"></i>
+                Aucun diplôme ajouté pour le moment.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-  }
 
-  <!-- Bouton ajouter -->
-  <div class="action-btn-row">
-    <button type="button" class="btn-aj" (click)="ouvrirModal()">
-      <i class="fa-solid fa-plus"></i> Ajouter un diplôme
-    </button>
-  </div>
+    <!-- Erreur globale si moins de 3 diplômes -->
+    @if (erreurGlobale) {
+      <div class="err-glob">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ erreurGlobale }}</span>
+      </div>
+    }
+
+    <!-- Bouton ajouter -->
+    <div class="action-btn-row">
+      <button type="button" class="btn-aj" (click)="ouvrirModal()">
+        <i class="fa-solid fa-plus"></i> Ajouter un diplôme
+      </button>
+    </div>
+
+  </fieldset>
 
   <!-- Navigation -->
   <div class="wizard-footer">

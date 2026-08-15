@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { DepartementAdminService } from '../../core/services/departement-admin.service';
 import { RegionAdminService } from '../../core/services/region-admin.service';
 import { AuthService } from '../../auth/auth';
@@ -36,13 +37,28 @@ export class DepartementsAdmin implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.charger();
-    this.regionSvc.getAll().subscribe({ next: data => this.allRegions = data });
+    this.chargerDonnees();
+  }
+
+  chargerDonnees(): void {
+    this.isLoading = true;
+    forkJoin({
+      departements: this.svc.getAll(this.filtreRegion || undefined),
+      regions: this.regionSvc.getAll()
+    }).subscribe({
+      next: ({ departements, regions }) => {
+        this.liste = departements;
+        this.allRegions = regions;
+        this.appliquerFiltres();
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
   }
 
   charger(): void {
     this.isLoading = true;
-    this.svc.getAll(this.filtreRegion || undefined).subscribe({
+    this.svc.getAll(this.filtreRegion || '').subscribe({
       next: data => { this.liste = data; this.appliquerFiltres(); this.isLoading = false; },
       error: () => { this.isLoading = false; }
     });
@@ -86,7 +102,7 @@ export class DepartementsAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? 'Erreur lors de l\'enregistrement.'; }
     });
   }
 
@@ -100,7 +116,7 @@ export class DepartementsAdmin implements OnInit {
     if (!this.deptASupprimer) return;
     this.svc.delete(this.deptASupprimer.codeDepartementGeographique).subscribe({
       next: () => { this.confirmOuverte = false; this.deptASupprimer = null; this.charger(); },
-      error: (err) => { this.erreur = err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 

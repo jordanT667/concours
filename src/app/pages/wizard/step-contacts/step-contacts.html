@@ -4,166 +4,219 @@
     <app-autosave-indicator [status]="autosaveStatus$ | async"></app-autosave-indicator>
   </div>
 
-  <div class="grille">
+  <!-- SECTION 1 : ACTIVITÉS & LOISIRS -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-masks-theater"></i> Activités & Loisirs</legend>
+    <div class="grille">
 
-    <!-- LIGNE 1 -->
-    <div class="champ col3">
-      <label class="titre">1er loisir</label>
-      <div class="saisie" [class.erreur]="isInvalid('loisir1')">
-        <i class="fa-solid fa-masks-theater ico"></i>
-        <select formControlName="loisir1" class="entr" title="1er loisir">
-          <option value="">-- Choisir --</option>
-          @for (opt of loisirOptions; track opt.idLoisir) {
-            <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
-          }
-        </select>
+      <div class="champ col3">
+        <label class="titre">1er loisir <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('loisir1')">
+          <i class="fa-solid fa-masks-theater ico"></i>
+          <select formControlName="loisir1" class="entr" title="1er loisir">
+            <option value="">-- Choisir --</option>
+            @for (opt of loisirOptions; track opt.idLoisir) {
+              <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('loisir1')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('loisir1')) {
-        <span class="err">Obligatoire</span>
-      }
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">1ère activité sportive</label>
-      <div class="saisie" [class.erreur]="isInvalid('activite1')">
-        <i class="fa-solid fa-futbol ico"></i>
-        <select formControlName="activite1" class="entr" title="1ère activité sportive">
-          <option value="">-- Choisir --</option>
-          @for (opt of sportOptions; track opt.idSport) {
-            <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
-          }
-        </select>
+      <div class="champ col3">
+        <label class="titre">2ème loisir</label>
+        <div class="saisie">
+          <i class="fa-solid fa-masks-theater ico"></i>
+          <select formControlName="loisir2" class="entr" title="2ème loisir">
+            <option value="">-- Choisir --</option>
+            @for (opt of loisirOptions; track opt.idLoisir) {
+              <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
+            }
+          </select>
+        </div>
       </div>
-      @if (isInvalid('activite1')) {
-        <span class="err">Obligatoire</span>
-      }
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">Handicap</label>
-      <div class="saisie" [class.erreur]="isInvalid('handicap')">
-        <i class="fa-solid fa-wheelchair ico"></i>
-        <select formControlName="handicap" class="entr" title="Handicap">
-          <option value="">-- Aucun --</option>
-          @for (opt of handicapOptions; track opt.idHandicap) {
-            <option [value]="opt.idHandicap">{{ opt.libelleFr }}</option>
-          }
-        </select>
+      <div class="champ col3">
+        <label class="titre">1ère activité sportive <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('activite1')">
+          <i class="fa-solid fa-futbol ico"></i>
+          <select formControlName="activite1" class="entr" title="1ère activité sportive">
+            <option value="">-- Choisir --</option>
+            @for (opt of sportOptions; track opt.idSport) {
+              <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('activite1')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('handicap')) {
-        <span class="err">Obligatoire</span>
-      }
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">Profession ?</label>
-      <div class="saisie" [class.erreur]="isInvalid('profession')">
-        <i class="fa-solid fa-user-tie ico"></i>
-        <select formControlName="profession" class="entr" title="Profession">
-          @for (opt of professionOptions; track opt) {
-            <option [value]="opt">{{ opt }}</option>
-          }
-        </select>
+      <div class="champ col3">
+        <label class="titre">2ème activité sportive</label>
+        <div class="saisie">
+          <i class="fa-solid fa-futbol ico"></i>
+          <select formControlName="activite2" class="entr" title="2ème activité sportive">
+            <option value="">-- Choisir --</option>
+            @for (opt of sportOptions; track opt.idSport) {
+              <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
+            }
+          </select>
+        </div>
       </div>
-      @if (isInvalid('profession')) {
-        <span class="err">Obligatoire</span>
-      }
-    </div>
 
-    <!-- LIGNE 2 -->
-    <div class="champ col3">
-      <label class="titre">2ième loisir</label>
-      <div class="saisie">
-        <i class="fa-solid fa-masks-theater ico"></i>
-        <select formControlName="loisir2" class="entr" title="2ième loisir">
-          <option value="">-- Choisir --</option>
-          @for (opt of loisirOptions; track opt.idLoisir) {
-            <option [value]="opt.idLoisir">{{ opt.libelleFr }}</option>
-          }
-        </select>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 2 : SITUATION PERSONNELLE -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-user-gear"></i> Situation personnelle</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Handicap</label>
+        <div class="saisie">
+          <i class="fa-solid fa-wheelchair ico"></i>
+          <select formControlName="handicap" class="entr" title="Handicap">
+            <option value="">-- Aucun --</option>
+            @for (opt of handicapOptions; track opt.idHandicap) {
+              <option [value]="opt.idHandicap">{{ opt.libelleFr }}</option>
+            }
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="champ col3">
-      <label class="titre">2ième activité sportive</label>
-      <div class="saisie">
-        <i class="fa-solid fa-futbol ico"></i>
-        <select formControlName="activite2" class="entr" title="2ième activité sportive">
-          <option value="">-- Choisir --</option>
-          @for (opt of sportOptions; track opt.idSport) {
-            <option [value]="opt.idSport">{{ opt.libelleFr }}</option>
-          }
-        </select>
+      <div class="champ col4">
+        <label class="titre">Activité professionnelle <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('profession')">
+          <i class="fa-solid fa-user-tie ico"></i>
+          <select formControlName="profession" class="entr" title="Activité professionnelle">
+            @for (opt of professionOptions; track opt) {
+              <option [value]="opt">{{ opt }}</option>
+            }
+          </select>
+        </div>
+        @if (isInvalid('profession')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-    </div>
 
-    <div class="col6"></div>
-
-    <!-- LIGNE 3 -->
-    <div class="champ col6">
-      <label class="titre">Nom du père ou du tuteur <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('nomPere')">
-        <i class="fa-solid fa-user ico"></i>
-        <input type="text" formControlName="nomPere"
-               placeholder="Nom du papa ou du tuteur à contacter en cas de problème"
-               class="entr"/>
+      <div class="champ col4">
+        <label class="titre">Description activité</label>
+        <div class="saisie">
+          <i class="fa-solid fa-pen ico"></i>
+          <input type="text" formControlName="descriptionActiviteProf"
+                 placeholder="préciser si nécessaire" class="entr"/>
+        </div>
       </div>
-      @if (isInvalid('nomPere')) {
-        <span class="err">Le nom du père ou tuteur est obligatoire.</span>
-      }
-    </div>
 
-    <div class="champ col6">
-      <label class="titre">Nom de la mère ou de la tutrice <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('nomMere')">
-        <i class="fa-solid fa-user-dress ico"></i>
-        <input type="text" formControlName="nomMere"
-               placeholder="Nom de la maman ou de la tutrice à contacter en cas de problème"
-               class="entr"/>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 3 : CONTACTS PARENTAUX -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-people-roof"></i> Contacts parentaux</legend>
+    <div class="grille">
+
+      <div class="champ col6">
+        <label class="titre">Nom du père ou tuteur <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('nomPere')">
+          <i class="fa-solid fa-user ico"></i>
+          <input type="text" formControlName="nomPere"
+                 placeholder="nom du père ou tuteur" class="entr"/>
+        </div>
+        @if (isInvalid('nomPere')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('nomMere')) {
-        <span class="err">Le nom de la mère ou tutrice est obligatoire.</span>
-      }
-    </div>
 
-    <!-- LIGNE 4 -->
-    <div class="champ col4">
-      <label class="titre">N° téléphone du père ou tuteur <span class="req">*</span></label>
-      <div class="saisie" [class.erreur]="isInvalid('telPere')">
-        <i class="fa-solid fa-phone ico"></i>
-        <input type="tel" formControlName="telPere" placeholder="N° tel père ou tuteur" class="entr"/>
+      <div class="champ col6">
+        <label class="titre">N° téléphone père / tuteur <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('telPere')">
+          <i class="fa-solid fa-phone ico"></i>
+          <input type="tel" formControlName="telPere" placeholder="9 chiffres" class="entr"/>
+        </div>
+        @if (isInvalid('telPere')) {
+          <span class="err">
+            @if (f['telPere'].errors?.['required']) { Champ obligatoire. }
+            @if (f['telPere'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
+          </span>
+        }
       </div>
-      @if (isInvalid('telPere')) {
-        <span class="err">
-          @if (f['telPere'].errors?.['required']) { Téléphone obligatoire. }
-          @if (f['telPere'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
-        </span>
-      }
-    </div>
 
-    <div class="champ col4">
-      <label class="titre">Email du père ou tuteur</label>
-      <div class="saisie" [class.erreur]="isInvalid('emailPere')">
-        <i class="fa-solid fa-paper-plane ico"></i>
-        <input type="email" formControlName="emailPere" placeholder="email père / tuteur" class="entr"/>
+      <div class="champ col6">
+        <label class="titre">Nom de la mère ou tutrice <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('nomMere')">
+          <i class="fa-solid fa-user ico"></i>
+          <input type="text" formControlName="nomMere"
+                 placeholder="nom de la mère ou tutrice" class="entr"/>
+        </div>
+        @if (isInvalid('nomMere')) {
+          <span class="err">Champ obligatoire.</span>
+        }
       </div>
-      @if (isInvalid('emailPere')) {
-        <span class="err">Format d'adresse email invalide.</span>
-      }
-    </div>
 
-    <div class="champ col4">
-      <label class="titre">N° téléphone de la mère ou tutrice</label>
-      <div class="saisie" [class.erreur]="isInvalid('telMere')">
-        <i class="fa-solid fa-phone ico"></i>
-        <input type="tel" formControlName="telMere" placeholder="N° tel mère / tutrice" class="entr"/>
+      <div class="champ col6">
+        <label class="titre">N° téléphone mère / tutrice</label>
+        <div class="saisie" [class.erreur]="isInvalid('telMere')">
+          <i class="fa-solid fa-phone ico"></i>
+          <input type="tel" formControlName="telMere" placeholder="9 chiffres" class="entr"/>
+        </div>
+        @if (isInvalid('telMere')) {
+          <span class="err">Numéro invalide (9 chiffres).</span>
+        }
       </div>
-      @if (isInvalid('telMere')) {
-        <span class="err">Numéro de téléphone invalide (9 chiffres).</span>
-      }
-    </div>
 
-  </div>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 4 : PERSONNE À CONTACTER EN CAS D'URGENCE -->
+  <fieldset class="section">
+    <legend class="section-titre"><i class="fa-solid fa-phone-volume"></i> Personne à contacter en cas d'urgence</legend>
+    <div class="grille">
+
+      <div class="champ col4">
+        <label class="titre">Nom complet <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('nomPersonneContact')">
+          <i class="fa-solid fa-user-shield ico"></i>
+          <input type="text" formControlName="nomPersonneContact"
+                 placeholder="nom de la personne" class="entr"/>
+        </div>
+        @if (isInvalid('nomPersonneContact')) {
+          <span class="err">Champ obligatoire.</span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Téléphone <span class="req">*</span></label>
+        <div class="saisie" [class.erreur]="isInvalid('telPersonneContact')">
+          <i class="fa-solid fa-phone ico"></i>
+          <input type="tel" formControlName="telPersonneContact" placeholder="9 chiffres" class="entr"/>
+        </div>
+        @if (isInvalid('telPersonneContact')) {
+          <span class="err">
+            @if (f['telPersonneContact'].errors?.['required']) { Champ obligatoire. }
+            @if (f['telPersonneContact'].errors?.['pattern']) { Numéro invalide (9 chiffres). }
+          </span>
+        }
+      </div>
+
+      <div class="champ col4">
+        <label class="titre">Email</label>
+        <div class="saisie" [class.erreur]="isInvalid('emailPersonneContact')">
+          <i class="fa-solid fa-at ico"></i>
+          <input type="email" formControlName="emailPersonneContact"
+                 placeholder="email (optionnel)" class="entr"/>
+        </div>
+        @if (isInvalid('emailPersonneContact')) {
+          <span class="err">Email invalide.</span>
+        }
+      </div>
+
+    </div>
+  </fieldset>
 
   <div class="wizard-footer">
     <button class="back" type="button" (click)="onBack()">&lsaquo; PRÉCÉDENT</button>

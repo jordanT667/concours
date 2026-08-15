@@ -1,80 +1,167 @@
 <div class="detail-page">
 
-  <div class="detail-header">
-    <button class="btn-retour" type="button" (click)="retour()">
-      &lsaquo; Retour
+  <div class="detail-top">
+    <button class="btn-retour" type="button" (click)="retour()" title="Retour">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+      Retour aux inscriptions
     </button>
-    <h2 class="detail-titre">Détail de l'inscription</h2>
   </div>
 
-  @if (erreur) {
+  @if (chargement) {
+    <div class="detail-loading">Chargement...</div>
+  } @else if (erreur) {
     <div class="alert-erreur">
       {{ erreur }}
+      <button type="button" (click)="charger()">Réessayer</button>
     </div>
-  } @else if (inscription) {
+  } @else if (ins) {
 
     <div class="detail-card">
-      <div class="detail-statut">
-        <span class="badge" [class]="couleurStatut(inscription.statut)">
-          {{ libelleStatut(inscription.statut) }}
-        </span>
-        <span class="detail-numero">N° reçu : {{ inscription.numeroRecu }}</span>
+
+      <!-- En-tête candidat -->
+      <div class="detail-hero">
+        <div class="hero-avatar">{{ ins.prenom[0] || '?' }}{{ ins.nom[0] || '?' }}</div>
+        <div class="hero-info">
+          <h2>{{ ins.prenom }} {{ ins.nom }}</h2>
+          <p class="hero-matricule">{{ ins.matricule || '—' }}</p>
+        </div>
+        <span [class]="'badge ' + etatCouleur(ins.etatPreins)">{{ etatLibelle(ins.etatPreins) }}</span>
       </div>
 
+      <!-- Identité -->
       <div class="detail-section">
-        <h3>Candidat</h3>
+        <h3>Identité</h3>
         <div class="detail-grid">
           <div class="detail-item">
             <span class="detail-label">Nom</span>
-            <span class="detail-val">{{ inscription.candidat.nom }}</span>
+            <span class="detail-val">{{ ins.nom }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Prénom</span>
-            <span class="detail-val">{{ inscription.candidat.prenom }}</span>
+            <span class="detail-val">{{ ins.prenom }}</span>
           </div>
           <div class="detail-item">
+            <span class="detail-label">Sexe</span>
+            <span class="detail-val">{{ ins.sexe || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date naissance</span>
+            <span class="detail-val">{{ ins.dateNaiss || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Lieu naissance</span>
+            <span class="detail-val">{{ ins.lieuNaiss || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">N° CNI</span>
+            <span class="detail-val">{{ ins.numCni || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Nationalité</span>
+            <span class="detail-val">{{ ins.paysNationalite || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Situation</span>
+            <span class="detail-val">{{ ins.situationMatrimoniale || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="detail-section">
+        <h3>Contact</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
             <span class="detail-label">Email</span>
-            <span class="detail-val">{{ inscription.candidat.email }}</span>
+            <span class="detail-val">{{ ins.email || '—' }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Téléphone</span>
-            <span class="detail-val">{{ inscription.candidat.telephone }}</span>
+            <span class="detail-val">{{ ins.numTel || '—' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">CNI</span>
-            <span class="detail-val">{{ inscription.candidat.numeroCNI }}</span>
+            <span class="detail-label">Adresse</span>
+            <span class="detail-val">{{ ins.adresse || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Ville</span>
+            <span class="detail-val">{{ ins.villeResid || '—' }}</span>
           </div>
         </div>
       </div>
 
+      <!-- Formation -->
       <div class="detail-section">
-        <h3>Inscription</h3>
+        <h3>Formation</h3>
         <div class="detail-grid">
           <div class="detail-item">
-            <span class="detail-label">Filière</span>
-            <span class="detail-val">{{ inscription.filiere.libelleFiliereFr }}</span>
+            <span class="detail-label">Formation 1</span>
+            <span class="detail-val">{{ ins.choixFormation1 || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Formation 2</span>
+            <span class="detail-val">{{ ins.choixFormation2 || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Formation 3</span>
+            <span class="detail-val">{{ ins.choixFormation3 || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Diplôme admission</span>
+            <span class="detail-val">{{ ins.diplomeAdmission || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Niveau</span>
+            <span class="detail-val">{{ ins.niveau || '—' }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Centre examen</span>
-            <span class="detail-val">{{ inscription.centreExamen.libeleFiliereFr }}</span>
+            <span class="detail-val">{{ ins.centredexamen || '—' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Centre dépôt</span>
-            <span class="detail-val">{{ inscription.centreDepot.libeleFiliereFr }}</span>
+            <span class="detail-label">Année académique</span>
+            <span class="detail-val">{{ ins.anneeAcademique || '—' }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Date inscription</span>
-            <span class="detail-val">{{ inscription.dateInscription | date:'dd/MM/yyyy' }}</span>
+            <span class="detail-label">Type BAC</span>
+            <span class="detail-val">{{ ins.typeBacc || '—' }}</span>
           </div>
         </div>
       </div>
 
-      @if (inscription.statut === 'SOUMISE' || inscription.statut === 'EN_COURS_VERIFICATION') {
+      <!-- Paiement -->
+      <div class="detail-section">
+        <h3>Paiement</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Statut</span>
+            <span [class]="ins.paye ? 'detail-val text-success' : 'detail-val text-warning'">
+              {{ ins.paye ? 'Payé' : 'Non payé' }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date paiement</span>
+            <span class="detail-val">{{ ins.datePaiement || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type paiement</span>
+            <span class="detail-val">{{ ins.typePaiement || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">N° Reçu</span>
+            <span class="detail-val">{{ ins.numRecu || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      @if (ins.etatPreins === 'E' || ins.etatPreins === 'V') {
         <div class="detail-actions">
-          <button class="btn-valider" type="button" (click)="valider()">Valider</button>
-          <button class="btn-rejeter" type="button" (click)="rejeter()">Rejeter</button>
+          <button class="btn-selectionner" type="button" (click)="changerEtat('S')">Sélectionner</button>
+          <button class="btn-rejeter" type="button" (click)="changerEtat('R')">Rejeter</button>
         </div>
       }
+
     </div>
 
   }

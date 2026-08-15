@@ -1,14 +1,74 @@
 <div class="stats-grille">
-  @for (carte of cartes; track carte.label) {
-    <div [class]="'stat-card ' + carte.couleur">
-      <div class="stat-header">
-        <span class="stat-icone">{{ carte.icone }}</span>
-        <span class="stat-evolution">{{ carte.evolution }}</span>
+
+  <!-- Total inscrits -->
+  <div class="stat-card bleu">
+    <div class="stat-header">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
       </div>
-      <div class="stat-body">
-        <span class="stat-valeur">{{ carte.valeur }}</span>
-        <span class="stat-label">{{ carte.label }}</span>
-      </div>
+      <span class="stat-evolution">{{ cartes[0].evolution }}</span>
     </div>
-  }
+    <div class="stat-body">
+      <span class="stat-valeur">{{ cartes[0].valeur }}</span>
+      <span class="stat-label">{{ cartes[0].label }}</span>
+    </div>
+  </div>
+
+  <!-- Sélectionnés -->
+  <div class="stat-card vert">
+    <div class="stat-header">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <path d="M22 4 12 14.01l-3-3"/>
+        </svg>
+      </div>
+      <span class="stat-evolution">{{ cartes[1].evolution }}</span>
+    </div>
+    <div class="stat-body">
+      <span class="stat-valeur">{{ cartes[1].valeur }}</span>
+      <span class="stat-label">{{ cartes[1].label }}</span>
+    </div>
+  </div>
+
+  <!-- En attente -->
+  <div class="stat-card orange">
+    <div class="stat-header">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <span class="stat-evolution">{{ cartes[2].evolution }}</span>
+    </div>
+    <div class="stat-body">
+      <span class="stat-valeur">{{ cartes[2].valeur }}</span>
+      <span class="stat-label">{{ cartes[2].label }}</span>
+    </div>
+  </div>
+
+  <!-- Rejetés -->
+  <div class="stat-card rouge">
+    <div class="stat-header">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <span class="stat-evolution">{{ cartes[3].evolution }}</span>
+    </div>
+    <div class="stat-body">
+      <span class="stat-valeur">{{ cartes[3].valeur }}</span>
+      <span class="stat-label">{{ cartes[3].label }}</span>
+    </div>
+  </div>
+
 </div>

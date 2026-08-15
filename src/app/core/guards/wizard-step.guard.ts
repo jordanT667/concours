@@ -24,7 +24,6 @@ export const wizardCursusGuard: CanActivateFn = () => {
 };
 
 export const wizardContactsGuard: CanActivateFn = () => {
- 4
   if (
     hasData(STORAGE_KEYS.IDENTIFICATION) &&
     hasData(STORAGE_KEYS.SPECIALISATION) &&

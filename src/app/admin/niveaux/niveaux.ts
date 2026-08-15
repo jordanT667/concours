@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { NiveauAdminService } from '../../core/services/niveau-admin.service';
 import { CursusAdminService } from '../../core/services/cursus-admin.service';
 import { AuthService } from '../../auth/auth';
@@ -35,8 +36,23 @@ export class NiveauxAdmin implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.charger();
-    this.cursusSvc.getAll().subscribe({ next: data => this.allCursus = data });
+    this.chargerDonnees();
+  }
+
+  chargerDonnees(): void {
+    this.isLoading = true;
+    forkJoin({
+      niveaux: this.svc.getAll(),
+      cursus: this.cursusSvc.getAll()
+    }).subscribe({
+      next: ({ niveaux, cursus }) => {
+        this.liste = niveaux;
+        this.allCursus = cursus;
+        this.appliquerFiltres();
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
   }
 
   charger(): void {
@@ -90,7 +106,7 @@ export class NiveauxAdmin implements OnInit {
       : this.svc.create(this.form);
     op$.subscribe({
       next: () => { this.enSoumission = false; this.fermerModal(); this.charger(); },
-      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? err?.error?.message ?? 'Une erreur est survenue.'; }
+      error: (err) => { this.enSoumission = false; this.erreur = err?.message ?? 'Une erreur est survenue.'; }
     });
   }
 
@@ -104,7 +120,7 @@ export class NiveauxAdmin implements OnInit {
     if (!this.niveauASupprimer) return;
     this.svc.delete(this.niveauASupprimer.codeNiveau).subscribe({
       next: () => { this.confirmOuverte = false; this.niveauASupprimer = null; this.charger(); },
-      error: (err) => { this.erreur = err?.message ?? err?.error?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
+      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; this.confirmOuverte = false; }
     });
   }
 
