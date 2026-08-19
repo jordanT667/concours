@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { ReferenceStore } from '../../../core/services/reference-store.service';
 import { STORAGE_KEYS } from '../../../core/services/storage';
 import { DiplomeDto, MentionDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -47,7 +47,7 @@ export class StepCursus implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private refCache: ReferenceCacheService,
+    private refStore: ReferenceStore,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) {}
@@ -62,17 +62,27 @@ export class StepCursus implements OnInit {
   }
 
   private chargerDiplomes(): void {
-    this.refCache.getAllDiplomes().subscribe({
-      next: (data) => { this.diplomesOptions = data.filter(d => !d.annuler); },
-      error: () => {}
-    });
+    const data = this.refStore.snapshot;
+    if (data.diplomes.length) {
+      this.diplomesOptions = data.diplomes.filter((d: any) => !d.annuler);
+    } else {
+      this.refStore.load().subscribe({
+        next: (d) => { this.diplomesOptions = d.diplomes.filter((x: any) => !x.annuler); },
+        error: () => {}
+      });
+    }
   }
 
   private chargerMentions(): void {
-    this.refCache.getMentions().subscribe({
-      next: (data) => { this.mentionsOptions = data; },
-      error: () => {}
-    });
+    const data = this.refStore.snapshot;
+    if (data.mentions.length) {
+      this.mentionsOptions = data.mentions;
+    } else {
+      this.refStore.load().subscribe({
+        next: (d) => { this.mentionsOptions = d.mentions; },
+        error: () => {}
+      });
+    }
   }
 
   private genererAnnees(): void {

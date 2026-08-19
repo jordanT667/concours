@@ -73,9 +73,8 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
-.section-header svg {
-  width: 18px;
-  height: 18px;
+.section-header i {
+  font-size: 16px;
   color: #4f46e5;
   flex-shrink: 0;
 }
@@ -86,6 +85,23 @@
   font-weight: 700;
   color: #1e293b;
   letter-spacing: 0.01em;
+  flex: 1;
+}
+
+.btn-modifier {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.btn-modifier:hover {
+  background: #eef2ff;
+  color: #4338ca;
 }
 
 .section-body {

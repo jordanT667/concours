@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
-import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { ReferenceStore } from '../../../core/services/reference-store.service';
 import { STORAGE_KEYS } from '../../../core/services/storage';
 import { LoisirDto, SportDto, HandicapDto } from '../../../core/models/referentiel.models';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -38,7 +38,7 @@ export class StepContacts implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private refCache: ReferenceCacheService,
+    private refStore: ReferenceStore,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) { }
@@ -54,18 +54,21 @@ export class StepContacts implements OnInit, OnDestroy {
   }
 
   private chargerDonneesReference(): void {
-    this.refCache.getLoisirs().subscribe({
-      next: (data) => { this.loisirOptions = data.filter(l => !l.annuler); },
-      error: () => { this.erreurChargement = 'Impossible de charger les loisirs.'; }
-    });
-    this.refCache.getSports().subscribe({
-      next: (data) => { this.sportOptions = data.filter(s => !s.annuler); },
-      error: () => { this.erreurChargement = 'Impossible de charger les sports.'; }
-    });
-    this.refCache.getHandicaps().subscribe({
-      next: (data) => { this.handicapOptions = data.filter(h => !h.annuler); },
-      error: () => { this.erreurChargement = 'Impossible de charger les handicaps.'; }
-    });
+    const data = this.refStore.snapshot;
+    if (data.loisirs.length || data.sports.length || data.handicaps.length) {
+      this.loisirOptions = data.loisirs.filter((l: any) => !l.annuler);
+      this.sportOptions = data.sports.filter((s: any) => !s.annuler);
+      this.handicapOptions = data.handicaps.filter((h: any) => !h.annuler);
+    } else {
+      this.refStore.load().subscribe({
+        next: (d) => {
+          this.loisirOptions = d.loisirs.filter((l: any) => !l.annuler);
+          this.sportOptions = d.sports.filter((s: any) => !s.annuler);
+          this.handicapOptions = d.handicaps.filter((h: any) => !h.annuler);
+        },
+        error: () => { this.erreurChargement = 'Impossible de charger les données de référence.'; }
+      });
+    }
   }
 
   ngOnDestroy(): void { this.formSub?.unsubscribe(); }

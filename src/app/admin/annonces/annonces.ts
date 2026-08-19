@@ -1,29 +1,39 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Annonce } from '../../core/models/annonce.models';
 import { AnnonceService } from '../../core/services/annonce.service';
 import { AnnonceForm } from '../annonce-from/annonce-from';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-annonces',
   standalone: true,
-  imports: [CommonModule, FormsModule, AnnonceForm],
+  imports: [CommonModule, FormsModule, AnnonceForm, ConfirmDialog],
   templateUrl: './annonces.html',
   styleUrl: './annonces.css'
 })
 export class Annonces implements OnInit {
 
+  private destroyRef = inject(DestroyRef);
+
   annonces: Annonce[] = [];
   formulaireOuvert = false;
   annonceSelectionnee: Annonce | null = null;
 
+  // Confirmation
+  confirmOuverte = false;
+  private confirmId = 0;
+
   constructor(public service: AnnonceService) {}
 
   ngOnInit(): void {
-    this.service.annonces$.subscribe(liste => {
-      this.annonces = [...liste].sort((a, b) => a.ordre - b.ordre);
-    });
+    this.service.annonces$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(liste => {
+        this.annonces = [...liste].sort((a, b) => a.ordre - b.ordre);
+      });
   }
 
   ouvrirFormulaire(a?: Annonce): void {
@@ -54,8 +64,17 @@ export class Annonces implements OnInit {
   }
 
   supprimer(id: number): void {
-    if (!confirm('Supprimer cette annonce ?')) return;
-    this.service.supprimer(id);
+    this.confirmId = id;
+    this.confirmOuverte = true;
+  }
+
+  onConfirmerSuppression(): void {
+    this.confirmOuverte = false;
+    this.service.supprimer(this.confirmId);
+  }
+
+  onAnnulerSuppression(): void {
+    this.confirmOuverte = false;
   }
 
   cssAnnonce(couleur: string): string {

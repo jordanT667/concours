@@ -79,4 +79,15 @@
     </div>
   }
 
+  <app-confirm-dialog
+    [ouvert]="confirmOuverte"
+    titre="Supprimer la filière"
+    message="Supprimer définitivement cette filière ?"
+    detail="Cette action est irréversible."
+    texteBouton="Supprimer"
+    classBouton="btn-danger"
+    (confirmer)="onConfirmerSuppression()"
+    (annuler)="onAnnulerSuppression()"
+  ></app-confirm-dialog>
+
 </div>

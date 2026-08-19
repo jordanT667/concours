@@ -8,15 +8,15 @@
     </div>
     <div class="header-actions">
       <div class="vue-toggle">
-        <button type="button" [class.active]="vue === 'grille'" (click)="vue = 'grille'" title="Vue grille">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <button type="button" [class.active]="vue === 'grille'" (click)="vue = 'grille'" title="Vue grille" aria-label="Vue grille">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         </button>
-        <button type="button" [class.active]="vue === 'liste'" (click)="vue = 'liste'" title="Vue liste">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <button type="button" [class.active]="vue === 'liste'" (click)="vue = 'liste'" title="Vue liste" aria-label="Vue liste">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
         </button>
       </div>
-      <button type="button" class="btn-refresh" (click)="charger(true)" title="Actualiser">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      <button type="button" class="btn-refresh" (click)="charger(true)" title="Actualiser" aria-label="Actualiser la liste">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
     </div>
   </div>
@@ -24,8 +24,8 @@
   @if (chargement) {
     <app-candidats-skeleton></app-candidats-skeleton>
   } @else if (erreur) {
-    <div class="alerte-erreur">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div class="alerte-erreur" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       {{ erreur }}
       <button type="button" (click)="charger(true)">Réessayer</button>
     </div>
@@ -34,17 +34,18 @@
     <!-- Filtres -->
     <div class="filtres-bar">
       <div class="recherche-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input
           type="text"
           class="input-recherche"
           placeholder="Rechercher par nom, matricule, CNI..."
+          aria-label="Rechercher un candidat"
           [(ngModel)]="recherche"
           (input)="appliquerFiltres()"
         />
       </div>
 
-      <select class="select-filtre" [(ngModel)]="filtreEtat" (change)="appliquerFiltres()" title="Filtrer par état">
+      <select class="select-filtre" [(ngModel)]="filtreEtat" (change)="appliquerFiltres()" aria-label="Filtrer par état">
         <option value="TOUS">Tous les états</option>
         <option value="E">Soumis</option>
         <option value="V">Vérification</option>
@@ -52,7 +53,7 @@
         <option value="R">Rejeté</option>
       </select>
 
-      <select class="select-filtre" [(ngModel)]="filtrePaiement" (change)="appliquerFiltres()" title="Filtrer par paiement">
+      <select class="select-filtre" [(ngModel)]="filtrePaiement" (change)="appliquerFiltres()" aria-label="Filtrer par paiement">
         <option value="TOUS">Paiement</option>
         <option value="PAYE">Payé</option>
         <option value="NON_PAYE">Non payé</option>
@@ -62,11 +63,11 @@
     <!-- VUE GRILLE -->
     @if (vue === 'grille') {
       <div class="candidats-grille">
-        @for (c of filtres; track c.idPreins) {
-          <div class="candidat-card" (click)="ouvrirDetail(c)">
+        @for (c of pageItems; track c.idPreins) {
+          <div class="candidat-card" (click)="ouvrirDetail(c)" role="button" tabindex="0" (keydown.enter)="ouvrirDetail(c)">
             <div class="card-top">
-              <div class="candidat-avatar">{{ c.prenom[0] || '?' }}{{ c.nom[0] || '?' }}</div>
-              <span [class]="'badge ' + etatCouleur(c.etatPreins)">{{ etatLibelle(c.etatPreins) }}</span>
+              <div class="candidat-avatar">{{ c.prenom?.[0] || '?' }}{{ c.nom?.[0] || '?' }}</div>
+              <span [class]="'badge ' + (c.etatPreins | etatCouleur)">{{ c.etatPreins | etatLibelle }}</span>
             </div>
             <div class="card-body">
               <p class="candidat-nom">{{ c.prenom }} {{ c.nom }}</p>
@@ -87,14 +88,14 @@
     <!-- VUE LISTE -->
     @if (vue === 'liste') {
       <div class="candidats-liste">
-        @for (c of filtres; track c.idPreins) {
-          <div class="liste-item" (click)="ouvrirDetail(c)">
-            <div class="liste-avatar">{{ c.prenom[0] || '?' }}{{ c.nom[0] || '?' }}</div>
+        @for (c of pageItems; track c.idPreins) {
+          <div class="liste-item" (click)="ouvrirDetail(c)" role="button" tabindex="0" (keydown.enter)="ouvrirDetail(c)">
+            <div class="liste-avatar">{{ c.prenom?.[0] || '?' }}{{ c.nom?.[0] || '?' }}</div>
             <div class="liste-info">
               <span class="liste-nom">{{ c.prenom }} {{ c.nom }}</span>
               <span class="liste-sub">{{ c.choixFormation1 || '—' }} · {{ c.matricule || '—' }}</span>
             </div>
-            <span [class]="'badge ' + etatCouleur(c.etatPreins)">{{ etatLibelle(c.etatPreins) }}</span>
+            <span [class]="'badge ' + (c.etatPreins | etatCouleur)">{{ c.etatPreins | etatLibelle }}</span>
             <span [class]="c.paye ? 'paiement-ok' : 'paiement-non'">{{ c.paye ? 'Payé' : 'Non payé' }}</span>
           </div>
         } @empty {
@@ -103,23 +104,35 @@
       </div>
     }
 
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <nav class="pagination" aria-label="Navigation entre les pages">
+        <button type="button" class="page-btn" [disabled]="page === 1" (click)="allerPage(page - 1)" aria-label="Page précédente">&laquo;</button>
+        @for (p of pagesVisibles; track p) {
+          <button type="button" class="page-btn" [class.active]="p === page" (click)="allerPage(p)" [attr.aria-current]="p === page ? 'page' : null">{{ p }}</button>
+        }
+        <button type="button" class="page-btn" [disabled]="page === totalPages" (click)="allerPage(page + 1)" aria-label="Page suivante">&raquo;</button>
+        <span class="page-info">{{ page }}/{{ totalPages }} ({{ filtres.length }} résultats)</span>
+      </nav>
+    }
+
   }
 
   <!-- PANEL DÉTAIL -->
   @if (detailOuvert) {
     <div class="overlay" (click)="fermerDetail()"></div>
-    <div class="detail-panel">
+    <div class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-titre">
       <div class="detail-header">
-        <h3>Fiche candidat</h3>
-        <button type="button" class="btn-fermer" (click)="fermerDetail()" title="Fermer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        <h3 id="detail-titre">Fiche candidat</h3>
+        <button type="button" class="btn-fermer" (click)="fermerDetail()" aria-label="Fermer le panel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="detail-body">
         <div class="detail-section">
-          <div class="detail-avatar-big">{{ detailOuvert.prenom[0] || '?' }}{{ detailOuvert.nom[0] || '?' }}</div>
+          <div class="detail-avatar-big">{{ detailOuvert.prenom?.[0] || '?' }}{{ detailOuvert.nom?.[0] || '?' }}</div>
           <h4>{{ detailOuvert.prenom }} {{ detailOuvert.nom }}</h4>
-          <span [class]="'badge ' + etatCouleur(detailOuvert.etatPreins)">{{ etatLibelle(detailOuvert.etatPreins) }}</span>
+          <span [class]="'badge ' + (detailOuvert.etatPreins | etatCouleur)">{{ detailOuvert.etatPreins | etatLibelle }}</span>
         </div>
 
         <div class="detail-grid">

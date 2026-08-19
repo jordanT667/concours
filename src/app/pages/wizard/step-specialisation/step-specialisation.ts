@@ -7,9 +7,10 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, Subscription, forkJoin } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
-import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { ReferenceStore } from '../../../core/services/reference-store.service';
 import { STORAGE_KEYS } from '../../../core/services/storage';
 import { PaysDto } from '../../../core/models/pays.models';
 import {
@@ -62,7 +63,7 @@ export class StepSpecialisation implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private router: Router,
     private ref: ConcoursReferenceService,
-    private refCache: ReferenceCacheService,
+    private refStore: ReferenceStore,
     private logger: LoggerService,
     private autosave: AutosaveService
   ) {}
@@ -102,26 +103,23 @@ export class StepSpecialisation implements OnInit, OnDestroy {
 
   private chargerDonneesReference(): void {
     this.chargement = true;
+    this.erreurChargement = '';
 
-    forkJoin({
-      cursus: this.refCache.getCursus(),
-      niveaux: this.refCache.getNiveaux(),
-      pays: this.refCache.getPays(),
-      mentions: this.refCache.getMentions(),
-      banques: this.refCache.getBanques(),
-      centres: this.refCache.getCentresExamen(),
-      sites: this.refCache.getSitesDepot(),
-      diplomes: this.refCache.getAllDiplomes()
-    }).subscribe({
+    this.refStore.load().subscribe({
       next: (data) => {
         this.cursusOptions = data.cursus.filter(c => !c.annuler);
         this.niveauxTous = data.niveaux;
         this.paysOptions = data.pays;
         this.mentionsOptions = data.mentions;
-        this.banquesOptions = data.banques.filter(b => !b.annuler);
+        this.banquesOptions = data.banques.filter((b: any) => !b.annuler);
         this.centresConcours = data.centres;
         this.centresDepot = data.sites;
-        this.diplomesAdmission = data.diplomes.filter(d => !d.annuler);
+        this.diplomesAdmission = data.diplomes.filter((d: any) => !d.annuler);
+
+        const critical = data.cursus.length + data.niveaux.length + data.diplomes.length;
+        if (critical === 0) {
+          this.erreurChargement = 'Impossible de charger les données. Vérifiez votre connexion.';
+        }
         this.chargement = false;
         this.restoreFromStorage();
       },

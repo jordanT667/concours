@@ -69,7 +69,7 @@
                 <span class="recente-detail">{{ ins.choixFormation1 || 'Non renseigné' }} · {{ ins.matricule }}</span>
               </div>
               <div class="recente-meta">
-                <span [class]="'badge ' + etatCouleur(ins.etatPreins)">{{ etatLibelle(ins.etatPreins) }}</span>
+                <span [class]="'badge ' + (ins.etatPreins | etatCouleur)">{{ ins.etatPreins | etatLibelle }}</span>
                 <span class="recente-paiement" [class.paye]="ins.paye">{{ ins.paye ? 'Payé' : 'Non payé' }}</span>
               </div>
             </div>

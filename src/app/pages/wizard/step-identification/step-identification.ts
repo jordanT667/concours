@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { SITUATIONS_MATRIMONIALES } from '../../../core/models/geo.constants';
 import { STORAGE_KEYS } from '../../../core/services/storage';
-import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { ReferenceStore } from '../../../core/services/reference-store.service';
 import { ConcoursReferenceService } from '../../../core/services/concours-reference.service';
 import { PaysDto } from '../../../core/models/pays.models';
 import { RegionDto, DepartementDto, LangueDto } from '../../../core/models/referentiel.models';
@@ -50,7 +50,7 @@ export class StepIdentification implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private refCache: ReferenceCacheService,
+    private refStore: ReferenceStore,
     private ref: ConcoursReferenceService,
     private logger: LoggerService,
     private autosave: AutosaveService
@@ -76,15 +76,19 @@ export class StepIdentification implements OnInit, OnDestroy {
     this.chargement = true;
     this.erreurChargement = '';
 
-    this.refCache.getPays().subscribe({
-      next: (data) => { this.pays = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger la liste des pays.'; }
-    });
-
-    this.refCache.getLangues().subscribe({
-      next: (data) => { this.langues = data; },
-      error: () => { this.erreurChargement = 'Impossible de charger les langues.'; }
-    });
+    const data = this.refStore.snapshot;
+    if (data.pays.length && data.langues.length) {
+      this.pays = data.pays;
+      this.langues = data.langues;
+    } else {
+      this.refStore.load().subscribe({
+        next: (d) => {
+          this.pays = d.pays;
+          this.langues = d.langues;
+        },
+        error: () => { this.erreurChargement = 'Impossible de charger les données de référence.'; }
+      });
+    }
 
     this.ref.getRegions('CMR').subscribe({
       next: (data) => {

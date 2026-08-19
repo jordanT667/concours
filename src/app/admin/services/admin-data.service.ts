@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, shareReplay, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap, shareReplay, of, map } from 'rxjs';
 import { PreinscriptionService } from '../../core/services/preinscription.service';
 import { PreinscriptionDto } from '../../core/models/preinscription.models';
 
@@ -52,14 +52,8 @@ export class AdminDataService {
   }
 
   getById(id: number, anneeAcademique: string): Observable<PreinscriptionDto | undefined> {
-    return new Observable(subscriber => {
-      this.getAll(anneeAcademique).subscribe({
-        next: (list) => {
-          subscriber.next(list.find(p => p.idPreins === id));
-          subscriber.complete();
-        },
-        error: (err) => subscriber.error(err)
-      });
-    });
+    return this.getAll(anneeAcademique).pipe(
+      map(list => list.find(p => p.idPreins === id))
+    );
   }
 }

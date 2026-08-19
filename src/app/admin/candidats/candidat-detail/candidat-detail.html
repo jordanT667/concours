@@ -24,7 +24,7 @@
           <h2>{{ candidat.prenom }} {{ candidat.nom }}</h2>
           <p class="hero-matricule">{{ candidat.matricule || '—' }}</p>
         </div>
-        <span [class]="'badge ' + etatCouleur(candidat.etatPreins)">{{ etatLibelle(candidat.etatPreins) }}</span>
+        <span [class]="'badge ' + (candidat.etatPreins | etatCouleur)">{{ candidat.etatPreins | etatLibelle }}</span>
       </div>
 
       <div class="detail-section">

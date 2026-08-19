@@ -25,7 +25,7 @@
           <h2>{{ ins.prenom }} {{ ins.nom }}</h2>
           <p class="hero-matricule">{{ ins.matricule || '—' }}</p>
         </div>
-        <span [class]="'badge ' + etatCouleur(ins.etatPreins)">{{ etatLibelle(ins.etatPreins) }}</span>
+        <span [class]="'badge ' + (ins.etatPreins | etatCouleur)">{{ ins.etatPreins | etatLibelle }}</span>
       </div>
 
       <!-- Identité -->
@@ -165,5 +165,15 @@
     </div>
 
   }
+
+  <app-confirm-dialog
+    [ouvert]="confirmOuverte"
+    [titre]="confirmTitre"
+    [message]="confirmMessage"
+    [texteBouton]="confirmTexteBouton"
+    [classBouton]="confirmClassBouton"
+    (confirmer)="onConfirmer()"
+    (annuler)="onAnnuler()"
+  ></app-confirm-dialog>
 
 </div>

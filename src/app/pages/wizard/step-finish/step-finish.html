@@ -36,6 +36,7 @@
         <div class="section-header">
           <i class="fa-solid fa-id-card"></i>
           <h4>État civil</h4>
+          <a class="btn-modifier" routerLink="/inscription/identification">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -49,7 +50,7 @@
             </div>
             <div class="info-item">
               <span class="item-label">Date de naissance</span>
-              <span class="item-value">{{ identification?.dateNaissance || '—' }}</span>
+              <span class="item-value">{{ dateNaissFormatee }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Lieu de naissance</span>
@@ -72,6 +73,7 @@
         <div class="section-header">
           <i class="fa-solid fa-globe"></i>
           <h4>Origine géographique</h4>
+          <a class="btn-modifier" routerLink="/inscription/identification">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -96,6 +98,7 @@
         <div class="section-header">
           <i class="fa-solid fa-address-book"></i>
           <h4>Coordonnées</h4>
+          <a class="btn-modifier" routerLink="/inscription/identification">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -120,6 +123,7 @@
         <div class="section-header">
           <i class="fa-solid fa-language"></i>
           <h4>Langues</h4>
+          <a class="btn-modifier" routerLink="/inscription/identification">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -142,6 +146,7 @@
         <div class="section-header">
           <i class="fa-solid fa-graduation-cap"></i>
           <h4>Choix de formation</h4>
+          <a class="btn-modifier" routerLink="/inscription/specialisation">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -166,6 +171,7 @@
         <div class="section-header">
           <i class="fa-solid fa-scroll"></i>
           <h4>Diplôme d'admission</h4>
+          <a class="btn-modifier" routerLink="/inscription/specialisation">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -206,6 +212,7 @@
         <div class="section-header">
           <i class="fa-solid fa-file-pen"></i>
           <h4>Concours</h4>
+          <a class="btn-modifier" routerLink="/inscription/specialisation">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -230,6 +237,7 @@
         <div class="section-header">
           <i class="fa-solid fa-credit-card"></i>
           <h4>Paiement</h4>
+          <a class="btn-modifier" routerLink="/inscription/specialisation">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -253,6 +261,7 @@
           <div class="section-header">
             <i class="fa-solid fa-book-open"></i>
             <h4>Parcours scolaire</h4>
+            <a class="btn-modifier" routerLink="/inscription/cursus">Modifier</a>
           </div>
           <div class="section-body">
             <table class="cursus-table">
@@ -286,6 +295,7 @@
         <div class="section-header">
           <i class="fa-solid fa-masks-theater"></i>
           <h4>Activités & Loisirs</h4>
+          <a class="btn-modifier" routerLink="/inscription/contacts">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -306,12 +316,13 @@
         <div class="section-header">
           <i class="fa-solid fa-user-gear"></i>
           <h4>Situation personnelle</h4>
+          <a class="btn-modifier" routerLink="/inscription/contacts">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
             <div class="info-item">
               <span class="item-label">Handicap</span>
-              <span class="item-value">{{ contacts.handicap || 'Aucun' }}</span>
+              <span class="item-value">{{ handicapLabel }}</span>
             </div>
             <div class="info-item">
               <span class="item-label">Profession</span>
@@ -332,6 +343,7 @@
         <div class="section-header">
           <i class="fa-solid fa-people-roof"></i>
           <h4>Contacts parentaux</h4>
+          <a class="btn-modifier" routerLink="/inscription/contacts">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -352,6 +364,7 @@
         <div class="section-header">
           <i class="fa-solid fa-phone-volume"></i>
           <h4>Personne d'urgence</h4>
+          <a class="btn-modifier" routerLink="/inscription/contacts">Modifier</a>
         </div>
         <div class="section-body">
           <div class="info-grid">
@@ -383,7 +396,7 @@
       </label>
 
       @if (erreur) {
-        <div class="erreur-msg">
+        <div class="erreur-msg" role="alert" aria-live="assertive">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
           </svg>
@@ -467,7 +480,7 @@
         }
 
         @if (copieFeedback) {
-          <div class="copie-feedback">{{ copieFeedback }}</div>
+          <div class="copie-feedback" aria-live="polite">{{ copieFeedback }}</div>
         }
 
         <div class="credential-warning">
@@ -500,7 +513,7 @@
             <span class="step-number">3</span>
             <div class="step-content">
               <strong>Déposez votre dossier</strong>
-              <p>Rendez-vous au centre de dépôt indiqué ({{ specialisation?.centreDepotDossier || 'voir fiche' }}) à la date fixée.</p>
+              <p>Rendez-vous au centre de dépôt indiqué ({{ labels.centreDepot || specialisation?.centreDepotDossier || 'voir fiche' }}) à la date fixée.</p>
             </div>
           </div>
         </div>

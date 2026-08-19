@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WelcomeBanner } from '../welcome-banner/welcome-banner';
 import { StatsOverview } from '../stats-overview/stats-overview';
@@ -11,6 +12,9 @@ import { DashboardSkeleton } from './dashboard-skeleton/dashboard-skeleton';
 import { DashboardStats } from '../../core/models/api-response.models';
 import { AdminDataService } from '../services/admin-data.service';
 import { PreinscriptionDto } from '../../core/models/preinscription.models';
+import { EtatLibellePipe } from '../../core/pipes/etat-libelle.pipe';
+import { EtatCouleurPipe } from '../../core/pipes/etat-couleur.pipe';
+import { getAnneeAcademique } from '../../core/utils/annee-academique';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +27,15 @@ import { PreinscriptionDto } from '../../core/models/preinscription.models';
     RepartitionCentres,
     RepartitionFilieres,
     DashboardSkeleton,
+    EtatLibellePipe,
+    EtatCouleurPipe,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
+
+  private destroyRef = inject(DestroyRef);
 
   nomAdmin = '';
   prenomAdmin = '';
@@ -40,6 +48,8 @@ export class Dashboard implements OnInit {
   totalPayes = 0;
   totalNonPayes = 0;
   tauxPaiement = 0;
+
+  readonly anneeAcademique = getAnneeAcademique();
 
   constructor(
     private router: Router,
@@ -63,35 +73,30 @@ export class Dashboard implements OnInit {
     }
   }
 
-  get anneeAcademique(): string {
-    const y = new Date().getFullYear();
-    const m = new Date().getMonth();
-    const start = m >= 7 ? y : y - 1;
-    return `${start}/${start + 1}`;
-  }
-
   chargerDashboard(force = false): void {
     this.chargement = true;
     this.erreur = '';
 
-    this.adminData.getAll(this.anneeAcademique, force).subscribe({
-      next: (list) => {
-        this.stats = this.computeStats(list);
-        this.recentes = list
-          .sort((a, b) => (b.idPreins ?? 0) - (a.idPreins ?? 0))
-          .slice(0, 5);
+    this.adminData.getAll(this.anneeAcademique, force)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (list) => {
+          this.stats = this.computeStats(list);
+          this.recentes = list
+            .sort((a, b) => (b.idPreins ?? 0) - (a.idPreins ?? 0))
+            .slice(0, 5);
 
-        this.totalPayes = list.filter(p => p.paye).length;
-        this.totalNonPayes = list.filter(p => !p.paye).length;
-        this.tauxPaiement = list.length > 0 ? Math.round((this.totalPayes / list.length) * 100) : 0;
+          this.totalPayes = list.filter(p => p.paye).length;
+          this.totalNonPayes = list.filter(p => !p.paye).length;
+          this.tauxPaiement = list.length > 0 ? Math.round((this.totalPayes / list.length) * 100) : 0;
 
-        this.chargement = false;
-      },
-      error: () => {
-        this.erreur = 'Impossible de charger les statistiques.';
-        this.chargement = false;
-      }
-    });
+          this.chargement = false;
+        },
+        error: () => {
+          this.erreur = 'Impossible de charger les statistiques.';
+          this.chargement = false;
+        }
+      });
   }
 
   private computeStats(list: PreinscriptionDto[]): DashboardStats {
@@ -118,25 +123,6 @@ export class Dashboard implements OnInit {
       .map(([filiere, nombre]) => ({ filiere, nombre }));
 
     return { totalInscrits: total, totalValides: valides, totalEnAttente: enAttente, totalRejetes: rejetes, tauxValidation: taux, parCentre, parFiliere };
-  }
-
-  etatLibelle(etat?: string): string {
-    switch (etat) {
-      case 'E': return 'Soumis';
-      case 'V': return 'Vérification';
-      case 'S': return 'Sélectionné';
-      case 'R': return 'Rejeté';
-      default: return 'En attente';
-    }
-  }
-
-  etatCouleur(etat?: string): string {
-    switch (etat) {
-      case 'S': return 'badge-vert';
-      case 'R': return 'badge-rouge';
-      case 'V': return 'badge-bleu';
-      default: return 'badge-orange';
-    }
   }
 
   allerInscriptions(): void { this.router.navigate(['/admin/inscriptions']); }

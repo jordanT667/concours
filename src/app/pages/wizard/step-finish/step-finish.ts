@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { timeout, retry, timer, forkJoin } from 'rxjs';
+import { timeout, retry, timer, finalize } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PreinscriptionService } from '../../../core/services/preinscription.service';
-import { ReferenceCacheService } from '../../../core/services/reference-cache.service';
+import { ReferenceStore } from '../../../core/services/reference-store.service';
 import { STORAGE_KEYS } from '../../../core/services/storage';
 import { PreinscriptionDto } from '../../../core/models/preinscription.models';
 import { ErrorResponse, ErrorCode } from '../../../core/models/error-response.models';
 import { LoggerService } from '../../../core/services/logger.service';
+import { getAnneeAcademique } from '../../../core/utils/annee-academique';
 
 type JsPDFType = InstanceType<typeof import('jspdf').default>;
 
@@ -87,6 +89,11 @@ interface Labels {
   banque: string;
   langue1: string;
   langue2: string;
+  loisir1: string;
+  loisir2: string;
+  sport1: string;
+  sport2: string;
+  handicap: string;
 }
 
 @Component({
@@ -117,37 +124,39 @@ export class StepFinish implements OnInit {
   ecoleChargee = false;
 
   private logoBase64: string | null = null;
-  private logoCharge: Promise<void> = Promise.resolve();
   private soumissionEffectuee = false;
   private codeEcole = '';
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private router: Router,
     private preinscriptionService: PreinscriptionService,
-    private refCache: ReferenceCacheService,
+    private refStore: ReferenceStore,
     private logger: LoggerService
   ) { }
 
   ngOnInit(): void {
     this.chargerDonnees();
-    this.logoCharge = this.chargerLogo();
     this.verifierCompletude();
-    this.chargerLabels();
-
-    this.refCache.getEcoles().subscribe({
-      next: (ecoles) => {
-        const active = ecoles.find(e => !e.annuler);
-        if (active) this.codeEcole = active.codeEcole;
-        this.ecoleChargee = true;
-      },
-      error: () => { this.ecoleChargee = true; }
-    });
 
     const existant = localStorage.getItem(STORAGE_KEYS.NUMERO_DOSSIER);
     if (existant) {
       this.numeroDossier = existant;
+      this.motDePasse = localStorage.getItem(STORAGE_KEYS.NUMERO_DOSSIER + '_pwd') ?? '';
       this.enregistrementReussi = true;
       this.soumissionEffectuee = true;
+    }
+
+    const snap = this.refStore.snapshot;
+    if (snap.pays.length) {
+      this.appliquerReferenceData(snap);
+    } else {
+      this.refStore.load().pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: (data) => this.appliquerReferenceData(data),
+        error: () => { this.ecoleChargee = true; }
+      });
     }
   }
 
@@ -159,59 +168,64 @@ export class StepFinish implements OnInit {
     this.contacts = this.lireJSON<Contacts>(STORAGE_KEYS.CONTACTS) || {};
   }
 
-  private chargerLabels(): void {
-    forkJoin({
-      cursus: this.refCache.getCursus(),
-      niveaux: this.refCache.getNiveaux(),
-      diplomes: this.refCache.getAllDiplomes(),
-      mentions: this.refCache.getMentions(),
-      pays: this.refCache.getPays(),
-      centres: this.refCache.getCentresExamen(),
-      sites: this.refCache.getSitesDepot(),
-      banques: this.refCache.getBanques(),
-      langues: this.refCache.getLangues()
-    }).subscribe({
-      next: (data) => {
-        const sp = this.specialisation;
-        const id = this.identification;
+  private appliquerReferenceData(data: any): void {
+    const sp = this.specialisation;
+    const id = this.identification;
 
-        const cursusObj = data.cursus.find(c => c.idCursus === sp.cursus);
-        this.labels.cursus = cursusObj?.libelle ?? sp.cursus ?? '—';
+    const active = data.ecoles?.find((e: any) => !e.annuler);
+    if (active) this.codeEcole = active.codeEcole;
+    this.ecoleChargee = true;
 
-        const niveauObj = data.niveaux.find(n => n.codeNiveau === sp.niveau);
-        this.labels.niveau = niveauObj?.libelleNiveau ?? sp.niveau ?? '—';
+    const cursusObj = data.cursus?.find((c: any) => c.idCursus === sp.cursus);
+    this.labels.cursus = cursusObj?.libelle ?? sp.cursus ?? '—';
 
-        this.labels.filiere = sp.filiere ?? '—';
+    const niveauObj = data.niveaux?.find((n: any) => n.codeNiveau === sp.niveau);
+    this.labels.niveau = niveauObj?.libelleNiveau ?? sp.niveau ?? '—';
 
-        const diplomeObj = data.diplomes.find(d => d.idDiplome === sp.diplomeAdmission);
-        this.labels.diplome = diplomeObj?.libelleFr ?? sp.diplomeAdmission ?? '—';
+    this.labels.filiere = sp.filiere ?? '—';
 
-        const mentionObj = data.mentions.find(m => m.idMention === sp.mentionDiplome);
-        this.labels.mention = mentionObj?.libelleFr ?? sp.mentionDiplome ?? '—';
+    const diplomeObj = data.diplomes?.find((d: any) => d.idDiplome === sp.diplomeAdmission);
+    this.labels.diplome = diplomeObj?.libelleFr ?? sp.diplomeAdmission ?? '—';
 
-        const paysObj = data.pays.find(p => p.codePays === id.paysNationalite);
-        this.labels.pays = paysObj?.libelleFr ?? id.paysNationalite ?? '—';
+    const mentionObj = data.mentions?.find((m: any) => m.idMention === sp.mentionDiplome);
+    this.labels.mention = mentionObj?.libelleFr ?? sp.mentionDiplome ?? '—';
 
-        const paysObtObj = data.pays.find(p => p.codePays === sp.paysObtention);
-        this.labels.paysObtention = paysObtObj?.libelleFr ?? sp.paysObtention ?? '—';
+    const paysObj = data.pays?.find((p: any) => p.codePays === id.paysNationalite);
+    this.labels.pays = paysObj?.libelleFr ?? id.paysNationalite ?? '—';
 
-        const centreObj = data.centres.find(c => c.idCexam === sp.centreConcours);
-        this.labels.centreConcours = centreObj?.libeleFiliereFr ?? sp.centreConcours ?? '—';
+    const paysObtObj = data.pays?.find((p: any) => p.codePays === sp.paysObtention);
+    this.labels.paysObtention = paysObtObj?.libelleFr ?? sp.paysObtention ?? '—';
 
-        const siteObj = data.sites.find(s => s.idSiteDepot === sp.centreDepotDossier);
-        this.labels.centreDepot = siteObj?.libelle ?? sp.centreDepotDossier ?? '—';
+    const centreObj = data.centres?.find((c: any) => c.idCexam === sp.centreConcours);
+    this.labels.centreConcours = centreObj?.libeleFiliereFr ?? sp.centreConcours ?? '—';
 
-        const banqueObj = data.banques.find(b => b.idBanque === sp.banque);
-        this.labels.banque = banqueObj?.libelleBanque ?? sp.banque ?? '—';
+    const siteObj = data.sites?.find((s: any) => s.idSiteDepot === sp.centreDepotDossier);
+    this.labels.centreDepot = siteObj?.libelle ?? sp.centreDepotDossier ?? '—';
 
-        const l1 = data.langues.find(l => l.code === id.premiereLangue);
-        this.labels.langue1 = l1?.libelleFr ?? id.premiereLangue ?? '—';
+    const banqueObj = data.banques?.find((b: any) => b.idBanque === sp.banque);
+    this.labels.banque = banqueObj?.libelleBanque ?? sp.banque ?? '—';
 
-        const l2 = data.langues.find(l => l.code === id.deuxiemeLangue);
-        this.labels.langue2 = l2?.libelleFr ?? id.deuxiemeLangue ?? '—';
-      },
-      error: () => {}
-    });
+    const l1 = data.langues?.find((l: any) => l.code === id.premiereLangue);
+    this.labels.langue1 = l1?.libelleFr ?? id.premiereLangue ?? '—';
+
+    const l2 = data.langues?.find((l: any) => l.code === id.deuxiemeLangue);
+    this.labels.langue2 = l2?.libelleFr ?? id.deuxiemeLangue ?? '—';
+
+    const ct = this.contacts;
+    const loisir1Obj = data.loisirs?.find((l: any) => l.idLoisir === ct.loisir1);
+    this.labels.loisir1 = loisir1Obj?.libelleFr ?? '';
+
+    const loisir2Obj = data.loisirs?.find((l: any) => l.idLoisir === ct.loisir2);
+    this.labels.loisir2 = loisir2Obj?.libelleFr ?? '';
+
+    const sport1Obj = data.sports?.find((s: any) => s.idSport === ct.activite1);
+    this.labels.sport1 = sport1Obj?.libelleFr ?? '';
+
+    const sport2Obj = data.sports?.find((s: any) => s.idSport === ct.activite2);
+    this.labels.sport2 = sport2Obj?.libelleFr ?? '';
+
+    const handicapObj = data.handicaps?.find((h: any) => h.idHandicap === ct.handicap);
+    this.labels.handicap = handicapObj?.libelleFr ?? '';
   }
 
   private lireJSON<T>(cle: string): T | null {
@@ -277,15 +291,27 @@ export class StepFinish implements OnInit {
   }
 
   get sportsPratiques(): string {
-    return [this.contacts?.activite1, this.contacts?.activite2]
+    return [this.labels.sport1 || this.contacts?.activite1, this.labels.sport2 || this.contacts?.activite2]
       .filter(Boolean)
       .join(' - ');
   }
 
   get loisirs(): string {
-    return [this.contacts?.loisir1, this.contacts?.loisir2]
+    return [this.labels.loisir1 || this.contacts?.loisir1, this.labels.loisir2 || this.contacts?.loisir2]
       .filter(Boolean)
       .join(' - ');
+  }
+
+  get dateNaissFormatee(): string {
+    const d = this.identification?.dateNaissance;
+    if (!d) return '—';
+    const parts = d.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return d;
+  }
+
+  get handicapLabel(): string {
+    return this.labels.handicap || this.contacts?.handicap || 'Aucun';
   }
 
   onEnregistrer(): void {
@@ -317,25 +343,20 @@ export class StepFinish implements OnInit {
           return timer(1500);
         }
       }),
-      timeout(12000)
+      timeout(12000),
+      finalize(() => { this.enCours = false; })
     ).subscribe({
       next: (res) => {
         this.numeroDossier = res.matricule ?? '';
         this.motDePasse = res.pwd ?? '';
         localStorage.setItem(STORAGE_KEYS.NUMERO_DOSSIER, this.numeroDossier);
+        if (this.motDePasse) {
+          localStorage.setItem(STORAGE_KEYS.NUMERO_DOSSIER + '_pwd', this.motDePasse);
+        }
         this.enregistrementReussi = true;
-        this.enCours = false;
-        setTimeout(async () => {
-          try {
-            await this.logoCharge;
-            await this.genererPdf();
-          } catch (e) {
-            this.logger.error('PDF auto-gen failed', e);
-          }
-        }, 0);
+        this.genererPdfAuto();
       },
       error: (err: ErrorResponse | any) => {
-        this.enCours = false;
         this.soumissionEffectuee = false;
         this.extraireErreur(err);
       },
@@ -346,18 +367,26 @@ export class StepFinish implements OnInit {
     const id = this.identification;
     const sp = this.specialisation;
     if (!id?.nom || !id?.prenom) return 'Nom et prénom sont obligatoires.';
+    if (!id?.sexe) return 'Le sexe est obligatoire.';
     if (!id?.dateNaissance) return 'Date de naissance obligatoire.';
     if (!id?.email) return 'Email obligatoire.';
     if (!id?.numeroCNI) return 'Numéro CNI obligatoire.';
     if (!sp?.cursus || !sp?.niveau) return 'Cursus et niveau obligatoires.';
     if (!sp?.diplomeAdmission) return "Diplôme d'admission obligatoire.";
+    if (!sp?.filiere) return 'Choix de filière obligatoire.';
+    if (!sp?.centreConcours) return "Centre d'examen obligatoire.";
+    if (!sp?.centreDepotDossier) return 'Lieu de dépôt obligatoire.';
     if (!sp?.numeroRecuCCA) return 'Numéro de reçu CCA obligatoire.';
+    if (!sp?.banque) return 'Banque de paiement obligatoire.';
+    if ((id?.paysNationalite?.length ?? 0) > 3) return 'Code pays invalide (max 3 caractères).';
+    if ((id?.premiereLangue?.length ?? 0) > 5) return 'Code langue 1 invalide.';
+    if ((id?.deuxiemeLangue?.length ?? 0) > 5) return 'Code langue 2 invalide.';
     return null;
   }
 
   private construirePayload(): PreinscriptionDto {
-    const annee = new Date().getFullYear();
     const cursusConcat = this.cursus.map(d => `${d.annee}|${d.etablissement}|${d.diplome}|${d.mention}`).join(';;');
+    const idCursus = this.specialisation.cursus ?? '';
     return {
       nom: this.identification.nom ?? '',
       prenom: this.identification.prenom ?? '',
@@ -367,6 +396,7 @@ export class StepFinish implements OnInit {
       numCni: this.identification.numeroCNI ?? '',
       email: this.identification.email ?? '',
       numTel: this.identification.telephone ?? '',
+      villeResid: this.identification.adresse ?? '',
       adresse: this.identification.adresse ?? '',
       paysNationalite: this.identification.paysNationalite ?? '',
       region: this.identification.regionOrigine ?? '',
@@ -374,7 +404,8 @@ export class StepFinish implements OnInit {
       situationMatrimoniale: this.identification.situationMatrimoniale ?? '',
       lang1: this.identification.premiereLangue ?? '',
       lang2: this.identification.deuxiemeLangue ?? '',
-      cycles: this.specialisation.cursus ?? '',
+      typeFormation: idCursus.charAt(0) || '',
+      cycles: cursusConcat || '',
       niveau: this.specialisation.niveau ?? '',
       choixFormation1: this.specialisation.filiere ?? '',
       diplomeAdmission: this.specialisation.diplomeAdmission ?? '',
@@ -387,15 +418,17 @@ export class StepFinish implements OnInit {
       lieudepot: this.specialisation.centreDepotDossier ?? '',
       numRecu: this.specialisation.numeroRecuCCA ?? '',
       anneeDipAnt: this.specialisation.anneeBEPC ? String(this.specialisation.anneeBEPC) : '',
+      typePaiement: this.specialisation.banque ?? '',
       loisir1: this.contacts.loisir1 || null,
       loisir2: this.contacts.loisir2 || null,
       sport1: this.contacts.activite1 ?? '',
       sport2: this.contacts.activite2 ?? '',
       activiteSportive: !!(this.contacts.activite1 || this.contacts.activite2),
-      handicap: !!this.contacts.handicap && this.contacts.handicap !== 'Aucun',
-      typeHandicap: this.contacts.handicap !== 'Aucun' ? (this.contacts.handicap ?? '') : '',
+      handicap: !!this.contacts.handicap,
+      typeHandicap: this.contacts.handicap ?? '',
       activiteProfessionnelle: this.contacts.profession ?? '',
       descriptionActiviteProf: this.contacts.descriptionActiviteProf ?? '',
+      taf: this.contacts.profession !== 'NON' && !!this.contacts.profession,
       nomParent1: this.contacts.nomPere ?? '',
       telParent1: this.contacts.telPere ?? '',
       nomParent2: this.contacts.nomMere ?? '',
@@ -403,9 +436,8 @@ export class StepFinish implements OnInit {
       nomPersonneAContacter: this.contacts.nomPersonneContact ?? '',
       telPersonneAContacter: this.contacts.telPersonneContact ?? '',
       emailPersonneAContacter: this.contacts.emailPersonneContact ?? '',
-      anneeAcademique: `${annee}/${annee + 1}`,
+      anneeAcademique: getAnneeAcademique(),
       ecole: this.codeEcole,
-      taf: cursusConcat ? true : undefined,
     };
   }
 
@@ -420,9 +452,19 @@ export class StepFinish implements OnInit {
 
     if (code === ErrorCode.DUPLICATE_RESOURCE) {
       this.erreur = 'Un dossier existe déjà avec cet email ou ce numéro CNI. Vérifiez vos informations ou contactez l\'administration.';
-    } else if (code === ErrorCode.VALIDATION_FAILED) {
+    } else if (code === ErrorCode.VALIDATION_FAILED || err?.status === 400) {
       const details = body?.details;
-      this.erreur = details ? `Données invalides : ${details}` : 'Certains champs sont invalides. Vérifiez votre dossier.';
+      const fieldErrors = body?.fieldErrors || body?.errors;
+      if (fieldErrors && typeof fieldErrors === 'object') {
+        const messages = Object.entries(fieldErrors)
+          .map(([champ, msg]) => `${champ}: ${msg}`)
+          .join(', ');
+        this.erreur = `Champs invalides — ${messages}`;
+      } else if (details) {
+        this.erreur = `Données invalides : ${details}`;
+      } else {
+        this.erreur = 'Certains champs sont invalides. Vérifiez votre dossier.';
+      }
     } else if (err?.status === 0) {
       this.erreur = 'Serveur inaccessible. Vérifiez votre connexion internet et réessayez.';
     } else if (err?.status >= 500) {
@@ -432,11 +474,20 @@ export class StepFinish implements OnInit {
     }
   }
 
+  private async genererPdfAuto(): Promise<void> {
+    try {
+      await this.chargerLogo();
+      await this.genererPdf();
+    } catch (e) {
+      this.logger.error('PDF auto-gen failed', e);
+    }
+  }
+
   async onRetelecharger(): Promise<void> {
     if (this.pdfEnCours) return;
     this.pdfEnCours = true;
     try {
-      await this.logoCharge;
+      if (!this.logoBase64) await this.chargerLogo();
       await this.genererPdf();
     } finally {
       this.pdfEnCours = false;
@@ -547,9 +598,8 @@ export class StepFinish implements OnInit {
     doc.text("REGISTRATION'S FILE", 105, y, { align: 'center' });
 
     y += 5;
-    const annee = new Date().getFullYear();
     doc.setFont('helvetica', 'normal');
-    doc.text(`Année académique ${annee}/${annee + 1}`, 105, y, { align: 'center' });
+    doc.text(`Année académique ${getAnneeAcademique()}`, 105, y, { align: 'center' });
 
     y += 9;
     doc.setFont('helvetica', 'bold');
