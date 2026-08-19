@@ -1,32 +1,46 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AdminDataService } from '../services/admin-data.service';
 import { PreinscriptionDto } from '../../core/models/preinscription.models';
 import { CandidatsSkeleton } from './candidats-skeleton/candidats-skeleton';
+import { EtatLibellePipe } from '../../core/pipes/etat-libelle.pipe';
+import { EtatCouleurPipe } from '../../core/pipes/etat-couleur.pipe';
+import { getAnneeAcademique } from '../../core/utils/annee-academique';
 
 @Component({
   selector: 'app-candidats',
   standalone: true,
-  imports: [CommonModule, FormsModule, CandidatsSkeleton],
+  imports: [CommonModule, FormsModule, CandidatsSkeleton, EtatLibellePipe, EtatCouleurPipe],
   templateUrl: './candidats.html',
   styleUrl: './candidats.css',
 })
 export class Candidats implements OnInit {
+
+  private destroyRef = inject(DestroyRef);
 
   chargement = true;
   erreur = '';
 
   private tous: PreinscriptionDto[] = [];
   filtres: PreinscriptionDto[] = [];
+  pageItems: PreinscriptionDto[] = [];
 
   recherche = '';
   filtreEtat = 'TOUS';
   filtrePaiement = 'TOUS';
   vue: 'grille' | 'liste' = 'grille';
 
+  // Pagination
+  page = 1;
+  pageSize = 24;
+  totalPages = 1;
+
   detailOuvert: PreinscriptionDto | null = null;
+
+  readonly anneeAcademique = getAnneeAcademique();
 
   constructor(private adminData: AdminDataService) {}
 
@@ -34,27 +48,22 @@ export class Candidats implements OnInit {
     this.charger();
   }
 
-  get anneeAcademique(): string {
-    const y = new Date().getFullYear();
-    const m = new Date().getMonth();
-    const start = m >= 7 ? y : y - 1;
-    return `${start}/${start + 1}`;
-  }
-
   charger(force = false): void {
     this.chargement = true;
     this.erreur = '';
-    this.adminData.getAll(this.anneeAcademique, force).subscribe({
-      next: (list) => {
-        this.tous = list;
-        this.appliquerFiltres();
-        this.chargement = false;
-      },
-      error: () => {
-        this.erreur = 'Impossible de charger les candidats.';
-        this.chargement = false;
-      }
-    });
+    this.adminData.getAll(this.anneeAcademique, force)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (list) => {
+          this.tous = list;
+          this.appliquerFiltres();
+          this.chargement = false;
+        },
+        error: () => {
+          this.erreur = 'Impossible de charger les candidats.';
+          this.chargement = false;
+        }
+      });
   }
 
   appliquerFiltres(): void {
@@ -79,6 +88,29 @@ export class Candidats implements OnInit {
     }
 
     this.filtres = result;
+    this.page = 1;
+    this.paginer();
+  }
+
+  paginer(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filtres.length / this.pageSize));
+    if (this.page > this.totalPages) this.page = this.totalPages;
+    const start = (this.page - 1) * this.pageSize;
+    this.pageItems = this.filtres.slice(start, start + this.pageSize);
+  }
+
+  allerPage(p: number): void {
+    if (p < 1 || p > this.totalPages) return;
+    this.page = p;
+    this.paginer();
+  }
+
+  get pagesVisibles(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, this.page - 2);
+    const end = Math.min(this.totalPages, this.page + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
   }
 
   ouvrirDetail(c: PreinscriptionDto): void {
@@ -87,24 +119,5 @@ export class Candidats implements OnInit {
 
   fermerDetail(): void {
     this.detailOuvert = null;
-  }
-
-  etatLibelle(etat?: string): string {
-    switch (etat) {
-      case 'E': return 'Soumis';
-      case 'V': return 'Vérification';
-      case 'S': return 'Sélectionné';
-      case 'R': return 'Rejeté';
-      default: return '—';
-    }
-  }
-
-  etatCouleur(etat?: string): string {
-    switch (etat) {
-      case 'S': return 'badge-vert';
-      case 'R': return 'badge-rouge';
-      case 'V': return 'badge-bleu';
-      default: return 'badge-orange';
-    }
   }
 }

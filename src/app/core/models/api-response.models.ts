@@ -7,15 +7,6 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-// Réponse paginée pour les listes (dashboard admin)
-export interface PageResponse<T> {
-  content: T[];
-  totalElements: number;    // total inscriptions
-  totalPages: number;
-  currentPage: number;
-  pageSize: number;
-}
-
 // Stats pour les cartes du dashboard admin
 export interface DashboardStats {
   totalInscrits: number;

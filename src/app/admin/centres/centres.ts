@@ -1,18 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CentreExamenDto } from '../../core/models/referentiel.models';
 import { CentreService } from '../../core/services/centre.service';
 import { CentreForm } from '../centre-form/centre-form';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-centres',
   standalone: true,
-  imports: [CommonModule, FormsModule, CentreForm],
+  imports: [CommonModule, FormsModule, CentreForm, ConfirmDialog],
   templateUrl: './centres.html',
   styleUrl: './centres.css'
 })
 export class Centres implements OnInit {
+
+  private destroyRef = inject(DestroyRef);
+  confirmOuverte = false;
+  private confirmId = '';
 
   centres: CentreExamenDto[] = [];
   centresFiltres: CentreExamenDto[] = [];
@@ -75,10 +81,21 @@ export class Centres implements OnInit {
   }
 
   supprimer(idCexam: string): void {
-    if (!confirm('Confirmer la suppression de ce centre ?')) return;
-    this.centreService.delete(idCexam).subscribe({
-      next: () => this.charger(),
-      error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; }
-    });
+    this.confirmId = idCexam;
+    this.confirmOuverte = true;
+  }
+
+  onConfirmerSuppression(): void {
+    this.confirmOuverte = false;
+    this.centreService.delete(this.confirmId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.charger(),
+        error: (err) => { this.erreur = err?.message ?? 'Suppression impossible.'; }
+      });
+  }
+
+  onAnnulerSuppression(): void {
+    this.confirmOuverte = false;
   }
 }

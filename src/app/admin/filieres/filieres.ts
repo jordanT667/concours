@@ -1,18 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FiliereDto } from '../../core/models/filiere.models';
 import { FiliereFormComponent } from '../filiere-form/filiere-form';
 import { FiliereService } from '../../core/services/filiere';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-filieres',
   standalone: true,
-  imports: [CommonModule, FormsModule, FiliereFormComponent],
+  imports: [CommonModule, FormsModule, FiliereFormComponent, ConfirmDialog],
   templateUrl: './filieres.html',
   styleUrl: './filieres.css'
 })
 export class Filieres implements OnInit {
+
+  private destroyRef = inject(DestroyRef);
+  confirmOuverte = false;
+  private confirmCode = '';
 
   filieres: FiliereDto[] = [];
   filieresFiltrees: FiliereDto[] = [];
@@ -78,13 +84,24 @@ export class Filieres implements OnInit {
   }
 
   supprimer(codeFiliere: string): void {
-    if (!confirm('Supprimer cette filière ?')) return;
-    this.filiereService.delete(codeFiliere).subscribe({
-      next: () => {
-        this.filieres = this.filieres.filter(f => f.codeFiliere !== codeFiliere);
-        this.appliquerFiltres();
-      },
-      error: () => { this.erreur = 'Erreur lors de la suppression.'; }
-    });
+    this.confirmCode = codeFiliere;
+    this.confirmOuverte = true;
+  }
+
+  onConfirmerSuppression(): void {
+    this.confirmOuverte = false;
+    this.filiereService.delete(this.confirmCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.filieres = this.filieres.filter(f => f.codeFiliere !== this.confirmCode);
+          this.appliquerFiltres();
+        },
+        error: () => { this.erreur = 'Erreur lors de la suppression.'; }
+      });
+  }
+
+  onAnnulerSuppression(): void {
+    this.confirmOuverte = false;
   }
 }

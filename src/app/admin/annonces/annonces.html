@@ -142,4 +142,14 @@
     </div>
   }
 
+  <app-confirm-dialog
+    [ouvert]="confirmOuverte"
+    titre="Supprimer l'annonce"
+    message="Supprimer définitivement cette annonce ?"
+    texteBouton="Supprimer"
+    classBouton="btn-danger"
+    (confirmer)="onConfirmerSuppression()"
+    (annuler)="onAnnulerSuppression()"
+  ></app-confirm-dialog>
+
 </div>

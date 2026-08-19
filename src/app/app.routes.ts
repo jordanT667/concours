@@ -17,6 +17,7 @@ import {
   wizardContactsGuard,
   wizardFinishGuard,
 } from './core/guards/wizard-step.guard';
+import { referenceDataResolver } from './core/resolvers/reference-data.resolver';
 
 
 export const routes: Routes = [
@@ -24,6 +25,7 @@ export const routes: Routes = [
   {
     path: 'inscription',
     component: WizardComponent,
+    resolve: { refData: referenceDataResolver },
     children: [
       { path: 'recommandation', component: StepRecommandation },
       { path: 'identification', component: StepIdentification,  canActivate: [wizardIdentificationGuard] },
