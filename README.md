@@ -1,64 +1,61 @@
-<<<<<<< HEAD
-# EstmUbe
+# Entrance exam registration platform
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
+An Angular web application for applying online to an engineering school entrance exam.
+Candidates go through a guided, step-by-step application; administrators manage the exam sessions, schools, programmes and applications from a back office.
 
-## Development server
+> This repository contains the **front end** only. It talks to a separate REST API under `/api/v1`.
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
-```
+**For candidates**
+- Six-step application wizard (recommendation, identification, specialisation, academic background, contacts, summary), each step protected by a route guard so it cannot be skipped
+- Autosave indicator while filling in the form
+- Application tracking page and personal candidate space
+- PDF generation of documents (`jsPDF`, `pdfmake`)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+**For administrators**
+- Dashboard with statistics (Chart.js)
+- About thirty management sections: sessions, schools, programmes, exam centres, subjects, diplomas, regions, applications, candidates and more
+- Announcements shown to candidates
 
-## Code scaffolding
+**Cross-cutting**
+- JWT authentication with automatic token refresh, XSRF protection, caching and error-handling HTTP interceptors
+- Server-side rendering with Angular SSR and Express, `helmet` security headers
+- Light and dark themes, skeleton loaders
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Tech stack
 
-```bash
-ng generate component component-name
-```
+Angular 21 · TypeScript · Angular SSR / Express · Tailwind CSS · Chart.js · Vitest · GitHub Actions
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Getting started
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Prerequisites: Node.js 20 or later.
 
 ```bash
-ng test
+npm ci
+npm start            # development server on http://localhost:4200
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+The app expects the API under `/api/v1` (see `src/environments/` and `src/proxy.conf.json`).
 
 ```bash
-ng e2e
+npm test             # unit tests (Vitest)
+npm run build        # production build in dist/
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Project structure
 
-## Additional Resources
+```
+src/app/
+├── auth/        authentication and HTTP interceptors
+├── core/        guards, interceptors, models, services, resolvers
+├── pages/       candidate pages: wizard, tracking, candidate space
+├── admin/       back office sections
+├── shared/      reusable components (charts, autosave indicator…)
+└── layout/      sidebar, top bar
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-=======
-# enstmo
-version 2
->>>>>>> 6b0d7a94c0e3b3c1aa79f9b64f3f870e9ff4dcb5
+## Deployment
+
+Every push to `main` builds the app and deploys it to a VPS served by Apache, through the workflow in `.github/workflows/deploy.yml`.
+The workflow reads the server address and SSH key from the repository secrets `VPS_HOST`, `VPS_USERNAME` and `VPS_SSH_KEY`; none are stored in the code.
